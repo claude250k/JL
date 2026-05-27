@@ -32,7 +32,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .sbar-t{font-size:15px;font-weight:600;color:var(--tx)}
 .sbar-i{display:flex;gap:5px;align-items:center;color:var(--tx);font-size:13px}
 .sc{display:none;flex-direction:column;flex:1;overflow:hidden;position:relative;min-height:0}.sc.on{display:flex}
-.sh{padding:8px 16px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.sh{padding:8px 16px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;overflow:visible}
 .logo{font-family:var(--fd);font-size:22px;font-weight:800;letter-spacing:-.5px;color:var(--tx)}.logo em{color:var(--gold);font-style:normal}
 .stitle{font-size:16px;font-weight:700;color:var(--tx)}
 .s-acts{display:flex;gap:8px;align-items:center}
@@ -124,7 +124,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .crnm{font-size:13px;font-weight:500;color:var(--tx)}.crds{font-size:11px;color:var(--mu2);margin-top:1px}
 .fbtn{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:5px 12px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}.fbtn.following{background:var(--gold);color:#000}
 .mbtn{background:transparent;border:1px solid var(--bd);color:var(--mu2);padding:5px 11px;border-radius:7px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:3px}.mbtn:hover{border-color:var(--gold);color:var(--gold)}
-.pcov{height:88px;background:linear-gradient(135deg,#110800,#3d2200);position:relative;flex-shrink:0;background-size:cover;background-position:center}
+.pcov{height:88px;background:linear-gradient(135deg,#110800,#3d2200);position:relative;flex-shrink:0;background-size:cover;background-position:center;overflow:visible}
 .pav{position:absolute;bottom:-30px;left:16px;width:60px;height:60px;border-radius:50%;border:3px solid var(--bg);background:linear-gradient(135deg,var(--gold),#a06010);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#000;overflow:hidden;cursor:pointer}
 .pav img{width:100%;height:100%;object-fit:cover}
 .ceditbtn{position:absolute;bottom:8px;right:12px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.15);color:var(--tx);padding:4px 11px;border-radius:7px;font-size:11px;cursor:pointer}
@@ -144,7 +144,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .plusbtn{width:30px;height:30px;border-radius:50%;background:var(--gold);border:none;color:#000;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .gearbtn{width:30px;height:30px;border-radius:50%;background:var(--sf2);border:1px solid var(--bd);color:var(--mu2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .fl-ov{position:absolute;inset:0;background:var(--bg);z-index:120;display:none;flex-direction:column}.fl-ov.on{display:flex}
-.citem{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--bd);cursor:pointer}.citem:hover{background:var(--sf)}
+.citem{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--bd);cursor:pointer;width:100%}.citem:hover{background:var(--sf)}
 .cnm{font-size:13px;font-weight:500;color:var(--tx)}.cprev{font-size:11px;color:var(--mu2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:185px}.ctm{font-size:10px;color:var(--mu)}
 .chov{position:absolute;inset:0;background:var(--bg);z-index:90;display:none;flex-direction:column}.chov.on{display:flex}
 .chh{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--bd);flex-shrink:0}
@@ -214,6 +214,17 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   .bnav{width:250px}
   .sc{max-width:600px;border-right:1px solid var(--bd)}
 }
+
+.ch-modal{position:absolute;inset:0;background:rgba(0,0,0,.8);z-index:250;display:none;align-items:center;justify-content:center;padding:24px}
+.ch-modal.on{display:flex}
+.ch-modal-box{background:var(--sf);border:1px solid var(--gold);border-radius:16px;padding:24px;width:100%;max-width:320px}
+.ch-modal-title{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:12px}
+.ch-modal-inp{width:100%;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:11px 12px;color:var(--tx);font-size:13px;outline:none;margin-bottom:12px}
+.ch-modal-inp:focus{border-color:var(--gold)}
+.ch-modal-inp::placeholder{color:var(--mu)}
+.ch-modal-foot{display:flex;gap:8px}
+.ch-modal-cancel{flex:1;background:transparent;border:1px solid var(--bd);color:var(--mu2);padding:9px;border-radius:9px;cursor:pointer;font-size:12px}
+.ch-modal-ok{flex:1;background:var(--gold);border:none;color:#000;padding:9px;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700}
 </style>
 </head>
 <body>
@@ -392,7 +403,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
     </div>
     <div style="padding:0 14px 3px;font-size:10px;color:var(--mu);letter-spacing:.7px;text-transform:uppercase;font-weight:700">Channels</div>
     <div class="chgrid" id="mychs"></div>
-    <div class="ptabs"><div class="ptab ak" onclick="ptab(this,'posts')">Posts</div><div class="ptab" onclick="ptab(this,'likes')">Likes</div></div>
+    <div class="ptabs"><div class="ptab ak" onclick="ptab(this,'posts')">Posts</div><div class="ptab" onclick="ptab(this,'reposts')">Reposts</div><div class="ptab" onclick="ptab(this,'likes')">Likes</div></div>
     <div id="myposts"></div><div style="height:16px"></div>
   </div>
   <div class="fl-ov" id="fl-ov"><div class="ovh"><button class="ovb" onclick="document.getElementById('fl-ov').classList.remove('on')"><i class="ti ti-arrow-left"></i></button><div class="ovt" id="fl-title">Followers</div></div><div class="scroll" id="fl-content"></div></div>
@@ -411,7 +422,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
     </div>
     <div style="padding:0 14px 3px;font-size:10px;color:var(--mu);letter-spacing:.7px;text-transform:uppercase;font-weight:700">Channels</div>
     <div class="chgrid" id="opchs"></div>
-    <div class="ptabs"><div class="ptab ak" onclick="opFilt(this,'all')">All</div><div class="ptab" onclick="opFilt(this,'bitcoin')">Bitcoin</div><div class="ptab" onclick="opFilt(this,'aktien')">Stocks</div><div class="ptab" onclick="opFilt(this,'wirtschaft')">Economy</div></div>
+    <div class="ptabs"><div class="ptab ak" onclick="opFilt(this,'all')">All</div><div class="ptab" onclick="opFilt(this,'bitcoin')">Bitcoin</div><div class="ptab" onclick="opFilt(this,'aktien')">Stocks</div><div class="ptab" onclick="opFilt(this,'reposts')">Reposts</div></div>
     <div id="opposts"></div><div style="height:16px"></div>
   </div>
 </div>
@@ -472,6 +483,16 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   </div>
 </div>
 
+<div class="ch-modal" id="ch-modal">
+  <div class="ch-modal-box">
+    <div class="ch-modal-title">Create Channel</div>
+    <input class="ch-modal-inp" id="ch-modal-inp" placeholder="Channel name (e.g. Gold, Real Estate)" onkeydown="if(event.key==='Enter')chModalOk()">
+    <div class="ch-modal-foot">
+      <button class="ch-modal-cancel" onclick="chModalClose()">Cancel</button>
+      <button class="ch-modal-ok" onclick="chModalOk()">Create</button>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 <div class="bnav">
   <button class="bn ak" id="bn-feed" onclick="goTo('feed')"><i class="ti ti-home"></i><span>Feed</span></button>
@@ -646,8 +667,15 @@ function renderCCats(){
 }
 function chLbl(ch){return ch?ch.charAt(0).toUpperCase()+ch.slice(1).replace(/_/g,' '):''}
 
-async function addCh(){
-  const n=prompt('Channel name (e.g. Gold, Real Estate):');
+function addCh(){
+  document.getElementById('ch-modal').classList.add('on');
+  document.getElementById('ch-modal-inp').value='';
+  setTimeout(()=>document.getElementById('ch-modal-inp').focus(),100);
+}
+function chModalClose(){document.getElementById('ch-modal').classList.remove('on')}
+async function chModalOk(){
+  const n=document.getElementById('ch-modal-inp').value;
+  chModalClose();
   if(!n||!n.trim())return;
   const id=n.trim().toLowerCase().replace(/\s+/g,'_');
   if(customChs.includes(id)){showToast('Channel already exists');return}
@@ -725,6 +753,7 @@ function pH(p){
   const img=p.imageUrl?`<img src="${p.imageUrl}" class="pimg" onclick="openPD('${p.id}')">`:'';
   const avH=p.authorAvatar?`<img src="${p.authorAvatar}">`:(p.authorName||'?').substring(0,2).toUpperCase();
   const liked=CU&&(p.likedBy||[]).includes(CU.uid);
+  const rpd=false; // repost state loaded async
   const myAvH=UP?.avatarUrl?`<img src="${UP.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(UP?.name||'?').substring(0,2).toUpperCase();
   return`<div class="pi" data-id="${p.id}">
     <div class="pr">
@@ -817,7 +846,7 @@ function loadNotifs(){
 function renderNotifs(notifs){
   const c=document.getElementById('notif-list');if(!c)return;
   if(!notifs.length){c.innerHTML='<div class="empty"><i class="ti ti-bell-off"></i><p>No notifications yet</p></div>';return}
-  const ic={like:'ti-heart-filled ni-l',comment:'ti-message-circle ni-c',follow:'ti-user-plus ni-f',mention:'ti-at ni-m'};
+  const ic={like:'ti-heart-filled ni-l',comment:'ti-message-circle ni-c',follow:'ti-user-plus ni-f',mention:'ti-at ni-m',repost:'ti-repeat ni-f'};
   c.innerHTML=notifs.map(n=>{const parts=(ic[n.type]||'ti-bell ni-c').split(' ');return`<div class="notif-item" onclick="openNotif('${n.id}','${n.refId||''}','${n.type}')"><div class="ni ${parts[1]}"><i class="ti ${parts[0]}"></i></div><div class="ntx"><div class="nmain">${esc(n.msg||'')}</div><div class="ntm">${n.createdAt?tAgo(n.createdAt.toDate()):''}</div></div>${!n.read?'<div class="ndot"></div>':''}</div>`}).join('');
 }
 async function openNotif(nid,refId,type){
@@ -830,7 +859,7 @@ function switchMT(tab){
   const baseStyle='padding:5px 16px;border-radius:8px;font-size:12px;border:none;cursor:pointer;';
   document.getElementById('tab-notif').style.cssText=baseStyle+(tab==='notif'?'background:var(--sf3);color:var(--tx);font-weight:500':'background:transparent;color:var(--mu2)');
   document.getElementById('tab-msgs').style.cssText=baseStyle+(tab==='msgs'?'background:var(--sf3);color:var(--tx);font-weight:500':'background:transparent;color:var(--mu2)');
-  document.getElementById('msgs-panel').style.display=tab==='msgs'?'flex':'none';document.getElementById('msgs-panel').style.flexDirection='column';
+  document.getElementById('msgs-panel').style.display=tab==='msgs'?'flex':'none';
   document.getElementById('notif-panel').style.display=tab==='notif'?'flex':'none';
   if(tab==='notif'){
     const{db,collection,getDocs,query,where,updateDoc,doc}=window._fb;
@@ -894,6 +923,18 @@ async function submitPost(){
   btn.textContent='Post';btn.disabled=false;
 }
 
+async function loadMyReposts(cid){
+  if(!CU)return;
+  const{db,collection,query,where,orderBy,getDocs,doc,getDoc}=window._fb;
+  const c=document.getElementById(cid);c.innerHTML='<div class="spin"></div>';
+  const snap=await getDocs(query(collection(db,'reposts'),where('uid','==',CU.uid)));
+  if(!snap.docs.length){c.innerHTML='<div class="empty"><i class="ti ti-repeat"></i><p>No reposts yet</p></div>';return}
+  const posts=await Promise.all(snap.docs.map(async d=>{
+    const ps=await getDoc(doc(db,'posts',d.data().postId));
+    return ps.exists()?{id:ps.id,...ps.data()}:null;
+  }));
+  c.innerHTML=posts.filter(Boolean).map(p=>pH(p)).join('');
+}
 async function loadMyPosts(ch){
   if(!CU)return;
   const{db,collection,query,orderBy,getDocs}=window._fb;
@@ -908,7 +949,12 @@ async function loadMyPosts(ch){
   c.innerHTML=posts.map(p=>pH(p)).join('');
 }
 function myCFilt(el,ch){document.querySelectorAll('#mychs .ck').forEach(c=>c.classList.remove('ak'));el.classList.add('ak');myPFilt=ch;loadMyPosts(ch)}
-function ptab(el,tab){document.querySelectorAll('.ptabs .ptab').forEach(t=>t.classList.remove('ak'));el.classList.add('ak');if(tab==='posts')loadMyPosts(myPFilt);else document.getElementById('myposts').innerHTML='<div class="empty"><i class="ti ti-heart"></i><p>Likes coming soon</p></div>'}
+function ptab(el,tab){
+  document.querySelectorAll('#sc-profile .ptabs .ptab').forEach(t=>t.classList.remove('ak'));el.classList.add('ak');
+  if(tab==='posts')loadMyPosts(myPFilt);
+  else if(tab==='reposts')loadMyReposts('myposts');
+  else document.getElementById('myposts').innerHTML='<div class="empty"><i class="ti ti-heart"></i><p>Likes coming soon</p></div>';
+}
 
 async function showFL(type){
   if(!CU)return;
@@ -950,6 +996,15 @@ async function openOP(uid){
 async function opFilt(el,ch){
   if(!curOP)return;
   document.querySelectorAll('#opov .ptabs .ptab').forEach(t=>t.classList.remove('ak'));el.classList.add('ak');
+  if(ch==='reposts'){
+    const{db,collection,query,where,getDocs,doc,getDoc}=window._fb;
+    const c=document.getElementById('opposts');c.innerHTML='<div class="spin"></div>';
+    const snap=await getDocs(query(collection(db,'reposts'),where('uid','==',curOP)));
+    if(!snap.docs.length){c.innerHTML='<div class="empty"><i class="ti ti-repeat"></i><p>No reposts</p></div>';return}
+    const posts=await Promise.all(snap.docs.map(async d=>{const ps=await getDoc(doc(db,'posts',d.data().postId));return ps.exists()?{id:ps.id,...ps.data()}:null}));
+    c.innerHTML=posts.filter(Boolean).map(p=>pH(p)).join('');
+    return;
+  }
   const{db,collection,query,orderBy,getDocs}=window._fb;
   const ps=await getDocs(query(collection(db,'posts'),orderBy('createdAt','desc')));
   const allP=ps.docs.map(d=>({id:d.id,...d.data()})).filter(p=>p.authorId===curOP);
@@ -988,6 +1043,10 @@ async function togFollow(){
     UP.following=(UP.following||0)+1;
     await addNotif(curOP,'follow',`${UP.name} started following you`,'');
   }
+  // Reload accurate counts from Firebase
+  const{db:db2,doc:doc2,getDoc:getDoc2}=window._fb;
+  const mySnap=await getDoc2(doc2(db2,'users',CU.uid));
+  if(mySnap.exists()){UP.following=mySnap.data().following||0;UP.followers=mySnap.data().followers||0}
   document.getElementById('ps-f').innerHTML=`<strong>${UP.followers||0}</strong> Followers`;
   document.getElementById('ps-g').innerHTML=`<strong>${UP.following}</strong> Following`;
   startFeed();
@@ -1023,7 +1082,7 @@ async function loadConvs(){
   if(msgUnsub)msgUnsub();
   msgUnsub=onSnapshot(q,snap=>{
     const convs=snap.docs.map(d=>({id:d.id,...d.data()}));
-    const c=document.getElementById('convlist');
+    const c=document.getElementById('convlist');if(c)c.style.display='block';
     if(!convs.length){c.innerHTML='<div class="empty"><i class="ti ti-message-circle-off"></i><p>No messages yet.<br>Tap the edit icon to start a conversation!</p></div>';return}
     c.innerHTML=convs.map(cv=>{const oid=cv.members.find(m=>m!==CU.uid);const nm=cv.memberNames?.[oid]||'-';const av=cv.memberAvatars?.[oid]||'';return`<div class="citem" onclick="openChat('${cv.id}','${oid}')"><div class="av" style="width:38px;height:38px;font-size:10px">${av?`<img src="${av}">`:(nm||'?').substring(0,2).toUpperCase()}</div><div style="flex:1;min-width:0"><div class="cnm">${esc(nm)}</div><div class="cprev">${esc(cv.lastMsg||'')}</div></div><div class="ctm">${cv.lastAt?tAgo(cv.lastAt.toDate()):''}</div></div>`}).join('');
   });
@@ -1191,10 +1250,26 @@ function showToast(m){const t=document.getElementById('toast');t.textContent=m;t
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function tAgo(d){const s=Math.floor((new Date()-d)/1000);if(s<60)return'now';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';return Math.floor(s/86400)+'d'}
-function repostP(pid,originalText){
+async function repostP(pid,btn){
   if(!CU||!UP){showToast('Please sign in');return}
-  document.getElementById('pta').value='Repost: '+originalText.substring(0,100);
-  openPM();showToast('Edit and post to repost');
+  const{db,collection,addDoc,doc,updateDoc,increment,serverTimestamp,getDoc}=window._fb;
+  const snap=await getDoc(doc(db,'posts',pid));if(!snap.exists())return;
+  const orig=snap.data();
+  // Toggle repost
+  const rpId=`${CU.uid}_rp_${pid}`;
+  const rpRef=doc(db,'reposts',rpId);
+  const rpSnap=await getDoc(rpRef);
+  if(rpSnap.exists()){
+    // Undo repost
+    await window._fb.deleteDoc(rpRef);
+    await updateDoc(doc(db,'posts',pid),{reposts:increment(-1)});
+    btn.classList.remove('reposted');showToast('Repost removed');
+  } else {
+    await window._fb.setDoc(rpRef,{uid:CU.uid,postId:pid,authorId:orig.authorId,createdAt:serverTimestamp()});
+    await updateDoc(doc(db,'posts',pid),{reposts:increment(1)});
+    btn.classList.add('reposted');showToast('Reposted!');
+    if(orig.authorId!==CU.uid)await addNotif(orig.authorId,'repost',`${UP.name} reposted your post`,pid);
+  }
 }
 function shareP(id){if(navigator.share)navigator.share({title:'JL',url:location.href+'#'+id});else showToast('Link copied!')}
 </script>
