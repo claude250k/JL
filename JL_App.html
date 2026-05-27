@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>JL – Finance. Markets. Power.</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0c0c0c;
+  --surface:#161616;
+  --surface2:#1f1f1f;
+  --surface3:#282828;
+  --chart-bg:#181818;
+  --border:#272727;
+  --muted:#4a4a4a;
+  --muted2:#6a6a6a;
+  --text:#f0ede6;
+  --text2:#b0ada6;
+  --gold:#F7931A;
+  --gold2:#ffa533;
+  --golddim:rgba(247,147,26,0.13);
+  --green:#22c55e;
+  --red:#ef4444;
+  --fd:'Syne',sans-serif;
+  --fb:'DM Sans',sans-serif;
+}
+html,body{
+  height:100%;background:#000;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fb);
+}
+
+/* ─── PHONE SHELL ─── */
+.shell{
+  width:390px;height:844px;
+  background:var(--bg);
+  border-radius:48px;
+  overflow:hidden;
+  position:relative;
+  display:flex;flex-direction:column;
+  border:1.5px solid #222;
+  box-shadow:0 60px 160px rgba(0,0,0,.95),0 0 0 1px #111;
+}
+
+/* STATUS BAR */
+.sbar{
+  height:48px;padding:0 28px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.sbar-time{font-size:15px;font-weight:600;color:var(--text)}
+.sbar-icons{display:flex;gap:5px;align-items:center;color:var(--text)}
+.sbar-icons i{font-size:14px}
+
+/* ─── SCREENS ─── */
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden;position:relative}
+.screen.on{display:flex}
+
+/* SCREEN TOP HEADER */
+.s-head{
+  padding:8px 18px 6px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.s-logo{font-family:var(--fd);font-size:24px;font-weight:800;letter-spacing:-1px;color:var(--text)}
+.s-logo em{color:var(--gold);font-style:normal}
+.s-title{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--text)}
+.s-head-actions{display:flex;gap:12px;align-items:center}
+.s-icon-btn{background:none;border:none;cursor:pointer;color:var(--muted2);font-size:20px;line-height:1;padding:2px}
+
+/* CATEGORY KACHELN / CHIPS */
+.kacheln{
+  display:flex;gap:6px;
+  padding:8px 14px 10px;
+  overflow-x:auto;scrollbar-width:none;
+  flex-shrink:0;
+  border-bottom:1px solid var(--border);
+}
+.kacheln::-webkit-scrollbar{display:none}
+.kachel{
+  padding:6px 15px;
+  border-radius:22px;
+  font-size:12px;font-weight:500;
+  cursor:pointer;white-space:nowrap;
+  border:1px solid var(--border);
+  color:var(--muted2);background:transparent;
+  transition:all .18s;font-family:var(--fb);
+}
+.kachel.ak{
+  background:var(--gold);color:#000;
+  border-color:var(--gold);font-weight:700;
+}
+
+/* SCROLL AREA */
+.scroll{flex:1;overflow-y:auto;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+
+/* ─── FEED POSTS ─── */
+.post{
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  cursor:pointer;transition:background .12s;
+}
+.post:hover{background:rgba(255,255,255,.02)}
+.post-row{display:flex;gap:10px;align-items:flex-start}
+.av{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:#000;
+}
+.post-body{flex:1;min-width:0}
+.post-top{display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap}
+.post-name{font-size:13px;font-weight:500;color:var(--text)}
+.post-handle{font-size:11px;color:var(--muted2)}
+.post-time{font-size:11px;color:var(--muted);margin-left:auto}
+.cat-badge{
+  font-size:10px;padding:2px 8px;border-radius:10px;
+  font-weight:700;font-family:var(--fd);
+}
+.cb-btc{background:rgba(247,147,26,.15);color:var(--gold)}
+.cb-stocks{background:rgba(34,197,94,.12);color:#4ade80}
+.cb-pol{background:rgba(96,165,250,.12);color:#7cb9ff}
+.cb-eco{background:rgba(192,132,252,.12);color:#d8b4fe}
+.cb-prog{background:rgba(251,191,36,.12);color:#fbbf24}
+.post-text{font-size:13.5px;line-height:1.62;color:var(--text2);margin-bottom:10px}
+.post-actions{display:flex;gap:20px}
+.pact{
+  display:flex;align-items:center;gap:4px;
+  font-size:12px;color:var(--muted2);cursor:pointer;
+  background:none;border:none;
+}
+.pact i{font-size:15px}
+.pact:hover{color:var(--text)}
+
+/* locked channel bar */
+.lock-bar{
+  margin-bottom:10px;
+  background:rgba(247,147,26,.07);
+  border:1px solid rgba(247,147,26,.18);
+  border-radius:10px;padding:10px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.lock-bar span{font-size:12px;color:var(--text2)}
+.lock-sub{
+  background:var(--gold);color:#000;border:none;
+  padding:5px 13px;border-radius:7px;
+  font-size:11px;font-weight:700;cursor:pointer;font-family:var(--fd);
+}
+
+/* ─── PULS CHARTS ─── */
+.chart-card{
+  margin:10px 14px;
+  background:var(--chart-bg);
+  border:1px solid var(--border);
+  border-radius:18px;overflow:hidden;
+}
+.chart-card-top{
+  padding:14px 16px 6px;
+  display:flex;align-items:flex-start;justify-content:space-between;
+}
+.cc-left .cc-name{font-size:14px;font-weight:600;color:var(--text)}
+.cc-left .cc-sub{font-size:11px;color:var(--muted2);margin-top:1px}
+.cc-right{text-align:right}
+.cc-price{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--text)}
+.cc-chg{
+  display:inline-block;margin-top:2px;
+  font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;
+}
+.chg-up{background:rgba(34,197,94,.13);color:#4ade80}
+.chg-dn{background:rgba(239,68,68,.13);color:#f87171}
+.chart-wrap{height:88px;padding:4px 10px 12px}
+
+/* Politik bars */
+.pol-section{padding:6px 14px 10px}
+.pol-card{
+  background:var(--chart-bg);border:1px solid var(--border);
+  border-radius:14px;padding:14px;margin-bottom:8px;cursor:pointer;
+  transition:background .15s;
+}
+.pol-card:hover{background:var(--surface)}
+.pol-top-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.pol-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.pol-pname{font-size:14px;font-weight:600;color:var(--text);flex:1}
+.pol-pct{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--text)}
+.bar-track{height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-bottom:10px}
+.bar-fill{height:100%;border-radius:3px;transition:width .5s ease}
+.pol-btns{display:flex;gap:6px}
+.pol-btn{
+  flex:1;padding:7px 0;border-radius:8px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--muted2);font-size:11px;cursor:pointer;
+  font-family:var(--fb);transition:all .18s;
+}
+.pol-btn:hover{border-color:var(--gold);color:var(--gold)}
+.pol-btn.voted{background:rgba(247,147,26,.15);border-color:var(--gold);color:var(--gold);font-weight:600}
+.pol-btn.detail-btn{color:#7cb9ff;border-color:rgba(96,165,250,.25)}
+
+/* Party detail overlay */
+.overlay{
+  position:absolute;inset:0;background:var(--bg);
+  z-index:80;display:none;flex-direction:column;
+}
+.overlay.on{display:flex}
+.ov-head{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.ov-back{
+  background:none;border:none;cursor:pointer;
+  color:var(--muted2);font-size:22px;line-height:1;padding:2px;
+}
+.ov-title{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--text)}
+.pol-person{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 16px;border-bottom:1px solid var(--border);
+}
+.pp-av{
+  width:42px;height:42px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:#fff;
+}
+.pp-meta{flex:1}
+.pp-name{font-size:14px;font-weight:500;color:var(--text)}
+.pp-role{font-size:11px;color:var(--muted2);margin-top:1px}
+.pp-follow{
+  background:transparent;border:1px solid var(--border);
+  color:var(--muted2);padding:5px 13px;border-radius:7px;
+  font-size:11px;cursor:pointer;font-family:var(--fb);
+  transition:all .18s;
+}
+.pp-follow:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ─── SUCHE ─── */
+.search-bar{padding:10px 14px;flex-shrink:0}
+.search-box{
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:13px;padding:10px 14px;
+}
+.search-box i{font-size:17px;color:var(--muted2);flex-shrink:0}
+.search-box input{
+  flex:1;background:transparent;border:none;outline:none;
+  color:var(--text);font-size:14px;font-family:var(--fb);
+}
+.search-box input::placeholder{color:var(--muted)}
+.trending-pills{
+  display:flex;gap:6px;padding:8px 14px 10px;
+  overflow-x:auto;scrollbar-width:none;flex-shrink:0;
+}
+.trending-pills::-webkit-scrollbar{display:none}
+.tp{
+  padding:6px 14px;border-radius:20px;
+  background:var(--surface2);border:1px solid var(--border);
+  font-size:12px;color:var(--muted2);white-space:nowrap;cursor:pointer;
+  transition:all .15s;font-family:var(--fb);
+}
+.tp:hover{border-color:var(--gold);color:var(--gold)}
+.sec-label{
+  padding:10px 16px 6px;
+  font-size:10px;font-weight:700;color:var(--muted);
+  letter-spacing:.9px;text-transform:uppercase;font-family:var(--fd);
+}
+.creator-row{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;
+}
+.creator-row:hover{background:var(--surface)}
+.cr-meta{flex:1}
+.cr-name{font-size:14px;font-weight:500;color:var(--text)}
+.cr-desc{font-size:11px;color:var(--muted2);margin-top:1px}
+.follow-btn{
+  background:transparent;border:1px solid var(--gold);
+  color:var(--gold);padding:5px 14px;border-radius:7px;
+  font-size:11px;font-weight:700;cursor:pointer;font-family:var(--fd);
+  transition:all .15s;
+}
+.follow-btn:hover{background:var(--gold);color:#000}
+
+/* ─── PROFIL ─── */
+.profile-cover{height:96px;background:linear-gradient(135deg,#110800,#3d2200,#1a1000);flex-shrink:0;position:relative}
+.profile-cover-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,var(--bg))}
+.profile-av-wrap{
+  position:absolute;bottom:-34px;left:16px;
+  width:68px;height:68px;border-radius:50%;
+  border:3px solid var(--bg);overflow:hidden;
+  background:linear-gradient(135deg,var(--gold),#a06010);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:700;color:#000;
+}
+.profile-edit{
+  position:absolute;bottom:10px;right:14px;
+  background:transparent;border:1px solid var(--border);
+  color:var(--text2);padding:6px 14px;border-radius:8px;
+  font-size:12px;cursor:pointer;font-family:var(--fb);
+}
+.profile-info{padding:42px 16px 12px;flex-shrink:0}
+.profile-name{font-family:var(--fd);font-size:17px;font-weight:800;color:var(--text)}
+.profile-handle{font-size:12px;color:var(--muted2);margin-bottom:6px}
+.profile-handle em{color:var(--gold);font-style:normal;font-weight:600}
+.profile-bio{font-size:13px;line-height:1.55;color:var(--text2);margin-bottom:10px}
+.profile-stats{display:flex;gap:18px;margin-bottom:12px}
+.pstat{font-size:12px;color:var(--muted2)}
+.pstat strong{color:var(--text);font-weight:600;font-size:13px}
+
+/* Channel-Kacheln 2x nebeneinander */
+.channel-kacheln{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+  padding:0 14px 12px;flex-shrink:0;
+}
+.ck{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:12px;padding:10px 12px;cursor:pointer;
+  transition:all .15s;
+}
+.ck:hover{border-color:var(--gold)}
+.ck.ak{border-color:var(--gold);background:var(--golddim)}
+.ck-name{font-size:12px;font-weight:600;color:var(--text);font-family:var(--fd)}
+.ck-count{font-size:10px;color:var(--muted2);margin-top:2px}
+.ck-lock{font-size:10px;color:var(--gold);margin-top:2px}
+.profile-tabs{
+  display:flex;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.ptab{
+  flex:1;text-align:center;padding:10px;
+  font-size:12px;color:var(--muted2);cursor:pointer;
+  border-bottom:2px solid transparent;transition:all .15s;
+}
+.ptab.ak{color:var(--gold);border-bottom-color:var(--gold);font-weight:600}
+
+/* Plus-Button oben rechts im Profil */
+.plus-btn{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--gold);border:none;color:#000;
+  font-size:20px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+
+/* ─── POST MODAL ─── */
+.post-modal{
+  position:absolute;inset:0;background:rgba(0,0,0,.75);
+  z-index:100;display:none;flex-direction:column;justify-content:flex-end;
+}
+.post-modal.on{display:flex}
+.post-sheet{
+  background:var(--surface);border-radius:24px 24px 0 0;
+  padding:20px 18px 34px;
+}
+.post-sheet h3{
+  font-family:var(--fd);font-size:15px;font-weight:700;
+  color:var(--text);margin-bottom:12px;
+}
+.post-ta{
+  width:100%;background:var(--surface2);border:1px solid var(--border);
+  border-radius:12px;padding:12px 14px;color:var(--text);
+  font-size:14px;outline:none;resize:none;height:90px;font-family:var(--fb);
+  line-height:1.5;
+}
+.post-ta::placeholder{color:var(--muted)}
+.post-cats{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.pcat{
+  padding:5px 12px;border-radius:16px;font-size:11px;font-weight:700;
+  cursor:pointer;border:1px solid var(--border);color:var(--muted2);
+  background:transparent;font-family:var(--fd);transition:all .15s;
+}
+.pcat.ak{background:var(--gold);color:#000;border-color:var(--gold)}
+.sheet-foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+.sheet-cancel{
+  background:transparent;border:1px solid var(--border);color:var(--muted2);
+  padding:9px 18px;border-radius:10px;font-size:13px;cursor:pointer;font-family:var(--fb);
+}
+.sheet-post{
+  background:var(--gold);color:#000;border:none;
+  padding:9px 22px;border-radius:10px;font-size:13px;
+  font-weight:700;cursor:pointer;font-family:var(--fd);
+}
+
+/* ─── BOTTOM NAV ─── */
+.bnav{
+  height:74px;background:var(--surface);border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-around;
+  flex-shrink:0;padding-bottom:8px;
+}
+.bn{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;padding:6px 20px;border-radius:12px;
+  background:none;border:none;transition:all .15s;
+}
+.bn i{font-size:23px;color:var(--muted);transition:color .15s}
+.bn span{font-size:10px;color:var(--muted);font-weight:500;transition:color .15s}
+.bn.ak i,.bn.ak span{color:var(--gold)}
+
+/* av colors */
+.av-a{background:linear-gradient(135deg,#F7931A,#c07010)}
+.av-b{background:linear-gradient(135deg,#3b82f6,#1d4ed8)}
+.av-c{background:linear-gradient(135deg,#a855f7,#7c3aed)}
+.av-d{background:linear-gradient(135deg,#22c55e,#15803d)}
+.av-e{background:linear-gradient(135deg,#ef4444,#b91c1c)}
+.av-f{background:linear-gradient(135deg,#f59e0b,#d97706)}
+
+/* divider */
+.divider{height:1px;background:var(--border);margin:4px 0}
+</style>
+</head>
+<body>
+<div class="shell" id="app">
+
+  <!-- STATUS BAR -->
+  <div class="sbar">
+    <span class="sbar-time">9:41</span>
+    <div class="sbar-icons">
+      <i class="ti ti-wifi"></i>
+      <i class="ti ti-battery-2"></i>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       SCREEN 1 · FEED
+  ════════════════════════════════ -->
+  <div class="screen on" id="sc-feed">
+    <div class="s-head">
+      <div class="s-logo">J<em>L</em></div>
+      <div class="s-head-actions">
+        <button class="s-icon-btn"><i class="ti ti-bell"></i></button>
+        <div class="av av-a" style="width:32px;height:32px;font-size:10px;cursor:pointer" onclick="goTo('profile')">DU</div>
+      </div>
+    </div>
+
+    <!-- KACHELN oben -->
+    <div class="kacheln" id="feed-kacheln">
+      <button class="kachel ak" onclick="filterFeed(this,'all')">Alle</button>
+      <button class="kachel" onclick="filterFeed(this,'btc')">Bitcoin</button>
+      <button class="kachel" onclick="filterFeed(this,'stocks')">Aktien</button>
+      <button class="kachel" onclick="filterFeed(this,'eco')">Wirtschaft</button>
+      <button class="kachel" onclick="filterFeed(this,'pol')">Politik</button>
+      <button class="kachel" onclick="filterFeed(this,'prog')">Prognosen</button>
+    </div>
+
+    <div class="scroll" id="feed-list">
+
+      <div class="post" data-c="btc">
+        <div class="post-row">
+          <div class="av av-a">MK</div>
+          <div class="post-body">
+            <div class="post-top">
+              <span class="post-name">Marco Klein</span>
+              <span class="cat-badge cb-btc">Bitcoin</span>
+              <span class="post-time">12 Min</span>
+            </div>
+            <div class="post-handle">@mk_finance</div>
+            <div class="post-text" style="margin-top:6px">BTC durchbricht die 95K – Volumen auf Binance heute +38%. Die Bullen haben die Kontrolle. Nächstes Ziel: 100K vor Ende Q1. 🟠</div>
+            <div class="post-actions">
+              <button class="pact"><i class="ti ti-heart"></i> 1.4K</button>
+              <button class="pact"><i class="ti ti-message-circle"></i> 203</button>
+              <button class="pact"><i class="ti ti-repeat"></i> 567</button>
+              <button class="pact"><i class="ti ti-share"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="post" data-c="stocks">
+        <div class="post-row">
+          <div class="av av-d">LF</div>
+          <div class="post-body">
+            <div class="post-top">
+              <span class="post-name">Lisa Fischer</span>
+              <span class="cat-badge cb-stocks">Aktien</span>
+              <span class="post-time">34 Min</span>
+            </div>
+            <div class="post-handle">@lisafischer</div>
+            <div class="post-text" style="margin-top:6px">Nvidia heute +4.2% nach Earnings. Jensen Huang hat wieder geliefert. Der GPU-Markt ist unaufhaltsam. Meine Prognose für Q2 im Premium-Channel:</div>
+            <div class="lock-bar">
+              <span><i class="ti ti-lock" style="font-size:12px"></i> Prognosen-Channel · 6,99€/Monat</span>
+              <button class="lock-sub">Abo</button>
+            </div>
+            <div class="post-actions">
+              <button class="pact"><i class="ti ti-heart"></i> 892</button>
+              <button class="pact"><i class="ti ti-message-circle"></i> 147</button>
+              <button class="pact"><i class="ti ti-repeat"></i> 312</button>
+              <button class="pact"><i class="ti ti-share"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="post" data-c="pol">
+        <div class="post-row">
+          <div class="av av-b">TW</div>
+          <div class="post-body">
+            <div class="post-top">
+              <span class="post-name">Tom Weber</span>
+              <span class="cat-badge cb-pol">Politik</span>
+              <span class="post-time">1 Std</span>
+            </div>
+            <div class="post-handle">@tomweber_pol</div>
+            <div class="post-text" style="margin-top:6px">Die neue Haushaltsdebatte zeigt: Keiner will sparen, alle wollen ausgeben. Das Ergebnis sehen wir in 10 Jahren auf unserem Kontostand.</div>
+            <div class="post-actions">
+              <button class="pact"><i class="ti ti-heart"></i> 3.4K</button>
+              <button class="pact"><i class="ti ti-message-circle"></i> 589</button>
+              <button class="pact"><i class="ti ti-repeat"></i> 1.1K</button>
+              <button class="pact"><i class="ti ti-share"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="post" data-c="eco">
+        <div class="post-row">
+          <div class="av av-c">NK</div>
+          <div class="post-body">
+            <div class="post-top">
+              <span class="post-name">Nina Kraft</span>
+              <span class="cat-badge cb-eco">Wirtschaft</span>
+              <span class="post-time">2 Std</span>
+            </div>
+            <div class="post-handle">@ninakraft</div>
+            <div class="post-text" style="margin-top:6px">EZB-Zinssenkung im März wird wahrscheinlicher. Inflation bei 2.3%. Was das für dein Portfolio bedeutet – Thread unten.</div>
+            <div class="post-actions">
+              <button class="pact"><i class="ti ti-heart"></i> 2.1K</button>
+              <button class="pact"><i class="ti ti-message-circle"></i> 311</button>
+              <button class="pact"><i class="ti ti-repeat"></i> 788</button>
+              <button class="pact"><i class="ti ti-share"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="post" data-c="btc">
+        <div class="post-row">
+          <div class="av av-e">SR</div>
+          <div class="post-body">
+            <div class="post-top">
+              <span class="post-name">Stefan R.</span>
+              <span class="cat-badge cb-btc">Krypto</span>
+              <span class="post-time">3 Std</span>
+            </div>
+            <div class="post-handle">@stefanr_crypto</div>
+            <div class="post-text" style="margin-top:6px">ETH hält die 3200 nicht. BTC-Dominanz steigt weiter. Altcoin-Season verschiebt sich deutlich – wer wartet, wartet richtig.</div>
+            <div class="post-actions">
+              <button class="pact"><i class="ti ti-heart"></i> 677</button>
+              <button class="pact"><i class="ti ti-message-circle"></i> 98</button>
+              <button class="pact"><i class="ti ti-repeat"></i> 203</button>
+              <button class="pact"><i class="ti ti-share"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="post" data-c="prog">
+        <div class="post-row">
+          <div class="av av-f">AH</div>
+          <div class="post-body">
+            <div class="post-top">
+              <span class="post-name">Anna Hoffmann</span>
+              <span class="cat-badge cb-prog">Prognosen</span>
+              <span class="post-time">4 Std</span>
+            </div>
+            <div class="post-handle">@anna_invest</div>
+            <div class="post-text" style="margin-top:6px">Meine Jahresprognose 2025: DAX 20.000+, BTC 120K, Gold auf ATH. Vollständige Analyse jetzt im Prognosen-Channel:</div>
+            <div class="lock-bar">
+              <span><i class="ti ti-lock" style="font-size:12px"></i> Prognosen-Channel · 9,99€/Monat</span>
+              <button class="lock-sub">Abo</button>
+            </div>
+            <div class="post-actions">
+              <button class="pact"><i class="ti ti-heart"></i> 1.8K</button>
+              <button class="pact"><i class="ti ti-message-circle"></i> 241</button>
+              <button class="pact"><i class="ti ti-repeat"></i> 634</button>
+              <button class="pact"><i class="ti ti-share"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /scroll feed-list -->
+  </div><!-- /screen feed -->
+
+
+  <!-- ════════════════════════════════
+       SCREEN 2 · PULS (Charts)
+  ════════════════════════════════ -->
+  <div class="screen" id="sc-puls">
+    <div class="s-head">
+      <div class="s-title">Puls<em style="color:var(--gold);font-style:normal">.</em></div>
+      <div class="s-head-actions">
+        <button class="s-icon-btn"><i class="ti ti-refresh"></i></button>
+      </div>
+    </div>
+
+    <!-- KACHELN Puls -->
+    <div class="kacheln" id="puls-kacheln">
+      <button class="kachel ak" onclick="filterPuls(this,'all')">Alle</button>
+      <button class="kachel" onclick="filterPuls(this,'btc')">Bitcoin &amp; Krypto</button>
+      <button class="kachel" onclick="filterPuls(this,'stocks')">Aktien</button>
+      <button class="kachel" onclick="filterPuls(this,'pol')">Politik</button>
+    </div>
+
+    <div class="scroll" id="puls-scroll">
+
+      <!-- ── KRYPTO CHARTS ── -->
+      <div data-pc="btc">
+        <div class="chart-card">
+          <div class="chart-card-top">
+            <div class="cc-left">
+              <div class="cc-name">Bitcoin (BTC)</div>
+              <div class="cc-sub">Liveticker · USD</div>
+            </div>
+            <div class="cc-right">
+              <div class="cc-price">$94,820</div>
+              <div class="cc-chg chg-up">+2.34% ↑</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="c-btc"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-top">
+            <div class="cc-left">
+              <div class="cc-name">Ethereum (ETH)</div>
+              <div class="cc-sub">Liveticker · USD</div>
+            </div>
+            <div class="cc-right">
+              <div class="cc-price">$3,187</div>
+              <div class="cc-chg chg-dn">−0.87% ↓</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="c-eth"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-top">
+            <div class="cc-left">
+              <div class="cc-name">Solana (SOL)</div>
+              <div class="cc-sub">Liveticker · USD</div>
+            </div>
+            <div class="cc-right">
+              <div class="cc-price">$198.40</div>
+              <div class="cc-chg chg-up">+5.12% ↑</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="c-sol"></canvas></div>
+        </div>
+      </div>
+
+      <!-- ── AKTIEN CHARTS ── -->
+      <div data-pc="stocks">
+        <div class="chart-card">
+          <div class="chart-card-top">
+            <div class="cc-left">
+              <div class="cc-name">Nvidia (NVDA)</div>
+              <div class="cc-sub">NASDAQ · USD</div>
+            </div>
+            <div class="cc-right">
+              <div class="cc-price">$876.40</div>
+              <div class="cc-chg chg-up">+4.21% ↑</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="c-nvda"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-top">
+            <div class="cc-left">
+              <div class="cc-name">DAX 40</div>
+              <div class="cc-sub">Frankfurt · EUR</div>
+            </div>
+            <div class="cc-right">
+              <div class="cc-price">17,840</div>
+              <div class="cc-chg chg-dn">−0.32% ↓</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="c-dax"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-top">
+            <div class="cc-left">
+              <div class="cc-name">Apple (AAPL)</div>
+              <div class="cc-sub">NASDAQ · USD</div>
+            </div>
+            <div class="cc-right">
+              <div class="cc-price">$218.80</div>
+              <div class="cc-chg chg-up">+1.04% ↑</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="c-aapl"></canvas></div>
+        </div>
+      </div>
+
+      <!-- ── POLITIK ── -->
+      <div data-pc="pol">
+        <div style="padding:10px 14px 4px">
+          <div style="font-size:11px;color:var(--muted2);font-weight:500">Sonntagsfrage · Bundestagswahl</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:1px">Stimme ab · Klicke auf eine Partei für Politiker</div>
+        </div>
+
+        <!-- CDU -->
+        <div class="pol-section">
+          <div class="pol-card" id="pc-cdu">
+            <div class="pol-top-row">
+              <div class="pol-dot" style="background:#555;border:1.5px solid #888"></div>
+              <div class="pol-pname">CDU / CSU</div>
+              <div class="pol-pct">33%</div>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:33%;background:#666"></div></div>
+            <div class="pol-btns">
+              <button class="pol-btn" onclick="vote(this,'cdu')">✓ Wählen</button>
+              <button class="pol-btn detail-btn" onclick="showParty('cdu')">Politiker →</button>
+            </div>
+          </div>
+          <div class="pol-card" id="pc-spd">
+            <div class="pol-top-row">
+              <div class="pol-dot" style="background:#c0392b"></div>
+              <div class="pol-pname">SPD</div>
+              <div class="pol-pct">16%</div>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:16%;background:#c0392b"></div></div>
+            <div class="pol-btns">
+              <button class="pol-btn" onclick="vote(this,'spd')">✓ Wählen</button>
+              <button class="pol-btn detail-btn" onclick="showParty('spd')">Politiker →</button>
+            </div>
+          </div>
+          <div class="pol-card" id="pc-afd">
+            <div class="pol-top-row">
+              <div class="pol-dot" style="background:#009ee0"></div>
+              <div class="pol-pname">AfD</div>
+              <div class="pol-pct">20%</div>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:20%;background:#009ee0"></div></div>
+            <div class="pol-btns">
+              <button class="pol-btn" onclick="vote(this,'afd')">✓ Wählen</button>
+              <button class="pol-btn detail-btn" onclick="showParty('afd')">Politiker →</button>
+            </div>
+          </div>
+          <div class="pol-card" id="pc-gru">
+            <div class="pol-top-row">
+              <div class="pol-dot" style="background:#1aad62"></div>
+              <div class="pol-pname">Grüne</div>
+              <div class="pol-pct">13%</div>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:13%;background:#1aad62"></div></div>
+            <div class="pol-btns">
+              <button class="pol-btn" onclick="vote(this,'gru')">✓ Wählen</button>
+              <button class="pol-btn detail-btn" onclick="showParty('gru')">Politiker →</button>
+            </div>
+          </div>
+          <div class="pol-card" id="pc-fdp">
+            <div class="pol-top-row">
+              <div class="pol-dot" style="background:#d4a800;border:1px solid #aaa"></div>
+              <div class="pol-pname">FDP</div>
+              <div class="pol-pct">4%</div>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:4%;background:#d4a800"></div></div>
+            <div class="pol-btns">
+              <button class="pol-btn" onclick="vote(this,'fdp')">✓ Wählen</button>
+              <button class="pol-btn detail-btn" onclick="showParty('fdp')">Politiker →</button>
+            </div>
+          </div>
+          <div class="pol-card" id="pc-bsw">
+            <div class="pol-top-row">
+              <div class="pol-dot" style="background:#7c3aed"></div>
+              <div class="pol-pname">BSW</div>
+              <div class="pol-pct">8%</div>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:8%;background:#7c3aed"></div></div>
+            <div class="pol-btns">
+              <button class="pol-btn" onclick="vote(this,'bsw')">✓ Wählen</button>
+              <button class="pol-btn detail-btn" onclick="showParty('bsw')">Politiker →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /puls scroll -->
+
+    <!-- PARTY DETAIL OVERLAY -->
+    <div class="overlay" id="party-overlay">
+      <div class="ov-head">
+        <button class="ov-back" onclick="closeParty()"><i class="ti ti-arrow-left"></i></button>
+        <div class="ov-title" id="ov-title">Partei</div>
+      </div>
+      <div class="scroll" id="ov-body"></div>
+    </div>
+
+  </div><!-- /screen puls -->
+
+
+  <!-- ════════════════════════════════
+       SCREEN 3 · SUCHE
+  ════════════════════════════════ -->
+  <div class="screen" id="sc-search">
+    <div class="s-head">
+      <div class="s-title">Suche</div>
+    </div>
+
+    <div class="search-bar">
+      <div class="search-box">
+        <i class="ti ti-search"></i>
+        <input type="text" placeholder="Creator, Themen, Hashtags …">
+      </div>
+    </div>
+
+    <div class="trending-pills">
+      <div class="tp">#Bitcoin</div>
+      <div class="tp">#DAX</div>
+      <div class="tp">#Inflation</div>
+      <div class="tp">#Nvidia</div>
+      <div class="tp">#Bundestag</div>
+      <div class="tp">#ETF</div>
+      <div class="tp">#Gold</div>
+    </div>
+
+    <div class="scroll">
+      <div class="sec-label">Top Creator</div>
+      <div class="creator-row">
+        <div class="av av-a">MK</div>
+        <div class="cr-meta">
+          <div class="cr-name">Marco Klein</div>
+          <div class="cr-desc">Bitcoin · Krypto · 12.4K Follower</div>
+        </div>
+        <button class="follow-btn">Folgen</button>
+      </div>
+      <div class="creator-row">
+        <div class="av av-d">LF</div>
+        <div class="cr-meta">
+          <div class="cr-name">Lisa Fischer</div>
+          <div class="cr-desc">Aktien · Prognosen · 28.1K Follower</div>
+        </div>
+        <button class="follow-btn">Folgen</button>
+      </div>
+      <div class="creator-row">
+        <div class="av av-b">TW</div>
+        <div class="cr-meta">
+          <div class="cr-name">Tom Weber</div>
+          <div class="cr-desc">Politik · Wirtschaft · 19.8K</div>
+        </div>
+        <button class="follow-btn">Folgen</button>
+      </div>
+      <div class="creator-row">
+        <div class="av av-c">NK</div>
+        <div class="cr-meta">
+          <div class="cr-name">Nina Kraft</div>
+          <div class="cr-desc">Wirtschaft · EZB · 8.4K Follower</div>
+        </div>
+        <button class="follow-btn">Folgen</button>
+      </div>
+
+      <div class="sec-label" style="padding-top:14px">Trending Themen</div>
+      <div class="post" style="border-bottom:1px solid var(--border);padding:12px 16px;cursor:pointer">
+        <div style="font-size:11px;color:var(--muted2)">Bitcoin · 4.2K Posts heute</div>
+        <div style="font-size:14px;font-weight:600;color:var(--text);margin-top:2px">#BitcoinATH</div>
+      </div>
+      <div class="post" style="border-bottom:1px solid var(--border);padding:12px 16px;cursor:pointer">
+        <div style="font-size:11px;color:var(--muted2)">Wirtschaft · 2.1K Posts heute</div>
+        <div style="font-size:14px;font-weight:600;color:var(--text);margin-top:2px">#EZBZinssenkung</div>
+      </div>
+      <div class="post" style="padding:12px 16px;cursor:pointer">
+        <div style="font-size:11px;color:var(--muted2)">Politik · 1.8K Posts heute</div>
+        <div style="font-size:14px;font-weight:600;color:var(--text);margin-top:2px">#Bundestagswahl</div>
+      </div>
+    </div>
+  </div><!-- /screen search -->
+
+
+  <!-- ════════════════════════════════
+       SCREEN 4 · PROFIL
+  ════════════════════════════════ -->
+  <div class="screen" id="sc-profile">
+    <!-- Header-Leiste ganz oben mit Plus-Button -->
+    <div class="s-head" style="padding-bottom:0">
+      <div class="s-title" style="font-size:16px">Mein Profil</div>
+      <div class="s-head-actions">
+        <button class="s-icon-btn"><i class="ti ti-settings"></i></button>
+        <button class="plus-btn" onclick="openModal()"><i class="ti ti-plus" style="font-size:19px"></i></button>
+      </div>
+    </div>
+
+    <div class="scroll">
+      <!-- Titelbild + Avatar -->
+      <div class="profile-cover">
+        <div class="profile-cover-overlay"></div>
+        <div class="profile-av-wrap">DU</div>
+        <button class="profile-edit">Bearbeiten</button>
+      </div>
+
+      <!-- Info -->
+      <div class="profile-info">
+        <div class="profile-name">Dein Name</div>
+        <div class="profile-handle">@username · <em>#0001</em></div>
+        <div class="profile-bio">Investor. Krypto-Enthusiast. Wirtschaft ist meine Leidenschaft. 📊 Follower bekommen tägliche Insights.</div>
+        <div class="profile-stats">
+          <div class="pstat"><strong>234</strong> Posts</div>
+          <div class="pstat"><strong>1.2K</strong> Follower</div>
+          <div class="pstat"><strong>389</strong> Follows</div>
+        </div>
+      </div>
+
+      <!-- Channel-Kacheln 2x nebeneinander -->
+      <div style="padding:0 14px 4px;font-size:10px;color:var(--muted);letter-spacing:.7px;text-transform:uppercase;font-family:var(--fd);font-weight:700">Deine Channels</div>
+      <div class="channel-kacheln">
+        <div class="ck ak" onclick="selCK(this)">
+          <div class="ck-name">Alle Posts</div>
+          <div class="ck-count">234 Posts</div>
+        </div>
+        <div class="ck" onclick="selCK(this)">
+          <div class="ck-name">Bitcoin</div>
+          <div class="ck-count">98 Posts</div>
+        </div>
+        <div class="ck" onclick="selCK(this)">
+          <div class="ck-name">Aktien</div>
+          <div class="ck-count">67 Posts</div>
+        </div>
+        <div class="ck" onclick="selCK(this)">
+          <div class="ck-name">Wirtschaft</div>
+          <div class="ck-count">41 Posts</div>
+        </div>
+        <div class="ck" onclick="selCK(this)">
+          <div class="ck-name">Politik</div>
+          <div class="ck-count">28 Posts</div>
+        </div>
+        <div class="ck" onclick="selCK(this)">
+          <div class="ck-name">Prognosen 🔒</div>
+          <div class="ck-count">0 Abonnenten</div>
+          <div class="ck-lock">Channel einrichten →</div>
+        </div>
+      </div>
+
+      <!-- Tab-Bar Posts/Kommentare/Medien -->
+      <div class="profile-tabs">
+        <div class="ptab ak">Posts</div>
+        <div class="ptab" onclick="switchPTab(this)">Kommentare</div>
+        <div class="ptab" onclick="switchPTab(this)">Medien</div>
+      </div>
+
+      <!-- Feed auf Profil -->
+      <div class="post">
+        <div class="post-row">
+          <div class="av av-a" style="width:34px;height:34px;font-size:10px">DU</div>
+          <div class="post-body">
+            <div class="post-top">
+              <span class="post-name">Dein Name</span>
+              <span class="cat-badge cb-btc">Bitcoin</span>
+              <span class="post-time">Jetzt</span>
+            </div>
+            <div class="post-handle">@username · #0001</div>
+            <div class="post-text" style="margin-top:6px">Mein erster JL-Post! Bitcoin ist die Zukunft des Geldes. Froh, Teil dieser Community zu sein. 🟠 #Bitcoin #JL</div>
+            <div class="post-actions">
+              <button class="pact"><i class="ti ti-heart"></i> 12</button>
+              <button class="pact"><i class="ti ti-message-circle"></i> 3</button>
+              <button class="pact"><i class="ti ti-repeat"></i> 5</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="post">
+        <div class="post-row">
+          <div class="av av-a" style="width:34px;height:34px;font-size:10px">DU</div>
+          <div class="post-body">
+            <div class="post-top">
+              <span class="post-name">Dein Name</span>
+              <span class="cat-badge cb-stocks">Aktien</span>
+              <span class="post-time">2 Std</span>
+            </div>
+            <div class="post-handle">@username</div>
+            <div class="post-text" style="margin-top:6px">Nvidia auf meiner Watchlist seit $400. Heute fast 2x. Geduld zahlt sich aus. 📈</div>
+            <div class="post-actions">
+              <button class="pact"><i class="ti ti-heart"></i> 47</button>
+              <button class="pact"><i class="ti ti-message-circle"></i> 9</button>
+              <button class="pact"><i class="ti ti-repeat"></i> 18</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="height:16px"></div>
+    </div><!-- /scroll profil -->
+  </div><!-- /screen profile -->
+
+
+  <!-- POST MODAL -->
+  <div class="post-modal" id="post-modal" onclick="modalBg(event)">
+    <div class="post-sheet">
+      <h3>Neuer Post</h3>
+      <textarea class="post-ta" placeholder="Was denkst du? Wähle zuerst einen Channel …"></textarea>
+      <div style="font-size:11px;color:var(--muted);margin-top:10px;margin-bottom:4px">Channel wählen – Post wird automatisch einsortiert:</div>
+      <div class="post-cats">
+        <button class="pcat" onclick="selPCat(this)">Bitcoin</button>
+        <button class="pcat" onclick="selPCat(this)">Krypto</button>
+        <button class="pcat" onclick="selPCat(this)">Aktien</button>
+        <button class="pcat" onclick="selPCat(this)">Wirtschaft</button>
+        <button class="pcat" onclick="selPCat(this)">Politik</button>
+        <button class="pcat" onclick="selPCat(this)">Prognosen 🔒</button>
+      </div>
+      <div class="sheet-foot">
+        <button class="sheet-cancel" onclick="closeModal()">Abbrechen</button>
+        <button class="sheet-post" onclick="closeModal()">Posten →</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ─── BOTTOM NAV ─── -->
+  <div class="bnav">
+    <button class="bn ak" id="bn-feed" onclick="goTo('feed')">
+      <i class="ti ti-home"></i><span>Feed</span>
+    </button>
+    <button class="bn" id="bn-puls" onclick="goTo('puls')">
+      <i class="ti ti-activity"></i><span>Puls</span>
+    </button>
+    <button class="bn" id="bn-search" onclick="goTo('search')">
+      <i class="ti ti-search"></i><span>Suche</span>
+    </button>
+    <button class="bn" id="bn-profile" onclick="goTo('profile')">
+      <i class="ti ti-user"></i><span>Profil</span>
+    </button>
+  </div>
+
+</div><!-- /shell -->
+
+<script>
+/* ─── NAV ─── */
+function goTo(s){
+  document.querySelectorAll('.screen').forEach(el=>el.classList.remove('on'));
+  document.querySelectorAll('.bn').forEach(el=>el.classList.remove('ak'));
+  document.getElementById('sc-'+s).classList.add('on');
+  document.getElementById('bn-'+s).classList.add('ak');
+  if(s==='puls') setTimeout(initCharts,80);
+}
+
+/* ─── FEED FILTER ─── */
+function filterFeed(btn,cat){
+  document.querySelectorAll('#feed-kacheln .kachel').forEach(b=>b.classList.remove('ak'));
+  btn.classList.add('ak');
+  document.querySelectorAll('#feed-list .post').forEach(p=>{
+    p.style.display=(cat==='all'||p.dataset.c===cat)?'':'none';
+  });
+}
+
+/* ─── PULS FILTER ─── */
+function filterPuls(btn,cat){
+  document.querySelectorAll('#puls-kacheln .kachel').forEach(b=>b.classList.remove('ak'));
+  btn.classList.add('ak');
+  document.querySelectorAll('#puls-scroll [data-pc]').forEach(el=>{
+    el.style.display=(cat==='all'||el.dataset.pc===cat)?'':'none';
+  });
+}
+
+/* ─── POLITIK VOTE ─── */
+let myVote=null;
+function vote(btn,party){
+  // reset all vote buttons
+  document.querySelectorAll('.pol-btn:not(.detail-btn)').forEach(b=>{
+    b.classList.remove('voted');b.textContent='✓ Wählen';
+  });
+  btn.classList.add('voted');btn.textContent='Gewählt ✓';
+  myVote=party;
+}
+
+/* ─── PARTY DETAIL ─── */
+const parties={
+  cdu:{name:'CDU / CSU',col:'#555',pols:[
+    {i:'FM',n:'Friedrich Merz',r:'Parteivorsitzender & Kanzlerkandidat',c:'#444'},
+    {i:'MS',n:'Markus Söder',r:'Ministerpräsident Bayern (CSU)',c:'#333'},
+    {i:'AL',n:'Armin Laschet',r:'NRW-Ministerpräsident a.D.',c:'#555'},
+    {i:'PW',n:'Paul Ziemiak',r:'Generalsekretär',c:'#444'},
+  ]},
+  spd:{name:'SPD',col:'#c0392b',pols:[
+    {i:'OS',n:'Olaf Scholz',r:'Bundeskanzler',c:'#922b21'},
+    {i:'SK',n:'Saskia Esken',r:'Parteivorsitzende',c:'#c0392b'},
+    {i:'LK',n:'Lars Klingbeil',r:'Parteivorsitzender',c:'#a93226'},
+    {i:'RM',n:'Rolf Mützenich',r:'Fraktionsvorsitzender',c:'#c0392b'},
+  ]},
+  afd:{name:'AfD',col:'#009ee0',pols:[
+    {i:'AW',n:'Alice Weidel',r:'Fraktionsvorsitzende & Kanzlerkandidatin',c:'#0080c0'},
+    {i:'TC',n:'Tino Chrupalla',r:'Parteivorsitzender',c:'#009ee0'},
+    {i:'BH',n:'Björn Höcke',r:'Landesvorsitzender Thüringen',c:'#0060a0'},
+  ]},
+  gru:{name:'Grüne',col:'#1aad62',pols:[
+    {i:'AB',n:'Annalena Baerbock',r:'Außenministerin',c:'#158f50'},
+    {i:'RH',n:'Robert Habeck',r:'Wirtschaftsminister',c:'#1aad62'},
+    {i:'ON',n:'Omid Nouripour',r:'Parteivorsitzender',c:'#139e58'},
+    {i:'RL',n:'Ricarda Lang',r:'Parteivorsitzende',c:'#158f50'},
+  ]},
+  fdp:{name:'FDP',col:'#d4a800',pols:[
+    {i:'CL',n:'Christian Lindner',r:'Parteivorsitzender',c:'#b09000'},
+    {i:'WK',n:'Wolfgang Kubicki',r:'Bundestagsvizepräsident',c:'#d4a800'},
+    {i:'BS',n:'Bettina Stark-Watzinger',r:'Bundesministerin a.D.',c:'#a08000'},
+  ]},
+  bsw:{name:'BSW',col:'#7c3aed',pols:[
+    {i:'SW',n:'Sahra Wagenknecht',r:'Parteivorsitzende & Gründerin',c:'#6d28d9'},
+    {i:'AF',n:'Amira Mohamed Ali',r:'Fraktionsvorsitzende',c:'#7c3aed'},
+  ]},
+};
+
+function showParty(id){
+  const p=parties[id];
+  document.getElementById('ov-title').textContent=p.name;
+  document.getElementById('ov-body').innerHTML=p.pols.map(pp=>`
+    <div class="pol-person">
+      <div class="pp-av" style="background:${pp.c}">${pp.i}</div>
+      <div class="pp-meta">
+        <div class="pp-name">${pp.n}</div>
+        <div class="pp-role">${pp.r}</div>
+      </div>
+      <button class="pp-follow">Folgen</button>
+    </div>
+  `).join('');
+  document.getElementById('party-overlay').classList.add('on');
+}
+function closeParty(){document.getElementById('party-overlay').classList.remove('on')}
+
+/* ─── PROFIL CHANNEL KACHELN ─── */
+function selCK(el){
+  document.querySelectorAll('.channel-kacheln .ck').forEach(c=>c.classList.remove('ak'));
+  el.classList.add('ak');
+}
+function switchPTab(el){
+  document.querySelectorAll('.profile-tabs .ptab').forEach(t=>t.classList.remove('ak'));
+  el.classList.add('ak');
+}
+
+/* ─── POST MODAL ─── */
+function openModal(){document.getElementById('post-modal').classList.add('on')}
+function closeModal(){document.getElementById('post-modal').classList.remove('on')}
+function modalBg(e){if(e.target===document.getElementById('post-modal'))closeModal()}
+function selPCat(btn){
+  document.querySelectorAll('.pcat').forEach(b=>b.classList.remove('ak'));
+  btn.classList.add('ak');
+}
+
+/* ─── CHARTS ─── */
+let chartsReady=false;
+function initCharts(){
+  if(chartsReady)return; chartsReady=true;
+  const GOLD='#F7931A',GR='#22c55e',RD='#ef4444';
+
+  function rnd(v,vol,n,drift=0){
+    let d=[],c=v;
+    for(let i=0;i<n;i++){c+=(Math.random()-.48)*vol+drift;d.push(Math.round(c*10)/10)}
+    return d;
+  }
+
+  function grad(ctx,color){
+    const g=ctx.createLinearGradient(0,0,0,80);
+    g.addColorStop(0,color+'44');g.addColorStop(1,color+'00');return g;
+  }
+
+  function line(id,data,color){
+    const el=document.getElementById(id);if(!el)return;
+    const up=data[data.length-1]>=data[0];
+    const col=up?GR:RD;
+    new Chart(el,{type:'line',
+      data:{labels:data.map((_,i)=>i),datasets:[{
+        data,borderColor:GOLD,borderWidth:2,
+        fill:true,backgroundColor:grad(el.getContext('2d'),GOLD),
+        pointRadius:0,tension:.42
+      }]},
+      options:{responsive:true,maintainAspectRatio:false,
+        animation:{duration:600},
+        plugins:{legend:{display:false},tooltip:{enabled:false}},
+        scales:{x:{display:false},y:{display:false}}
+      }
+    });
+  }
+
+  // Alle Charts mit Bitcoin-Orange
+  line('c-btc', rnd(94000,700,40,15));
+  line('c-eth', rnd(3200,55,40,-4));
+  line('c-sol', rnd(190,7,40,8));
+  line('c-nvda',rnd(840,14,40,10));
+  line('c-dax', rnd(17800,75,40,-2));
+  line('c-aapl',rnd(216,3,40,2));
+}
+</script>
+</body>
+</html>
