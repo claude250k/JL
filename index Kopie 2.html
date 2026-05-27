@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JL – Finance. Markets. Power.</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, getDocs, getDoc, doc, setDoc, updateDoc, query, orderBy, limit, where, onSnapshot, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+  // ══════════════════════════════════════════════
+  // FIREBASE CONFIG – Replace with your own from
+  // https://console.firebase.google.com
+  // ══════════════════════════════════════════════
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+  const googleProvider = new GoogleAuthProvider();
+
+  // Expose globally
+  window._fb = { auth, db, storage, googleProvider,
+    createUserWithEmailAndPassword, signInWithEmailAndPassword,
+    signInWithPopup, onAuthStateChanged, signOut, updateProfile,
+    collection, addDoc, getDocs, getDoc, doc, setDoc, updateDoc,
+    query, orderBy, limit, where, onSnapshot, serverTimestamp, increment,
+    ref, uploadBytes, getDownloadURL
+  };
+  window._fbReady = true;
+  document.dispatchEvent(new Event('fb-ready'));
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0c0c0c;--surface:#161616;--surface2:#1f1f1f;--surface3:#282828;
+  --chart-bg:#181818;--border:#272727;--muted:#4a4a4a;--muted2:#7a7a7a;
+  --text:#f0ede6;--text2:#b0ada6;
+  --gold:#F7931A;--golddim:rgba(247,147,26,.13);
+  --green:#22c55e;--red:#ef4444;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;background:#000;display:flex;align-items:center;justify-content:center;font-family:var(--fb);overflow:hidden}
+.shell{width:390px;height:844px;background:var(--bg);border-radius:48px;overflow:hidden;position:relative;display:flex;flex-direction:column;border:1.5px solid #1a1a1a;box-shadow:0 60px 160px rgba(0,0,0,.95)}
+@media(max-width:430px){.shell{width:100%;height:100%;border-radius:0;border:none}}
+
+/* STATUS */
+.sbar{height:48px;padding:0 28px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.sbar-t{font-size:15px;font-weight:600;color:var(--text)}
+.sbar-i{display:flex;gap:5px;align-items:center;color:var(--text)}
+.sbar-i i{font-size:14px}
+
+/* SCREENS */
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden;position:relative}
+.screen.on{display:flex}
+
+/* HEADERS */
+.s-head{padding:8px 18px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.s-logo{font-family:var(--fd);font-size:24px;font-weight:800;letter-spacing:-1px;color:var(--text)}
+.s-logo em{color:var(--gold);font-style:normal}
+.s-title{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--text)}
+.s-actions{display:flex;gap:10px;align-items:center}
+.icon-btn{background:none;border:none;cursor:pointer;color:var(--muted2);font-size:20px;padding:4px;line-height:1}
+
+/* KACHELN */
+.kacheln{display:flex;gap:6px;padding:8px 14px 10px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;border-bottom:1px solid var(--border)}
+.kacheln::-webkit-scrollbar{display:none}
+.kachel{padding:6px 15px;border-radius:22px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;border:1px solid var(--border);color:var(--muted2);background:transparent;transition:all .18s;font-family:var(--fb)}
+.kachel.ak{background:var(--gold);color:#000;border-color:var(--gold);font-weight:700}
+
+/* SCROLL */
+.scroll{flex:1;overflow-y:auto;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+
+/* POSTS */
+.post-item{padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s}
+.post-item:hover{background:rgba(255,255,255,.02)}
+.post-row{display:flex;gap:10px}
+.av{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#000;background:linear-gradient(135deg,var(--gold),#b06010);object-fit:cover}
+.av img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+.post-body{flex:1;min-width:0}
+.post-top{display:flex;align-items:center;gap:6px;margin-bottom:2px;flex-wrap:wrap}
+.post-author{font-size:13px;font-weight:600;color:var(--text)}
+.post-handle{font-size:11px;color:var(--muted2)}
+.post-time{font-size:11px;color:var(--muted);margin-left:auto}
+.cat-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;font-family:var(--fd)}
+.cb-btc{background:rgba(247,147,26,.15);color:var(--gold)}
+.cb-stocks{background:rgba(34,197,94,.12);color:#4ade80}
+.cb-pol{background:rgba(96,165,250,.12);color:#7cb9ff}
+.cb-eco{background:rgba(192,132,252,.12);color:#d8b4fe}
+.cb-prog{background:rgba(251,191,36,.12);color:#fbbf24}
+.cb-custom{background:rgba(255,255,255,.08);color:var(--text2)}
+.post-text{font-size:13.5px;line-height:1.62;color:var(--text2);margin:6px 0 8px}
+.post-img{width:100%;border-radius:10px;margin-bottom:8px;max-height:200px;object-fit:cover}
+.post-actions{display:flex;gap:18px}
+.pact{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted2);cursor:pointer;background:none;border:none;font-family:var(--fb);padding:0;transition:color .15s}
+.pact i{font-size:15px}
+.pact:hover{color:var(--text)}
+.pact.liked{color:#ef4444}
+.empty-feed{text-align:center;padding:40px 20px;color:var(--muted2)}
+.empty-feed i{font-size:40px;color:var(--muted);margin-bottom:10px;display:block}
+
+/* CHART CARDS */
+.chart-card{margin:10px 14px;background:var(--chart-bg);border:1px solid var(--border);border-radius:18px;overflow:hidden}
+.cc-top{padding:14px 16px 6px;display:flex;align-items:flex-start;justify-content:space-between}
+.cc-name{font-size:14px;font-weight:600;color:var(--text)}
+.cc-sub{font-size:11px;color:var(--muted2);margin-top:1px}
+.cc-price{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--text)}
+.cc-chg{display:inline-block;margin-top:3px;font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px}
+.chg-up{background:rgba(34,197,94,.13);color:#4ade80}
+.chg-dn{background:rgba(239,68,68,.13);color:#f87171}
+.chart-wrap{height:88px;padding:4px 10px 12px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;margin-right:4px;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* POLITIK */
+.pol-section{padding:6px 14px 4px}
+.pol-card{background:var(--chart-bg);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:8px}
+.pol-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.pol-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.pol-name{font-size:14px;font-weight:600;color:var(--text);flex:1}
+.pol-pct{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--text)}
+.bar-track{height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-bottom:10px}
+.bar-fill{height:100%;border-radius:3px;transition:width .6s}
+.pol-btns{display:flex;gap:6px}
+.pol-btn{flex:1;padding:7px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted2);font-size:11px;cursor:pointer;font-family:var(--fb);transition:all .18s}
+.pol-btn:hover{border-color:var(--gold);color:var(--gold)}
+.pol-btn.voted{background:rgba(247,147,26,.15);border-color:var(--gold);color:var(--gold);font-weight:600}
+.pol-btn.detail{color:#7cb9ff;border-color:rgba(96,165,250,.2)}
+
+/* OVERLAY (Party detail / Profile view) */
+.overlay{position:absolute;inset:0;background:var(--bg);z-index:80;display:none;flex-direction:column;overflow:hidden}
+.overlay.on{display:flex}
+.ov-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.ov-back{background:none;border:none;cursor:pointer;color:var(--muted2);font-size:22px;line-height:1;padding:2px}
+.ov-title{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--text);flex:1}
+.pol-person{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--border)}
+.pp-av{width:42px;height:42px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.pp-meta{flex:1}
+.pp-name{font-size:14px;font-weight:500;color:var(--text)}
+.pp-role{font-size:11px;color:var(--muted2);margin-top:1px}
+.download-btn{background:transparent;border:1px solid var(--border);color:var(--muted2);padding:6px 12px;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--fb);transition:all .18s;display:flex;align-items:center;gap:4px}
+.download-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* SEARCH */
+.search-bar{padding:10px 14px;flex-shrink:0}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:13px;padding:10px 14px}
+.search-box i{font-size:17px;color:var(--muted2);flex-shrink:0}
+.search-box input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:14px;font-family:var(--fb)}
+.search-box input::placeholder{color:var(--muted)}
+.trending-pills{display:flex;gap:6px;padding:8px 14px 10px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.trending-pills::-webkit-scrollbar{display:none}
+.tp{padding:6px 14px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);font-size:12px;color:var(--muted2);white-space:nowrap;cursor:pointer;transition:all .15s}
+.tp:hover{border-color:var(--gold);color:var(--gold)}
+.sec-label{padding:10px 16px 6px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.9px;text-transform:uppercase;font-family:var(--fd)}
+.creator-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s}
+.creator-row:hover{background:var(--surface)}
+.cr-meta{flex:1}
+.cr-name{font-size:14px;font-weight:500;color:var(--text)}
+.cr-desc{font-size:11px;color:var(--muted2);margin-top:1px}
+.follow-btn{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:5px 14px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--fd);transition:all .15s}
+.follow-btn:hover,.follow-btn.following{background:var(--gold);color:#000}
+
+/* PROFIL */
+.profile-cover{height:96px;background:linear-gradient(135deg,#110800,#3d2200);position:relative;flex-shrink:0}
+.profile-av-wrap{position:absolute;bottom:-34px;left:16px;width:68px;height:68px;border-radius:50%;border:3px solid var(--bg);background:linear-gradient(135deg,var(--gold),#a06010);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#000;overflow:hidden}
+.profile-av-wrap img{width:100%;height:100%;object-fit:cover}
+.profile-edit{position:absolute;bottom:10px;right:14px;background:transparent;border:1px solid var(--border);color:var(--text2);padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:var(--fb)}
+.profile-info{padding:42px 16px 12px;flex-shrink:0}
+.profile-name{font-family:var(--fd);font-size:17px;font-weight:800;color:var(--text)}
+.profile-handle{font-size:12px;color:var(--muted2);margin-bottom:6px}
+.profile-handle em{color:var(--gold);font-style:normal;font-weight:600}
+.profile-bio{font-size:13px;line-height:1.55;color:var(--text2);margin-bottom:10px}
+.profile-stats{display:flex;gap:18px;margin-bottom:12px}
+.pstat{font-size:12px;color:var(--muted2)}
+.pstat strong{color:var(--text);font-size:13px}
+.channel-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 14px 12px}
+.ck{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;cursor:pointer;transition:all .15s}
+.ck:hover{border-color:var(--gold)}
+.ck.ak{border-color:var(--gold);background:var(--golddim)}
+.ck-name{font-size:12px;font-weight:600;color:var(--text);font-family:var(--fd)}
+.ck-count{font-size:10px;color:var(--muted2);margin-top:2px}
+.profile-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.ptab{flex:1;text-align:center;padding:10px;font-size:12px;color:var(--muted2);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.ptab.ak{color:var(--gold);border-bottom-color:var(--gold);font-weight:600}
+.plus-btn{width:34px;height:34px;border-radius:50%;background:var(--gold);border:none;color:#000;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* AUTH SCREEN */
+.auth-screen{position:absolute;inset:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 28px}
+.auth-logo{font-family:var(--fd);font-size:48px;font-weight:800;color:var(--text);margin-bottom:6px}
+.auth-logo em{color:var(--gold);font-style:normal}
+.auth-tagline{font-size:13px;color:var(--muted2);margin-bottom:36px;text-align:center}
+.auth-tabs{display:flex;gap:0;width:100%;margin-bottom:20px;background:var(--surface);border-radius:12px;padding:4px}
+.auth-tab{flex:1;padding:8px;text-align:center;font-size:13px;cursor:pointer;border-radius:9px;color:var(--muted2);transition:all .18s;font-family:var(--fb)}
+.auth-tab.ak{background:var(--surface3);color:var(--text);font-weight:500}
+.auth-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--text);font-size:14px;outline:none;margin-bottom:10px;font-family:var(--fb)}
+.auth-input:focus{border-color:var(--gold)}
+.auth-input::placeholder{color:var(--muted)}
+.auth-btn{width:100%;background:var(--gold);color:#000;border:none;padding:13px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--fd);margin-top:4px;transition:opacity .15s}
+.auth-btn:hover{opacity:.9}
+.auth-divider{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--muted);font-size:12px}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.auth-google{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px;border-radius:12px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--fb);display:flex;align-items:center;justify-content:center;gap:10px;transition:background .15s}
+.auth-google:hover{background:var(--surface3)}
+.auth-err{color:#f87171;font-size:12px;margin-top:6px;text-align:center}
+
+/* POST MODAL */
+.modal-bg{position:absolute;inset:0;background:rgba(0,0,0,.75);z-index:100;display:none;flex-direction:column;justify-content:flex-end}
+.modal-bg.on{display:flex}
+.modal-sheet{background:var(--surface);border-radius:24px 24px 0 0;padding:20px 18px 34px}
+.modal-title{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px}
+.post-ta{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--text);font-size:14px;outline:none;resize:none;height:90px;font-family:var(--fb);line-height:1.5}
+.post-ta::placeholder{color:var(--muted)}
+.post-ta:focus{border-color:var(--gold)}
+.modal-cats{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.pcat{padding:5px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border);color:var(--muted2);background:transparent;font-family:var(--fd);transition:all .15s}
+.pcat.ak{background:var(--gold);color:#000;border-color:var(--gold)}
+.custom-cat-input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:12px;outline:none;font-family:var(--fb);width:140px;margin-top:2px}
+.custom-cat-input:focus{border-color:var(--gold)}
+.modal-foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:8px}
+.modal-upload{display:flex;align-items:center;gap:8px}
+.upload-btn-sm{background:transparent;border:1px solid var(--border);color:var(--muted2);width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all .15s}
+.upload-btn-sm:hover{border-color:var(--gold);color:var(--gold)}
+.modal-cancel{background:transparent;border:1px solid var(--border);color:var(--muted2);padding:9px 18px;border-radius:10px;font-size:13px;cursor:pointer;font-family:var(--fb)}
+.modal-post{background:var(--gold);color:#000;border:none;padding:9px 22px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--fd)}
+.upload-preview{width:60px;height:60px;border-radius:8px;object-fit:cover;margin-top:8px}
+
+/* NOTIFICATION TOAST */
+.toast{position:absolute;top:60px;left:50%;transform:translateX(-50%);background:var(--surface3);color:var(--text);padding:10px 18px;border-radius:10px;font-size:13px;z-index:300;white-space:nowrap;border:1px solid var(--border);opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+
+/* BOTTOM NAV */
+.bnav{height:74px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;flex-shrink:0;padding-bottom:8px}
+.bn{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 20px;border-radius:12px;background:none;border:none;transition:all .15s}
+.bn i{font-size:23px;color:var(--muted);transition:color .15s}
+.bn span{font-size:10px;color:var(--muted);font-weight:500;transition:color .15s}
+.bn.ak i,.bn.ak span{color:var(--gold)}
+.spinner{border:2px solid var(--border);border-top:2px solid var(--gold);border-radius:50%;width:20px;height:20px;animation:spin .7s linear infinite;margin:20px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Setup notice */
+.setup-notice{background:rgba(247,147,26,.08);border:1px solid rgba(247,147,26,.25);border-radius:12px;padding:14px 16px;margin:10px 14px;font-size:12px;color:var(--text2);line-height:1.6}
+.setup-notice strong{color:var(--gold);display:block;margin-bottom:4px;font-family:var(--fd)}
+</style>
+</head>
+<body>
+<div class="shell" id="app">
+  <div class="sbar">
+    <span class="sbar-t" id="clock">9:41</span>
+    <div class="sbar-i"><i class="ti ti-wifi"></i><i class="ti ti-battery-2"></i></div>
+  </div>
+
+  <!-- ══ AUTH SCREEN ══ -->
+  <div class="auth-screen" id="auth-screen">
+    <div class="auth-logo">J<em>L</em></div>
+    <div class="auth-tagline">Finance · Markets · Power</div>
+
+    <div class="auth-tabs">
+      <div class="auth-tab ak" onclick="authTab('login')">Anmelden</div>
+      <div class="auth-tab" onclick="authTab('register')">Registrieren</div>
+    </div>
+
+    <div id="auth-login">
+      <input class="auth-input" id="login-email" type="email" placeholder="E-Mail">
+      <input class="auth-input" id="login-pw" type="password" placeholder="Passwort">
+      <button class="auth-btn" onclick="doLogin()">Anmelden</button>
+    </div>
+
+    <div id="auth-register" style="display:none">
+      <input class="auth-input" id="reg-name" type="text" placeholder="Dein Name">
+      <input class="auth-input" id="reg-email" type="email" placeholder="E-Mail">
+      <input class="auth-input" id="reg-pw" type="password" placeholder="Passwort (min. 6 Zeichen)">
+      <button class="auth-btn" onclick="doRegister()">Account erstellen</button>
+    </div>
+
+    <div class="auth-divider">oder</div>
+    <button class="auth-google" onclick="doGoogle()">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Mit Google anmelden
+    </button>
+    <div class="auth-err" id="auth-err"></div>
+  </div>
+
+  <!-- ══ FEED ══ -->
+  <div class="screen on" id="sc-feed">
+    <div class="s-head">
+      <div class="s-logo">J<em>L</em></div>
+      <div class="s-actions">
+        <button class="icon-btn" onclick="showToast('Benachrichtigungen kommen bald')"><i class="ti ti-bell"></i></button>
+        <div class="av" id="feed-av" onclick="goTo('profile')" style="width:32px;height:32px;font-size:10px;cursor:pointer"></div>
+      </div>
+    </div>
+    <div class="kacheln" id="feed-kacheln">
+      <button class="kachel ak" onclick="filterFeed(this,'all')">Alle</button>
+      <button class="kachel" onclick="filterFeed(this,'bitcoin')">Bitcoin</button>
+      <button class="kachel" onclick="filterFeed(this,'aktien')">Aktien</button>
+      <button class="kachel" onclick="filterFeed(this,'wirtschaft')">Wirtschaft</button>
+      <button class="kachel" onclick="filterFeed(this,'politik')">Politik</button>
+      <button class="kachel" onclick="filterFeed(this,'prognosen')">Prognosen</button>
+    </div>
+    <div class="scroll" id="feed-scroll">
+      <div class="spinner" id="feed-spinner"></div>
+      <div id="feed-posts"></div>
+    </div>
+  </div>
+
+  <!-- ══ PULS ══ -->
+  <div class="screen" id="sc-puls">
+    <div class="s-head">
+      <div class="s-title">Puls<em style="color:var(--gold);font-style:normal">.</em></div>
+      <div class="s-actions">
+        <span style="font-size:11px;color:var(--muted2)"><span class="live-dot"></span>Live</span>
+        <button class="icon-btn" onclick="refreshCharts()"><i class="ti ti-refresh"></i></button>
+      </div>
+    </div>
+    <div class="kacheln" id="puls-kacheln">
+      <button class="kachel ak" onclick="filterPuls(this,'all')">Alle</button>
+      <button class="kachel" onclick="filterPuls(this,'crypto')">Bitcoin &amp; Krypto</button>
+      <button class="kachel" onclick="filterPuls(this,'stocks')">Aktien</button>
+      <button class="kachel" onclick="filterPuls(this,'pol')">Politik</button>
+    </div>
+    <div class="scroll">
+
+      <div data-pc="crypto">
+        <div class="chart-card" id="cc-btc"><div class="cc-top"><div><div class="cc-name">Bitcoin (BTC)</div><div class="cc-sub"><span class="live-dot"></span>CoinGecko · USD</div></div><div style="text-align:right"><div class="cc-price" id="p-btc">–</div><div class="cc-chg" id="c-btc">–</div></div></div><div class="chart-wrap"><canvas id="ch-btc"></canvas></div></div>
+        <div class="chart-card" id="cc-eth"><div class="cc-top"><div><div class="cc-name">Ethereum (ETH)</div><div class="cc-sub"><span class="live-dot"></span>CoinGecko · USD</div></div><div style="text-align:right"><div class="cc-price" id="p-eth">–</div><div class="cc-chg" id="c-eth">–</div></div></div><div class="chart-wrap"><canvas id="ch-eth"></canvas></div></div>
+        <div class="chart-card" id="cc-sol"><div class="cc-top"><div><div class="cc-name">Solana (SOL)</div><div class="cc-sub"><span class="live-dot"></span>CoinGecko · USD</div></div><div style="text-align:right"><div class="cc-price" id="p-sol">–</div><div class="cc-chg" id="c-sol">–</div></div></div><div class="chart-wrap"><canvas id="ch-sol"></canvas></div></div>
+        <div class="chart-card" id="cc-bnb"><div class="cc-top"><div><div class="cc-name">BNB</div><div class="cc-sub"><span class="live-dot"></span>CoinGecko · USD</div></div><div style="text-align:right"><div class="cc-price" id="p-bnb">–</div><div class="cc-chg" id="c-bnb">–</div></div></div><div class="chart-wrap"><canvas id="ch-bnb"></canvas></div></div>
+      </div>
+
+      <div data-pc="stocks">
+        <div class="chart-card"><div class="cc-top"><div><div class="cc-name">Nvidia (NVDA)</div><div class="cc-sub">NASDAQ · USD · Demo</div></div><div style="text-align:right"><div class="cc-price" id="p-nvda">$876</div><div class="cc-chg chg-up" id="c-nvda">+4.2% ↑</div></div></div><div class="chart-wrap"><canvas id="ch-nvda"></canvas></div></div>
+        <div class="chart-card"><div class="cc-top"><div><div class="cc-name">DAX 40</div><div class="cc-sub">Frankfurt · EUR · Demo</div></div><div style="text-align:right"><div class="cc-price" id="p-dax">17,840</div><div class="cc-chg chg-dn" id="c-dax">−0.3% ↓</div></div></div><div class="chart-wrap"><canvas id="ch-dax"></canvas></div></div>
+        <div class="chart-card"><div class="cc-top"><div><div class="cc-name">Apple (AAPL)</div><div class="cc-sub">NASDAQ · USD · Demo</div></div><div style="text-align:right"><div class="cc-price" id="p-aapl">$218</div><div class="cc-chg chg-up" id="c-aapl">+1.0% ↑</div></div></div><div class="chart-wrap"><canvas id="ch-aapl"></canvas></div></div>
+        <div style="margin:0 14px 10px;padding:10px;background:rgba(247,147,26,.06);border:1px solid rgba(247,147,26,.15);border-radius:10px;font-size:11px;color:var(--muted2)">
+          💡 Live-Aktienkurse: Für echte Börsen-API empfehlen wir <strong style="color:var(--text)">Alpha Vantage</strong> (kostenloser Plan verfügbar).
+        </div>
+      </div>
+
+      <div data-pc="pol">
+        <div style="padding:10px 14px 2px">
+          <div style="font-size:13px;font-weight:600;color:var(--text)">Sonntagsfrage · Bundestagswahl</div>
+          <div style="font-size:11px;color:var(--muted2);margin-top:2px">Community-Abstimmung · Anonym</div>
+        </div>
+        <div class="pol-section" id="pol-list"></div>
+      </div>
+
+    </div>
+
+    <!-- Party Detail -->
+    <div class="overlay" id="party-overlay">
+      <div class="ov-head">
+        <button class="ov-back" onclick="closeParty()"><i class="ti ti-arrow-left"></i></button>
+        <div class="ov-title" id="ov-title"></div>
+      </div>
+      <div class="scroll" id="ov-body"></div>
+    </div>
+  </div>
+
+  <!-- ══ SUCHE ══ -->
+  <div class="screen" id="sc-search">
+    <div class="s-head"><div class="s-title">Suche</div></div>
+    <div class="search-bar">
+      <div class="search-box">
+        <i class="ti ti-search"></i>
+        <input type="text" id="search-input" placeholder="Creator, Themen, Hashtags …" oninput="doSearch()">
+      </div>
+    </div>
+    <div class="trending-pills">
+      <div class="tp" onclick="searchTag('Bitcoin')">#Bitcoin</div>
+      <div class="tp" onclick="searchTag('DAX')">#DAX</div>
+      <div class="tp" onclick="searchTag('Inflation')">#Inflation</div>
+      <div class="tp" onclick="searchTag('Nvidia')">#Nvidia</div>
+      <div class="tp" onclick="searchTag('Bundestag')">#Bundestag</div>
+      <div class="tp" onclick="searchTag('ETF')">#ETF</div>
+    </div>
+    <div class="scroll" id="search-results">
+      <div class="sec-label">Creator entdecken</div>
+      <div id="creator-list"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- ══ PROFIL ══ -->
+  <div class="screen" id="sc-profile">
+    <div class="s-head" style="padding-bottom:0">
+      <div class="s-title" style="font-size:16px">Profil</div>
+      <div class="s-actions">
+        <button class="icon-btn" onclick="doSignOut()"><i class="ti ti-logout"></i></button>
+        <button class="plus-btn" onclick="openPostModal()"><i class="ti ti-plus" style="font-size:19px"></i></button>
+      </div>
+    </div>
+    <div class="scroll" id="profile-scroll">
+      <div class="profile-cover" id="profile-cover">
+        <div class="profile-av-wrap" id="profile-av-big"></div>
+        <button class="profile-edit" onclick="document.getElementById('cover-input').click()">Cover ändern</button>
+        <input type="file" id="cover-input" accept="image/*" style="display:none" onchange="uploadCover(this)">
+      </div>
+      <div class="profile-info">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between">
+          <div>
+            <div class="profile-name" id="profile-name-display">Lade...</div>
+            <div class="profile-handle"><span id="profile-handle-display">@–</span> · <em id="profile-num-display">#0000</em></div>
+          </div>
+          <button onclick="document.getElementById('av-input').click()" style="background:transparent;border:1px solid var(--border);color:var(--muted2);padding:5px 10px;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--fb);margin-top:4px">Foto</button>
+          <input type="file" id="av-input" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+        </div>
+        <div class="profile-bio" id="profile-bio-display" onclick="editBio()">📝 Tippe hier für deine Bio</div>
+        <div class="profile-stats">
+          <div class="pstat" id="ps-posts"><strong>0</strong> Posts</div>
+          <div class="pstat" id="ps-followers"><strong>0</strong> Follower</div>
+          <div class="pstat" id="ps-following"><strong>0</strong> Following</div>
+        </div>
+      </div>
+      <div style="padding:0 14px 4px;font-size:10px;color:var(--muted);letter-spacing:.7px;text-transform:uppercase;font-family:var(--fd);font-weight:700">Channels</div>
+      <div class="channel-grid" id="channel-grid">
+        <div class="ck ak" onclick="filterProfile(this,'all')"><div class="ck-name">Alle Posts</div><div class="ck-count" id="ck-all">0 Posts</div></div>
+        <div class="ck" onclick="filterProfile(this,'bitcoin')"><div class="ck-name">Bitcoin</div><div class="ck-count" id="ck-bitcoin">0 Posts</div></div>
+        <div class="ck" onclick="filterProfile(this,'aktien')"><div class="ck-name">Aktien</div><div class="ck-count" id="ck-aktien">0 Posts</div></div>
+        <div class="ck" onclick="filterProfile(this,'wirtschaft')"><div class="ck-name">Wirtschaft</div><div class="ck-count" id="ck-wirtschaft">0 Posts</div></div>
+        <div class="ck" onclick="filterProfile(this,'politik')"><div class="ck-name">Politik</div><div class="ck-count" id="ck-politik">0 Posts</div></div>
+        <div class="ck" onclick="filterProfile(this,'prognosen')"><div class="ck-name">Prognosen</div><div class="ck-count" id="ck-prognosen">0 Posts</div></div>
+        <div class="ck" id="ck-custom-add" onclick="addCustomChannel()" style="border-style:dashed;grid-column:span 2"><div class="ck-name" style="color:var(--muted2)">+ Eigenen Channel erstellen</div></div>
+      </div>
+      <div class="profile-tabs">
+        <div class="ptab ak" onclick="profileTab(this,'posts')">Posts</div>
+        <div class="ptab" onclick="profileTab(this,'likes')">Likes</div>
+      </div>
+      <div id="profile-posts-list"></div>
+      <div style="height:16px"></div>
+    </div>
+  </div>
+
+  <!-- ══ OTHER PROFILE VIEW ══ -->
+  <div class="overlay" id="other-profile">
+    <div class="ov-head">
+      <button class="ov-back" onclick="closeOtherProfile()"><i class="ti ti-arrow-left"></i></button>
+      <div class="ov-title" id="op-title">Profil</div>
+      <button class="follow-btn" id="op-follow-btn" onclick="toggleFollowProfile()">Folgen</button>
+    </div>
+    <div class="scroll">
+      <div class="profile-cover" style="height:80px;background:linear-gradient(135deg,#0d1120,#1d2d4f)">
+        <div class="profile-av-wrap" id="op-av" style="bottom:-28px;width:56px;height:56px;font-size:18px"></div>
+      </div>
+      <div style="padding:36px 16px 12px">
+        <div class="profile-name" id="op-name"></div>
+        <div class="profile-handle"><span id="op-handle"></span></div>
+        <div class="profile-bio" id="op-bio" style="margin-top:4px"></div>
+        <div class="profile-stats" style="margin-top:10px">
+          <div class="pstat"><strong id="op-posts">0</strong> Posts</div>
+          <div class="pstat"><strong id="op-followers">0</strong> Follower</div>
+        </div>
+      </div>
+      <div class="channel-grid" id="op-channels"></div>
+      <div style="border-top:1px solid var(--border);padding-top:4px" id="op-posts-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ POST MODAL ══ -->
+  <div class="modal-bg" id="post-modal" onclick="modalBg(event)">
+    <div class="modal-sheet">
+      <div class="modal-title">Neuer Post</div>
+      <textarea class="post-ta" id="post-text" placeholder="Was denkst du?"></textarea>
+      <img id="upload-preview" class="upload-preview" style="display:none">
+      <div style="font-size:11px;color:var(--muted);margin-top:10px;margin-bottom:4px">Channel wählen:</div>
+      <div class="modal-cats" id="modal-cats">
+        <button class="pcat ak" onclick="selCat(this)" data-cat="bitcoin">Bitcoin</button>
+        <button class="pcat" onclick="selCat(this)" data-cat="aktien">Aktien</button>
+        <button class="pcat" onclick="selCat(this)" data-cat="wirtschaft">Wirtschaft</button>
+        <button class="pcat" onclick="selCat(this)" data-cat="politik">Politik</button>
+        <button class="pcat" onclick="selCat(this)" data-cat="prognosen">Prognosen</button>
+      </div>
+      <div id="custom-cats-modal"></div>
+      <div class="modal-foot">
+        <div class="modal-upload">
+          <label class="upload-btn-sm" for="img-upload"><i class="ti ti-photo"></i></label>
+          <input type="file" id="img-upload" accept="image/*" style="display:none" onchange="previewImg(this)">
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="modal-cancel" onclick="closePostModal()">Abbrechen</button>
+          <button class="modal-post" onclick="submitPost()" id="post-submit-btn">Posten →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ══ BOTTOM NAV ══ -->
+  <div class="bnav">
+    <button class="bn ak" id="bn-feed" onclick="goTo('feed')"><i class="ti ti-home"></i><span>Feed</span></button>
+    <button class="bn" id="bn-puls" onclick="goTo('puls')"><i class="ti ti-activity"></i><span>Puls</span></button>
+    <button class="bn" id="bn-search" onclick="goTo('search')"><i class="ti ti-search"></i><span>Suche</span></button>
+    <button class="bn" id="bn-profile" onclick="goTo('profile')"><i class="ti ti-user"></i><span>Profil</span></button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// CLOCK
+// ══════════════════════════════════════════
+function updateClock(){const n=new Date();document.getElementById('clock').textContent=n.getHours()+':'+(n.getMinutes()<10?'0':'')+n.getMinutes()}
+setInterval(updateClock,10000);updateClock();
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let currentUser=null, userProfile=null;
+let currentFeedFilter='all', currentProfileFilter='all';
+let selectedCat='bitcoin', uploadedImageUrl=null;
+let feedUnsubscribe=null, profileUnsubscribe=null;
+let chartsInited=false, chartInstances={};
+let currentProfileUserId=null;
+let myVote=null;
+let customChannels=[];
+let allUsers=[]; // for search
+
+const PARTIES=[
+  {id:'cdu',name:'CDU/CSU',color:'#666',border:'#888',pols:[{i:'FM',n:'Friedrich Merz',r:'Parteivorsitzender'},{i:'MS',n:'Markus Söder',r:'Ministerpräsident Bayern (CSU)'},{i:'AL',n:'Armin Laschet',r:'NRW MP a.D.'},{i:'PW',n:'Paul Ziemiak',r:'Generalsekretär'}]},
+  {id:'spd',name:'SPD',color:'#c0392b',pols:[{i:'OS',n:'Olaf Scholz',r:'Bundeskanzler'},{i:'SK',n:'Saskia Esken',r:'Parteivorsitzende'},{i:'LK',n:'Lars Klingbeil',r:'Parteivorsitzender'},{i:'RM',n:'Rolf Mützenich',r:'Fraktionsvorsitzender'}]},
+  {id:'afd',name:'AfD',color:'#009ee0',pols:[{i:'AW',n:'Alice Weidel',r:'Fraktionsvorsitzende'},{i:'TC',n:'Tino Chrupalla',r:'Parteivorsitzender'},{i:'BH',n:'Björn Höcke',r:'Landesvorsitzender Thüringen'}]},
+  {id:'gru',name:'Grüne',color:'#1aad62',pols:[{i:'AB',n:'Annalena Baerbock',r:'Außenministerin'},{i:'RH',n:'Robert Habeck',r:'Wirtschaftsminister'},{i:'ON',n:'Omid Nouripour',r:'Parteivorsitzender'},{i:'RL',n:'Ricarda Lang',r:'Parteivorsitzende'}]},
+  {id:'fdp',name:'FDP',color:'#d4a800',pols:[{i:'CL',n:'Christian Lindner',r:'Parteivorsitzender'},{i:'WK',n:'Wolfgang Kubicki',r:'Bundestagsvizepräsident'},{i:'BS',n:'Bettina Stark-Watzinger',r:'Bundesministerin a.D.'}]},
+  {id:'bsw',name:'BSW',color:'#7c3aed',pols:[{i:'SW',n:'Sahra Wagenknecht',r:'Parteivorsitzende'},{i:'AF',n:'Amira Mohamed Ali',r:'Fraktionsvorsitzende'}]},
+];
+
+// ══════════════════════════════════════════
+// FIREBASE INIT WAIT
+// ══════════════════════════════════════════
+function waitFB(cb){
+  if(window._fbReady){cb()}else{document.addEventListener('fb-ready',cb,{once:true})}
+}
+
+waitFB(()=>{
+  const {auth,onAuthStateChanged}=window._fb;
+  onAuthStateChanged(auth, async user=>{
+    if(user){
+      currentUser=user;
+      await loadUserProfile(user.uid);
+      document.getElementById('auth-screen').style.display='none';
+      updateProfileUI();
+      startFeedListener();
+      loadCreators();
+      renderParties();
+    } else {
+      currentUser=null;
+      document.getElementById('auth-screen').style.display='flex';
+      document.getElementById('feed-spinner').style.display='none';
+    }
+  });
+});
+
+// ══════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════
+function authTab(t){
+  document.querySelectorAll('.auth-tab').forEach(b=>b.classList.remove('ak'));
+  event.target.classList.add('ak');
+  document.getElementById('auth-login').style.display=t==='login'?'':'none';
+  document.getElementById('auth-register').style.display=t==='register'?'':'none';
+  document.getElementById('auth-err').textContent='';
+}
+function setErr(msg){document.getElementById('auth-err').textContent=msg}
+
+async function doLogin(){
+  const {auth,signInWithEmailAndPassword}=window._fb;
+  const e=document.getElementById('login-email').value.trim();
+  const p=document.getElementById('login-pw').value;
+  if(!e||!p){setErr('Bitte alle Felder ausfüllen');return}
+  try{await signInWithEmailAndPassword(auth,e,p)}
+  catch(err){setErr(authErrMsg(err.code))}
+}
+
+async function doRegister(){
+  const {auth,db,createUserWithEmailAndPassword,updateProfile,doc,setDoc,serverTimestamp}=window._fb;
+  const name=document.getElementById('reg-name').value.trim();
+  const e=document.getElementById('reg-email').value.trim();
+  const p=document.getElementById('reg-pw').value;
+  if(!name||!e||!p){setErr('Bitte alle Felder ausfüllen');return}
+  try{
+    const uc=await createUserWithEmailAndPassword(auth,e,p);
+    await updateProfile(uc.user,{displayName:name});
+    const handle='@'+name.toLowerCase().replace(/\s+/g,'_')+Math.floor(Math.random()*1000);
+    const num='#'+String(Math.floor(Math.random()*9000)+1000);
+    await setDoc(doc(db,'users',uc.user.uid),{
+      uid:uc.user.uid,name,handle,num,bio:'',avatarUrl:'',coverUrl:'',
+      followers:0,following:0,posts:0,customChannels:[],
+      createdAt:serverTimestamp()
+    });
+  }catch(err){setErr(authErrMsg(err.code))}
+}
+
+async function doGoogle(){
+  const {auth,db,signInWithPopup,googleProvider,doc,setDoc,getDoc,serverTimestamp}=window._fb;
+  try{
+    const result=await signInWithPopup(auth,googleProvider);
+    const u=result.user;
+    const ref=doc(db,'users',u.uid);
+    const snap=await getDoc(ref);
+    if(!snap.exists()){
+      const handle='@'+u.displayName.toLowerCase().replace(/\s+/g,'_')+Math.floor(Math.random()*1000);
+      const num='#'+String(Math.floor(Math.random()*9000)+1000);
+      await setDoc(ref,{uid:u.uid,name:u.displayName,handle,num,bio:'',avatarUrl:u.photoURL||'',coverUrl:'',followers:0,following:0,posts:0,customChannels:[],createdAt:serverTimestamp()});
+    }
+  }catch(err){setErr(authErrMsg(err.code))}
+}
+
+function authErrMsg(code){
+  if(code==='auth/user-not-found')return 'Kein Account mit dieser E-Mail';
+  if(code==='auth/wrong-password')return 'Falsches Passwort';
+  if(code==='auth/email-already-in-use')return 'E-Mail bereits registriert';
+  if(code==='auth/weak-password')return 'Passwort zu kurz (min. 6 Zeichen)';
+  if(code==='auth/invalid-email')return 'Ungültige E-Mail';
+  return 'Fehler: '+code;
+}
+
+async function doSignOut(){
+  const {auth,signOut}=window._fb;
+  await signOut(auth);
+}
+
+// ══════════════════════════════════════════
+// USER PROFILE LOAD
+// ══════════════════════════════════════════
+async function loadUserProfile(uid){
+  const {db,doc,getDoc}=window._fb;
+  const snap=await getDoc(doc(db,'users',uid));
+  if(snap.exists()){
+    userProfile=snap.data();
+    customChannels=userProfile.customChannels||[];
+    renderCustomCatsModal();
+  }
+}
+
+function updateProfileUI(){
+  if(!userProfile)return;
+  const av=userProfile.avatarUrl?`<img src="${userProfile.avatarUrl}">`:(userProfile.name||'?').substring(0,2).toUpperCase();
+  const feedAv=document.getElementById('feed-av');
+  feedAv.innerHTML=userProfile.avatarUrl?`<img src="${userProfile.avatarUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`:(userProfile.name||'?').substring(0,2).toUpperCase();
+  const bigAv=document.getElementById('profile-av-big');
+  bigAv.innerHTML=userProfile.avatarUrl?`<img src="${userProfile.avatarUrl}">`:(userProfile.name||'?').substring(0,2).toUpperCase();
+  document.getElementById('profile-name-display').textContent=userProfile.name||'';
+  document.getElementById('profile-handle-display').textContent=userProfile.handle||'';
+  document.getElementById('profile-num-display').textContent=userProfile.num||'';
+  document.getElementById('profile-bio-display').textContent=userProfile.bio||'📝 Tippe hier für deine Bio';
+  if(userProfile.coverUrl)document.getElementById('profile-cover').style.backgroundImage=`url(${userProfile.coverUrl})`;
+  renderChannelGrid();
+}
+
+// ══════════════════════════════════════════
+// CHANNEL GRID (Profile)
+// ══════════════════════════════════════════
+const defaultChannels=[
+  {id:'bitcoin',label:'Bitcoin'},
+  {id:'aktien',label:'Aktien'},
+  {id:'wirtschaft',label:'Wirtschaft'},
+  {id:'politik',label:'Politik'},
+  {id:'prognosen',label:'Prognosen'},
+];
+
+function renderChannelGrid(){
+  const grid=document.getElementById('channel-grid');
+  const allChannels=[...defaultChannels,...customChannels.map(c=>({id:c,label:c}))];
+  let html=`<div class="ck ak" onclick="filterProfile(this,'all')"><div class="ck-name">Alle Posts</div><div class="ck-count" id="ck-all">– Posts</div></div>`;
+  allChannels.forEach(ch=>{
+    html+=`<div class="ck" onclick="filterProfile(this,'${ch.id}')"><div class="ck-name">${ch.label}</div><div class="ck-count" id="ck-${ch.id}">– Posts</div></div>`;
+  });
+  html+=`<div class="ck" id="ck-custom-add" onclick="addCustomChannel()" style="border-style:dashed;grid-column:span 2"><div class="ck-name" style="color:var(--muted2)">+ Eigenen Channel erstellen</div></div>`;
+  grid.innerHTML=html;
+}
+
+function addCustomChannel(){
+  const name=prompt('Name des neuen Channels (z.B. "Makro", "Gold", "Immobilien"):');
+  if(!name||name.trim()==='')return;
+  const id=name.trim().toLowerCase().replace(/\s+/g,'_');
+  if(customChannels.find(c=>c===id))return;
+  customChannels.push(id);
+  // Add to feed kacheln
+  const feedK=document.getElementById('feed-kacheln');
+  const btn=document.createElement('button');
+  btn.className='kachel';
+  btn.textContent=name.trim();
+  btn.onclick=()=>filterFeed(btn,id);
+  feedK.appendChild(btn);
+  // Add to modal cats
+  renderCustomCatsModal();
+  // Save to Firebase
+  if(currentUser){
+    const {db,doc,updateDoc}=window._fb;
+    updateDoc(doc(db,'users',currentUser.uid),{customChannels});
+  }
+  renderChannelGrid();
+  showToast(`Channel "${name}" erstellt!`);
+}
+
+function renderCustomCatsModal(){
+  const container=document.getElementById('custom-cats-modal');
+  if(!container||customChannels.length===0){return}
+  let html='<div style="font-size:11px;color:var(--muted);margin-bottom:4px">Eigene Channels:</div><div class="modal-cats">';
+  customChannels.forEach(c=>{
+    html+=`<button class="pcat" onclick="selCat(this)" data-cat="${c}">${c}</button>`;
+  });
+  html+='</div>';
+  container.innerHTML=html;
+}
+
+// ══════════════════════════════════════════
+// FEED
+// ══════════════════════════════════════════
+function startFeedListener(){
+  if(!currentUser)return;
+  const {db,collection,query,orderBy,limit,onSnapshot}=window._fb;
+  document.getElementById('feed-spinner').style.display='block';
+  const q=query(collection(db,'posts'),orderBy('createdAt','desc'),limit(50));
+  if(feedUnsubscribe)feedUnsubscribe();
+  feedUnsubscribe=onSnapshot(q,snap=>{
+    document.getElementById('feed-spinner').style.display='none';
+    const posts=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderFeed(posts);
+  });
+}
+
+function renderFeed(posts){
+  const container=document.getElementById('feed-posts');
+  const filtered=currentFeedFilter==='all'?posts:posts.filter(p=>p.channel===currentFeedFilter);
+  if(filtered.length===0){
+    container.innerHTML=`<div class="empty-feed"><i class="ti ti-news"></i>Noch keine Posts in diesem Channel<br><span style="font-size:11px;margin-top:6px;display:block">Sei der Erste!</span></div>`;
+    return;
+  }
+  container.innerHTML=filtered.map(p=>renderPostHTML(p)).join('');
+}
+
+function renderPostHTML(p){
+  const time=p.createdAt?timeAgo(p.createdAt.toDate()):'-';
+  const catClass=catBadgeClass(p.channel);
+  const catLabel=p.channel?p.channel.charAt(0).toUpperCase()+p.channel.slice(1):'–';
+  const imgHtml=p.imageUrl?`<img src="${p.imageUrl}" class="post-img" loading="lazy">`:'';
+  const initials=p.authorName?p.authorName.substring(0,2).toUpperCase():'??';
+  const avHtml=p.authorAvatar?`<img src="${p.authorAvatar}">`:`<span>${initials}</span>`;
+  const isLiked=currentUser&&(p.likedBy||[]).includes(currentUser.uid);
+  return `<div class="post-item" data-c="${p.channel||''}" data-id="${p.id}">
+    <div class="post-row">
+      <div class="av" onclick="openOtherProfile('${p.authorId}')">${avHtml}</div>
+      <div class="post-body">
+        <div class="post-top">
+          <span class="post-author" onclick="openOtherProfile('${p.authorId}')">${escHtml(p.authorName||'Anonym')}</span>
+          <span class="cat-badge ${catClass}">${catLabel}</span>
+          <span class="post-time">${time}</span>
+        </div>
+        <div class="post-handle" onclick="openOtherProfile('${p.authorId}')">${escHtml(p.authorHandle||'')}</div>
+        <div class="post-text">${escHtml(p.text||'')}</div>
+        ${imgHtml}
+        <div class="post-actions">
+          <button class="pact ${isLiked?'liked':''}" onclick="likePost('${p.id}',this)"><i class="ti ti-heart${isLiked?'-filled':''}"></i> ${p.likes||0}</button>
+          <button class="pact"><i class="ti ti-message-circle"></i> ${p.comments||0}</button>
+          <button class="pact" onclick="sharePost('${p.id}')"><i class="ti ti-share"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function catBadgeClass(ch){
+  if(!ch)return'cb-custom';
+  const m={bitcoin:'cb-btc',aktien:'cb-stocks',wirtschaft:'cb-eco',politik:'cb-pol',prognosen:'cb-prog'};
+  return m[ch]||'cb-custom';
+}
+
+function filterFeed(btn,cat){
+  document.querySelectorAll('#feed-kacheln .kachel').forEach(b=>b.classList.remove('ak'));
+  btn.classList.add('ak');
+  currentFeedFilter=cat;
+  const {db,collection,query,orderBy,limit,where,onSnapshot}=window._fb;
+  document.getElementById('feed-spinner').style.display='block';
+  document.getElementById('feed-posts').innerHTML='';
+  let q;
+  if(cat==='all'){
+    q=query(collection(db,'posts'),orderBy('createdAt','desc'),limit(50));
+  } else {
+    q=query(collection(db,'posts'),where('channel','==',cat),orderBy('createdAt','desc'),limit(50));
+  }
+  if(feedUnsubscribe)feedUnsubscribe();
+  feedUnsubscribe=onSnapshot(q,snap=>{
+    document.getElementById('feed-spinner').style.display='none';
+    renderFeed(snap.docs.map(d=>({id:d.id,...d.data()})));
+  });
+}
+
+// ══════════════════════════════════════════
+// POST SUBMIT
+// ══════════════════════════════════════════
+async function submitPost(){
+  if(!currentUser){showToast('Bitte anmelden');return}
+  const text=document.getElementById('post-text').value.trim();
+  if(!text){showToast('Bitte Text eingeben');return}
+  const btn=document.getElementById('post-submit-btn');
+  btn.textContent='…';btn.disabled=true;
+  try{
+    const {db,storage,collection,addDoc,doc,updateDoc,increment,ref,uploadBytes,getDownloadURL,serverTimestamp}=window._fb;
+    let imageUrl='';
+    const file=document.getElementById('img-upload').files[0];
+    if(file){
+      const sRef=ref(storage,`posts/${currentUser.uid}/${Date.now()}_${file.name}`);
+      await uploadBytes(sRef,file);
+      imageUrl=await getDownloadURL(sRef);
+    }
+    await addDoc(collection(db,'posts'),{
+      text,channel:selectedCat,imageUrl,
+      authorId:currentUser.uid,
+      authorName:userProfile?.name||currentUser.displayName||'Anonym',
+      authorHandle:userProfile?.handle||'',
+      authorAvatar:userProfile?.avatarUrl||'',
+      likes:0,likedBy:[],comments:0,
+      createdAt:serverTimestamp()
+    });
+    await updateDoc(doc(db,'users',currentUser.uid),{posts:increment(1)});
+    userProfile.posts=(userProfile.posts||0)+1;
+    document.getElementById('post-text').value='';
+    document.getElementById('img-upload').value='';
+    document.getElementById('upload-preview').style.display='none';
+    uploadedImageUrl=null;
+    closePostModal();
+    showToast('✓ Post veröffentlicht in '+selectedCat);
+    goTo('feed');
+  }catch(e){showToast('Fehler: '+e.message)}
+  btn.textContent='Posten →';btn.disabled=false;
+}
+
+async function likePost(postId,btn){
+  if(!currentUser)return;
+  const {db,doc,updateDoc,increment,getDoc}=window._fb;
+  const ref=doc(db,'posts',postId);
+  const snap=await getDoc(ref);
+  const data=snap.data();
+  const likedBy=data.likedBy||[];
+  const alreadyLiked=likedBy.includes(currentUser.uid);
+  if(alreadyLiked){
+    likedBy.splice(likedBy.indexOf(currentUser.uid),1);
+    await updateDoc(ref,{likes:increment(-1),likedBy});
+    btn.classList.remove('liked');
+  } else {
+    likedBy.push(currentUser.uid);
+    await updateDoc(ref,{likes:increment(1),likedBy});
+    btn.classList.add('liked');
+  }
+}
+
+function sharePost(id){
+  if(navigator.share){navigator.share({title:'JL Post',url:window.location.href+'#'+id})}
+  else{showToast('Link kopiert!')}
+}
+
+// ══════════════════════════════════════════
+// PROFILE POSTS
+// ══════════════════════════════════════════
+async function loadProfilePosts(uid,channel='all'){
+  const {db,collection,query,orderBy,where,getDocs}=window._fb;
+  const container=document.getElementById('profile-posts-list');
+  container.innerHTML='<div class="spinner"></div>';
+  let q;
+  if(channel==='all'){
+    q=query(collection(db,'posts'),where('authorId','==',uid),orderBy('createdAt','desc'));
+  } else {
+    q=query(collection(db,'posts'),where('authorId','==',uid),where('channel','==',channel),orderBy('createdAt','desc'));
+  }
+  const snap=await getDocs(q);
+  const posts=snap.docs.map(d=>({id:d.id,...d.data()}));
+  // Update counts
+  const allQ=await getDocs(query(collection(db,'posts'),where('authorId','==',uid)));
+  const allPosts=allQ.docs.map(d=>d.data());
+  const countEl=document.getElementById('ck-all');
+  if(countEl)countEl.textContent=allPosts.length+' Posts';
+  const ps=document.getElementById('ps-posts');
+  if(ps)ps.innerHTML=`<strong>${allPosts.length}</strong> Posts`;
+  const channels=[...defaultChannels,...customChannels.map(c=>({id:c,label:c}))];
+  channels.forEach(ch=>{
+    const el=document.getElementById('ck-'+ch.id);
+    if(el)el.textContent=allPosts.filter(p=>p.channel===ch.id).length+' Posts';
+  });
+  if(posts.length===0){
+    container.innerHTML=`<div class="empty-feed"><i class="ti ti-pencil-off"></i>Noch keine Posts hier</div>`;
+    return;
+  }
+  container.innerHTML=posts.map(p=>renderPostHTML(p)).join('');
+}
+
+function filterProfile(el,ch){
+  document.querySelectorAll('.channel-grid .ck').forEach(c=>c.classList.remove('ak'));
+  el.classList.add('ak');
+  currentProfileFilter=ch;
+  if(currentUser)loadProfilePosts(currentUser.uid,ch);
+}
+
+function profileTab(el,tab){
+  document.querySelectorAll('.profile-tabs .ptab').forEach(t=>t.classList.remove('ak'));
+  el.classList.add('ak');
+  if(tab==='posts'&&currentUser)loadProfilePosts(currentUser.uid,currentProfileFilter);
+}
+
+// ══════════════════════════════════════════
+// OTHER PROFILE
+// ══════════════════════════════════════════
+async function openOtherProfile(uid){
+  if(uid===currentUser?.uid){goTo('profile');return}
+  currentProfileUserId=uid;
+  const {db,doc,getDoc,collection,query,where,orderBy,getDocs}=window._fb;
+  const uSnap=await getDoc(doc(db,'users',uid));
+  if(!uSnap.exists())return;
+  const u=uSnap.data();
+  document.getElementById('op-title').textContent=u.name||'Profil';
+  document.getElementById('op-name').textContent=u.name||'';
+  document.getElementById('op-handle').textContent=u.handle||'';
+  document.getElementById('op-bio').textContent=u.bio||'';
+  document.getElementById('op-followers').textContent=u.followers||0;
+  const opAv=document.getElementById('op-av');
+  opAv.innerHTML=u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase();
+  // channels
+  const channels=[...defaultChannels,...(u.customChannels||[]).map(c=>({id:c,label:c}))];
+  document.getElementById('op-channels').innerHTML=channels.map(ch=>`<div class="ck" onclick="filterOtherProfile('${uid}','${ch.id}',this)"><div class="ck-name">${ch.label}</div></div>`).join('');
+  // posts
+  const q=query(collection(db,'posts'),where('authorId','==',uid),orderBy('createdAt','desc'));
+  const snap=await getDocs(q);
+  const posts=snap.docs.map(d=>({id:d.id,...d.data()}));
+  document.getElementById('op-posts').textContent=posts.length;
+  document.getElementById('op-posts-list').innerHTML=posts.map(p=>renderPostHTML(p)).join('')||'<div class="empty-feed">Noch keine Posts</div>';
+  document.getElementById('other-profile').classList.add('on');
+}
+
+async function filterOtherProfile(uid,ch,el){
+  document.querySelectorAll('#op-channels .ck').forEach(c=>c.classList.remove('ak'));
+  el.classList.add('ak');
+  const {db,collection,query,where,orderBy,getDocs}=window._fb;
+  const q=query(collection(db,'posts'),where('authorId','==',uid),where('channel','==',ch),orderBy('createdAt','desc'));
+  const snap=await getDocs(q);
+  const posts=snap.docs.map(d=>({id:d.id,...d.data()}));
+  document.getElementById('op-posts-list').innerHTML=posts.map(p=>renderPostHTML(p)).join('')||'<div class="empty-feed">Keine Posts in diesem Channel</div>';
+}
+
+async function toggleFollowProfile(){
+  if(!currentUser||!currentProfileUserId)return;
+  const btn=document.getElementById('op-follow-btn');
+  const {db,doc,updateDoc,increment}=window._fb;
+  if(btn.classList.contains('following')){
+    btn.classList.remove('following');btn.textContent='Folgen';
+    await updateDoc(doc(db,'users',currentProfileUserId),{followers:increment(-1)});
+    await updateDoc(doc(db,'users',currentUser.uid),{following:increment(-1)});
+  } else {
+    btn.classList.add('following');btn.textContent='Folge ich ✓';
+    await updateDoc(doc(db,'users',currentProfileUserId),{followers:increment(1)});
+    await updateDoc(doc(db,'users',currentUser.uid),{following:increment(1)});
+  }
+}
+
+function closeOtherProfile(){
+  document.getElementById('other-profile').classList.remove('on');
+  currentProfileUserId=null;
+}
+
+// ══════════════════════════════════════════
+// AVATAR & COVER UPLOAD
+// ══════════════════════════════════════════
+async function uploadAvatar(input){
+  if(!input.files[0]||!currentUser)return;
+  const {storage,db,ref,uploadBytes,getDownloadURL,doc,updateDoc}=window._fb;
+  const file=input.files[0];
+  showToast('Bild wird hochgeladen…');
+  const sRef=ref(storage,`avatars/${currentUser.uid}`);
+  await uploadBytes(sRef,file);
+  const url=await getDownloadURL(sRef);
+  await updateDoc(doc(db,'users',currentUser.uid),{avatarUrl:url});
+  userProfile.avatarUrl=url;
+  updateProfileUI();
+  showToast('Profilbild gespeichert!');
+}
+
+async function uploadCover(input){
+  if(!input.files[0]||!currentUser)return;
+  const {storage,db,ref,uploadBytes,getDownloadURL,doc,updateDoc}=window._fb;
+  const file=input.files[0];
+  showToast('Cover wird hochgeladen…');
+  const sRef=ref(storage,`covers/${currentUser.uid}`);
+  await uploadBytes(sRef,file);
+  const url=await getDownloadURL(sRef);
+  await updateDoc(doc(db,'users',currentUser.uid),{coverUrl:url});
+  userProfile.coverUrl=url;
+  document.getElementById('profile-cover').style.backgroundImage=`url(${url})`;
+  document.getElementById('profile-cover').style.backgroundSize='cover';
+  showToast('Titelbild gespeichert!');
+}
+
+async function editBio(){
+  const bio=prompt('Deine Bio:',userProfile?.bio||'');
+  if(bio===null)return;
+  const {db,doc,updateDoc}=window._fb;
+  await updateDoc(doc(db,'users',currentUser.uid),{bio});
+  userProfile.bio=bio;
+  document.getElementById('profile-bio-display').textContent=bio||'📝 Tippe hier für deine Bio';
+  showToast('Bio gespeichert!');
+}
+
+// ══════════════════════════════════════════
+// SEARCH / CREATORS
+// ══════════════════════════════════════════
+async function loadCreators(){
+  const {db,collection,getDocs,query,orderBy,limit}=window._fb;
+  const q=query(collection(db,'users'),limit(20));
+  const snap=await getDocs(q);
+  allUsers=snap.docs.map(d=>d.data()).filter(u=>u.uid!==currentUser?.uid);
+  renderCreators(allUsers);
+}
+
+function renderCreators(users){
+  const container=document.getElementById('creator-list');
+  if(users.length===0){container.innerHTML='<div class="empty-feed">Keine Creator gefunden</div>';return}
+  container.innerHTML=users.map(u=>`
+    <div class="creator-row" onclick="openOtherProfile('${u.uid}')">
+      <div class="av" style="width:38px;height:38px">${u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase()}</div>
+      <div class="cr-meta">
+        <div class="cr-name">${escHtml(u.name||'Anonym')}</div>
+        <div class="cr-desc">${escHtml(u.handle||'')} · ${u.followers||0} Follower</div>
+      </div>
+      <button class="follow-btn" onclick="event.stopPropagation();toggleFollow('${u.uid}',this)">Folgen</button>
+    </div>`).join('');
+}
+
+async function toggleFollow(uid,btn){
+  if(!currentUser)return;
+  const {db,doc,updateDoc,increment}=window._fb;
+  if(btn.classList.contains('following')){
+    btn.classList.remove('following');btn.textContent='Folgen';
+    await updateDoc(doc(db,'users',uid),{followers:increment(-1)});
+    await updateDoc(doc(db,'users',currentUser.uid),{following:increment(-1)});
+  } else {
+    btn.classList.add('following');btn.textContent='Folge ich ✓';
+    await updateDoc(doc(db,'users',uid),{followers:increment(1)});
+    await updateDoc(doc(db,'users',currentUser.uid),{following:increment(1)});
+  }
+}
+
+function doSearch(){
+  const q=document.getElementById('search-input').value.toLowerCase();
+  if(!q){renderCreators(allUsers);return}
+  renderCreators(allUsers.filter(u=>(u.name||'').toLowerCase().includes(q)||(u.handle||'').toLowerCase().includes(q)));
+}
+
+function searchTag(tag){
+  document.getElementById('search-input').value=tag;
+  goTo('search');
+  doSearch();
+}
+
+// ══════════════════════════════════════════
+// POLITIK
+// ══════════════════════════════════════════
+async function renderParties(){
+  const {db,collection,getDocs}=window._fb;
+  let votes={};
+  try{
+    const snap=await getDocs(collection(db,'votes'));
+    snap.docs.forEach(d=>votes[d.id]=(d.data().count||0));
+  }catch(e){}
+  const total=Object.values(votes).reduce((a,b)=>a+b,0)||1;
+  const container=document.getElementById('pol-list');
+  container.innerHTML=PARTIES.map(p=>{
+    const pct=votes[p.id]?Math.round((votes[p.id]/total)*100):0;
+    return`<div class="pol-card">
+      <div class="pol-top">
+        <div class="pol-dot" style="background:${p.color}"></div>
+        <div class="pol-name">${p.name}</div>
+        <div class="pol-pct" id="pct-${p.id}">${pct}%</div>
+      </div>
+      <div class="bar-track"><div class="bar-fill" id="bar-${p.id}" style="width:${pct}%;background:${p.color}"></div></div>
+      <div class="pol-btns">
+        <button class="pol-btn ${myVote===p.id?'voted':''}" id="vbtn-${p.id}" onclick="voteParty('${p.id}')">${myVote===p.id?'Gewählt ✓':'Anonym wählen'}</button>
+        <button class="pol-btn detail" onclick="showParty('${p.id}')">Politiker →</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function voteParty(id){
+  if(!currentUser)return;
+  if(myVote===id){showToast('Du hast bereits für '+id+' gestimmt');return}
+  const {db,doc,setDoc,updateDoc,increment,getDoc}=window._fb;
+  // Remove old vote
+  if(myVote){
+    try{await updateDoc(doc(db,'votes',myVote),{count:increment(-1)})}catch(e){}
+  }
+  // Add new vote
+  const vRef=doc(db,'votes',id);
+  const vSnap=await getDoc(vRef);
+  if(vSnap.exists()){await updateDoc(vRef,{count:increment(1)})}
+  else{await setDoc(vRef,{count:1})}
+  // Save user vote
+  await setDoc(doc(db,'userVotes',currentUser.uid),{partyId:id});
+  myVote=id;
+  showToast('Stimme abgegeben – anonym ✓');
+  renderParties();
+}
+
+function showParty(id){
+  const p=PARTIES.find(x=>x.id===id);if(!p)return;
+  document.getElementById('ov-title').textContent=p.name;
+  document.getElementById('ov-body').innerHTML=p.pols.map(pp=>`
+    <div class="pol-person">
+      <div class="pp-av" style="background:${p.color};color:#fff">${pp.i}</div>
+      <div class="pp-meta">
+        <div class="pp-name">${pp.n}</div>
+        <div class="pp-role">${pp.r}</div>
+      </div>
+      <button class="download-btn" onclick="downloadPolitiker('${pp.n}')">
+        <i class="ti ti-download" style="font-size:13px"></i> Info
+      </button>
+    </div>`).join('');
+  document.getElementById('party-overlay').classList.add('on');
+}
+
+function downloadPolitiker(name){
+  const text=`JL – Politiker Info\n\nName: ${name}\nQuelle: Öffentliche Daten\nPlatform: JL Finance App\n\nhttps://www.bundestag.de`;
+  const blob=new Blob([text],{type:'text/plain'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=name.replace(/\s+/g,'_')+'_Info.txt';
+  a.click();
+}
+
+function closeParty(){document.getElementById('party-overlay').classList.remove('on')}
+
+// Load user's existing vote
+waitFB(()=>{
+  const{auth,onAuthStateChanged}=window._fb;
+  onAuthStateChanged(auth,async u=>{
+    if(!u)return;
+    const{db,doc,getDoc}=window._fb;
+    try{
+      const snap=await getDoc(doc(db,'userVotes',u.uid));
+      if(snap.exists())myVote=snap.data().partyId;
+    }catch(e){}
+  });
+});
+
+// ══════════════════════════════════════════
+// LIVE CHARTS – CoinGecko
+// ══════════════════════════════════════════
+const GOLD_COLOR='#F7931A';
+
+function makeGrad(ctx){
+  const g=ctx.createLinearGradient(0,0,0,80);
+  g.addColorStop(0,GOLD_COLOR+'55');
+  g.addColorStop(1,GOLD_COLOR+'00');
+  return g;
+}
+
+function buildChart(id,data){
+  const canvas=document.getElementById(id);
+  if(!canvas)return;
+  if(chartInstances[id])chartInstances[id].destroy();
+  chartInstances[id]=new Chart(canvas,{type:'line',data:{
+    labels:data.map((_,i)=>i),
+    datasets:[{data,borderColor:GOLD_COLOR,borderWidth:2,fill:true,
+      backgroundColor:makeGrad(canvas.getContext('2d')),
+      pointRadius:0,tension:.42}]
+  },options:{responsive:true,maintainAspectRatio:false,animation:{duration:500},
+    plugins:{legend:{display:false},tooltip:{
+      callbacks:{label:ctx=>'$'+ctx.parsed.y.toLocaleString()},
+      backgroundColor:'#1a1a1a',borderColor:'#333',borderWidth:1
+    }},
+    scales:{x:{display:false},y:{display:false}}}
+  });
+}
+
+function fmtPrice(n){
+  if(n>=1000)return'$'+n.toLocaleString('de-DE',{maximumFractionDigits:0});
+  return'$'+n.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+async function fetchCryptoData(){
+  try{
+    const r=await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana,binancecoin&order=market_cap_desc&sparkline=true');
+    if(!r.ok)throw new Error('API limit');
+    const data=await r.json();
+    data.forEach(coin=>{
+      const idMap={bitcoin:'btc',ethereum:'eth',solana:'sol',binancecoin:'bnb'};
+      const k=idMap[coin.id];if(!k)return;
+      const price=document.getElementById('p-'+k);
+      const chg=document.getElementById('c-'+k);
+      if(price)price.textContent=fmtPrice(coin.current_price);
+      if(chg){
+        const pct=coin.price_change_percentage_24h;
+        const up=pct>=0;
+        chg.textContent=(up?'+':'')+pct.toFixed(2)+'% '+(up?'↑':'↓');
+        chg.className='cc-chg '+(up?'chg-up':'chg-dn');
+      }
+      const sparkline=coin.sparkline_in_7d?.price;
+      if(sparkline&&sparkline.length>0){
+        // take last 40 points
+        const pts=sparkline.slice(-40);
+        buildChart('ch-'+k,pts);
+      }
+    });
+  }catch(e){
+    // Fallback demo data if rate limited
+    ['btc','eth','sol','bnb'].forEach(k=>{
+      const base={btc:94000,eth:3200,sol:190,bnb:400};
+      const data=[];let v=base[k];
+      for(let i=0;i<40;i++){v+=(Math.random()-.48)*base[k]*0.01;data.push(Math.round(v*100)/100)}
+      buildChart('ch-'+k,data);
+    });
+  }
+  // Demo stock charts always
+  ['nvda','dax','aapl'].forEach(k=>{
+    const base={nvda:840,dax:17800,aapl:216};
+    const data=[];let v=base[k];
+    for(let i=0;i<40;i++){v+=(Math.random()-.48)*base[k]*0.008;data.push(Math.round(v*10)/10)}
+    buildChart('ch-'+k,data);
+  });
+}
+
+function refreshCharts(){chartsInited=false;initCharts()}
+
+function initCharts(){
+  if(chartsInited)return;
+  chartsInited=true;
+  fetchCryptoData();
+  setInterval(fetchCryptoData,60000); // refresh every minute
+}
+
+function filterPuls(btn,cat){
+  document.querySelectorAll('#puls-kacheln .kachel').forEach(b=>b.classList.remove('ak'));
+  btn.classList.add('ak');
+  document.querySelectorAll('#puls-scroll [data-pc]').forEach(el=>{
+    el.style.display=(cat==='all'||el.dataset.pc===cat)?'':'none';
+  });
+}
+
+// ══════════════════════════════════════════
+// POST MODAL
+// ══════════════════════════════════════════
+function openPostModal(){
+  if(!currentUser){showToast('Bitte zuerst anmelden');return}
+  document.getElementById('post-modal').classList.add('on');
+  loadProfilePosts(currentUser.uid,'all');
+}
+function closePostModal(){document.getElementById('post-modal').classList.remove('on')}
+function modalBg(e){if(e.target===document.getElementById('post-modal'))closePostModal()}
+
+function selCat(btn){
+  document.querySelectorAll('.pcat').forEach(b=>b.classList.remove('ak'));
+  btn.classList.add('ak');
+  selectedCat=btn.dataset.cat||btn.textContent.toLowerCase();
+}
+
+function previewImg(input){
+  if(!input.files[0])return;
+  const prev=document.getElementById('upload-preview');
+  prev.src=URL.createObjectURL(input.files[0]);
+  prev.style.display='block';
+}
+
+// ══════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════
+function goTo(s){
+  document.querySelectorAll('.screen').forEach(el=>el.classList.remove('on'));
+  document.querySelectorAll('.bn').forEach(el=>el.classList.remove('ak'));
+  document.getElementById('sc-'+s).classList.add('on');
+  document.getElementById('bn-'+s).classList.add('ak');
+  if(s==='puls')setTimeout(initCharts,100);
+  if(s==='profile'&&currentUser){
+    updateProfileUI();
+    loadProfilePosts(currentUser.uid,'all');
+  }
+  if(s==='search')loadCreators();
+}
+
+// ══════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ══════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════
+function escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function timeAgo(date){
+  const s=Math.floor((new Date()-date)/1000);
+  if(s<60)return'Jetzt';if(s<3600)return Math.floor(s/60)+' Min';
+  if(s<86400)return Math.floor(s/3600)+' Std';
+  return Math.floor(s/86400)+' Tagen';
+}
+</script>
+</body>
+</html>

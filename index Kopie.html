@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JL – Finance. Markets. Power.</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc, query, orderBy, limit, where, onSnapshot, serverTimestamp, increment, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBQ1-aEtgcMV8ZaNnjLAeyTu0t1piRm9Us",
+  authDomain: "k-12b86.firebaseapp.com",
+  projectId: "k-12b86",
+  storageBucket: "k-12b86.firebasestorage.app",
+  messagingSenderId: "375281147692",
+  appId: "1:375281147692:web:5833aee12494854a859689"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+const googleProvider = new GoogleAuthProvider();
+
+window._fb = { auth, db, storage, googleProvider,
+  createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  signInWithPopup, onAuthStateChanged, signOut, updateProfile,
+  collection, addDoc, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc,
+  query, orderBy, limit, where, onSnapshot, serverTimestamp, increment,
+  arrayUnion, arrayRemove, ref, uploadBytes, getDownloadURL
+};
+window._fbReady = true;
+document.dispatchEvent(new Event('fb-ready'));
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0c0c0c;--surface:#161616;--surface2:#1f1f1f;--surface3:#282828;
+  --chart-bg:#181818;--border:#272727;--muted:#4a4a4a;--muted2:#7a7a7a;
+  --text:#f0ede6;--text2:#b0ada6;
+  --gold:#F7931A;--golddim:rgba(247,147,26,.13);
+  --green:#22c55e;--red:#ef4444;
+  --fd:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+}
+html,body{
+  height:100%;width:100%;background:#000;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fb);overflow:hidden;
+}
+.shell{
+  width:390px;height:844px;
+  background:var(--bg);border-radius:48px;overflow:hidden;
+  position:relative;display:flex;flex-direction:column;
+  border:1.5px solid #1a1a1a;
+  box-shadow:0 60px 160px rgba(0,0,0,.95);
+  flex-shrink:0;
+}
+@media(max-width:430px){
+  .shell{width:100vw;height:100vh;border-radius:0;border:none}
+}
+.sbar{height:48px;padding:0 28px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.sbar-t{font-size:15px;font-weight:600;color:var(--text)}
+.sbar-i{display:flex;gap:5px;align-items:center;color:var(--text)}
+
+/* SCREENS */
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden;position:relative;min-height:0}
+.screen.on{display:flex}
+
+/* HEADERS */
+.s-head{padding:8px 18px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.s-logo{font-family:var(--fd);font-size:24px;font-weight:800;letter-spacing:-1px;color:var(--text)}
+.s-logo em{color:var(--gold);font-style:normal}
+.s-title{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--text)}
+.s-actions{display:flex;gap:10px;align-items:center}
+.icon-btn{background:none;border:none;cursor:pointer;color:var(--muted2);font-size:20px;padding:4px;line-height:1}
+
+/* KACHELN */
+.kacheln{display:flex;gap:6px;padding:8px 14px 10px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;border-bottom:1px solid var(--border)}
+.kacheln::-webkit-scrollbar{display:none}
+.kachel{padding:6px 15px;border-radius:22px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;border:1px solid var(--border);color:var(--muted2);background:transparent;transition:all .18s;font-family:var(--fb)}
+.kachel.ak{background:var(--gold);color:#000;border-color:var(--gold);font-weight:700}
+
+/* SCROLL */
+.scroll{flex:1;overflow-y:auto;scrollbar-width:none;min-height:0}
+.scroll::-webkit-scrollbar{display:none}
+
+/* POSTS */
+.post-item{padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s}
+.post-item:hover{background:rgba(255,255,255,.02)}
+.post-row{display:flex;gap:10px}
+.av{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#000;background:linear-gradient(135deg,var(--gold),#b06010);overflow:hidden}
+.av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.post-body{flex:1;min-width:0}
+.post-top{display:flex;align-items:center;gap:6px;margin-bottom:2px;flex-wrap:wrap}
+.post-author{font-size:13px;font-weight:600;color:var(--text)}
+.post-handle{font-size:11px;color:var(--muted2)}
+.post-time-label{font-size:11px;color:var(--muted);margin-left:auto}
+.cat-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;font-family:var(--fd)}
+.cb-bitcoin{background:rgba(247,147,26,.15);color:var(--gold)}
+.cb-aktien{background:rgba(34,197,94,.12);color:#4ade80}
+.cb-politik{background:rgba(96,165,250,.12);color:#7cb9ff}
+.cb-wirtschaft{background:rgba(192,132,252,.12);color:#d8b4fe}
+.cb-prognosen{background:rgba(251,191,36,.12);color:#fbbf24}
+.cb-custom{background:rgba(255,255,255,.08);color:var(--text2)}
+.post-text{font-size:13.5px;line-height:1.62;color:var(--text2);margin:6px 0 8px;word-break:break-word}
+.post-img{width:100%;border-radius:10px;margin-bottom:8px;max-height:220px;object-fit:cover}
+.post-actions-row{display:flex;gap:18px;margin-top:4px}
+.pact{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted2);cursor:pointer;background:none;border:none;font-family:var(--fb);padding:0;transition:color .15s}
+.pact i{font-size:15px}
+.pact:hover{color:var(--text)}
+.pact.liked{color:#ef4444}
+.empty-state{text-align:center;padding:50px 20px;color:var(--muted2)}
+.empty-state i{font-size:40px;color:var(--muted);margin-bottom:12px;display:block}
+.spinner{border:2px solid var(--border);border-top:2px solid var(--gold);border-radius:50%;width:22px;height:22px;animation:spin .7s linear infinite;margin:30px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* COMMENTS */
+.comments-section{background:var(--surface);border-top:1px solid var(--border);padding:0}
+.comment-item{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px}
+.comment-av{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#000;background:linear-gradient(135deg,var(--gold),#b06010);overflow:hidden}
+.comment-av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.comment-body{flex:1}
+.comment-author{font-size:12px;font-weight:600;color:var(--text)}
+.comment-text{font-size:12px;color:var(--text2);line-height:1.5;margin-top:2px}
+.comment-time{font-size:10px;color:var(--muted);margin-top:2px}
+.comment-input-row{display:flex;gap:8px;padding:10px 16px;border-top:1px solid var(--border);background:var(--surface);flex-shrink:0}
+.comment-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:8px 14px;color:var(--text);font-size:13px;outline:none;font-family:var(--fb)}
+.comment-input:focus{border-color:var(--gold)}
+.comment-send{background:var(--gold);border:none;color:#000;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+
+/* CHART CARDS */
+.chart-card{margin:10px 14px;background:var(--chart-bg);border:1px solid var(--border);border-radius:18px;overflow:hidden;cursor:pointer;transition:border-color .15s}
+.chart-card:hover{border-color:rgba(247,147,26,.3)}
+.cc-top{padding:14px 16px 6px;display:flex;align-items:flex-start;justify-content:space-between}
+.cc-name{font-size:14px;font-weight:600;color:var(--text)}
+.cc-sub{font-size:11px;color:var(--muted2);margin-top:1px}
+.cc-price{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--text)}
+.cc-chg{display:inline-block;margin-top:3px;font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px}
+.chg-up{background:rgba(34,197,94,.13);color:#4ade80}
+.chg-dn{background:rgba(239,68,68,.13);color:#f87171}
+.chart-wrap{height:88px;padding:4px 10px 12px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;margin-right:4px;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* CHART DETAIL OVERLAY */
+.chart-detail{position:absolute;inset:0;background:var(--bg);z-index:90;display:none;flex-direction:column}
+.chart-detail.on{display:flex}
+.cd-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.cd-back{background:none;border:none;cursor:pointer;color:var(--muted2);font-size:22px;line-height:1}
+.cd-title{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--text);flex:1}
+.cd-price-big{font-family:var(--fd);font-size:32px;font-weight:800;color:var(--text);padding:0 16px}
+.cd-chg-big{font-size:14px;font-weight:600;padding:3px 10px;border-radius:7px;margin:4px 16px 0;display:inline-block}
+.cd-chart-wrap{height:220px;padding:10px 14px}
+.cd-range-btns{display:flex;gap:6px;padding:8px 14px;flex-shrink:0}
+.range-btn{padding:5px 12px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);color:var(--muted2);background:transparent;transition:all .15s;font-family:var(--fd)}
+.range-btn.ak{background:var(--gold);color:#000;border-color:var(--gold)}
+.cd-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 14px;flex-shrink:0}
+.cd-stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.cd-stat-label{font-size:10px;color:var(--muted2);margin-bottom:3px}
+.cd-stat-val{font-size:14px;font-weight:600;color:var(--text);font-family:var(--fd)}
+
+/* POLITIK */
+.pol-card{background:var(--chart-bg);border:1px solid var(--border);border-radius:14px;padding:14px;margin:8px 14px}
+.pol-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.pol-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.pol-name{font-size:14px;font-weight:600;color:var(--text);flex:1}
+.pol-pct{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--text)}
+.bar-track{height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-bottom:10px}
+.bar-fill{height:100%;border-radius:3px;transition:width .6s}
+.pol-btns{display:flex;gap:6px}
+.pol-btn{flex:1;padding:7px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted2);font-size:11px;cursor:pointer;font-family:var(--fb);transition:all .18s}
+.pol-btn:hover{border-color:var(--gold);color:var(--gold)}
+.pol-btn.voted{background:rgba(247,147,26,.15);border-color:var(--gold);color:var(--gold);font-weight:600}
+.pol-btn.detail{color:#7cb9ff;border-color:rgba(96,165,250,.2)}
+
+/* OVERLAYS */
+.overlay{position:absolute;inset:0;background:var(--bg);z-index:80;display:none;flex-direction:column;overflow:hidden}
+.overlay.on{display:flex}
+.ov-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.ov-back{background:none;border:none;cursor:pointer;color:var(--muted2);font-size:22px;line-height:1;padding:2px}
+.ov-title{font-family:var(--fd);font-size:16px;font-weight:700;color:var(--text);flex:1}
+.pol-person{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--border)}
+.pp-av{width:42px;height:42px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
+.pp-meta{flex:1}
+.pp-name{font-size:14px;font-weight:500;color:var(--text)}
+.pp-role{font-size:11px;color:var(--muted2);margin-top:1px}
+.dl-btn{background:transparent;border:1px solid var(--border);color:var(--muted2);padding:6px 12px;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--fb);transition:all .18s;display:flex;align-items:center;gap:4px}
+.dl-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* SEARCH */
+.search-bar{padding:10px 14px;flex-shrink:0}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:13px;padding:10px 14px}
+.search-box i{font-size:17px;color:var(--muted2);flex-shrink:0}
+.search-box input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:14px;font-family:var(--fb)}
+.search-box input::placeholder{color:var(--muted)}
+.trending-pills{display:flex;gap:6px;padding:8px 14px 10px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.trending-pills::-webkit-scrollbar{display:none}
+.tp{padding:6px 14px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);font-size:12px;color:var(--muted2);white-space:nowrap;cursor:pointer;transition:all .15s}
+.tp:hover{border-color:var(--gold);color:var(--gold)}
+.sec-label{padding:10px 16px 6px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.9px;text-transform:uppercase;font-family:var(--fd)}
+.creator-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s}
+.creator-row:hover{background:var(--surface)}
+.cr-meta{flex:1}
+.cr-name{font-size:14px;font-weight:500;color:var(--text)}
+.cr-desc{font-size:11px;color:var(--muted2);margin-top:1px}
+.follow-btn{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:5px 14px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--fd);transition:all .15s}
+.follow-btn.following{background:var(--gold);color:#000}
+
+/* PROFIL */
+.profile-cover{height:96px;background:linear-gradient(135deg,#110800,#3d2200);position:relative;flex-shrink:0;background-size:cover;background-position:center}
+.profile-av-wrap{position:absolute;bottom:-34px;left:16px;width:68px;height:68px;border-radius:50%;border:3px solid var(--bg);background:linear-gradient(135deg,var(--gold),#a06010);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#000;overflow:hidden;cursor:pointer}
+.profile-av-wrap img{width:100%;height:100%;object-fit:cover}
+.profile-edit-btn{position:absolute;bottom:10px;right:14px;background:transparent;border:1px solid var(--border);color:var(--text2);padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:var(--fb)}
+.profile-info{padding:42px 16px 10px;flex-shrink:0}
+.profile-name{font-family:var(--fd);font-size:17px;font-weight:800;color:var(--text)}
+.profile-handle{font-size:12px;color:var(--muted2);margin-bottom:4px}
+.profile-handle em{color:var(--gold);font-style:normal;font-weight:600}
+.profile-bio{font-size:13px;line-height:1.55;color:var(--text2);margin-bottom:8px;cursor:pointer}
+.profile-stats{display:flex;gap:18px;margin-bottom:10px}
+.pstat{font-size:12px;color:var(--muted2)}
+.pstat strong{color:var(--text);font-size:13px}
+.channel-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 14px 10px;flex-shrink:0}
+.ck{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;cursor:pointer;transition:all .15s}
+.ck:hover{border-color:var(--gold)}
+.ck.ak{border-color:var(--gold);background:var(--golddim)}
+.ck-name{font-size:12px;font-weight:600;color:var(--text);font-family:var(--fd)}
+.ck-count{font-size:10px;color:var(--muted2);margin-top:2px}
+.profile-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.ptab{flex:1;text-align:center;padding:10px;font-size:12px;color:var(--muted2);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.ptab.ak{color:var(--gold);border-bottom-color:var(--gold);font-weight:600}
+.plus-btn{width:34px;height:34px;border-radius:50%;background:var(--gold);border:none;color:#000;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* MESSAGES */
+.msg-list{flex:1;overflow-y:auto;scrollbar-width:none}
+.msg-list::-webkit-scrollbar{display:none}
+.conv-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s}
+.conv-item:hover{background:var(--surface)}
+.conv-meta{flex:1;min-width:0}
+.conv-name{font-size:14px;font-weight:500;color:var(--text)}
+.conv-preview{font-size:12px;color:var(--muted2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conv-time{font-size:11px;color:var(--muted);flex-shrink:0}
+.unread-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0}
+
+/* CHAT */
+.chat-overlay{position:absolute;inset:0;background:var(--bg);z-index:90;display:none;flex-direction:column}
+.chat-overlay.on{display:flex}
+.chat-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.chat-messages{flex:1;overflow-y:auto;padding:12px 14px;scrollbar-width:none;display:flex;flex-direction:column;gap:8px}
+.chat-messages::-webkit-scrollbar{display:none}
+.msg-bubble{max-width:75%;padding:9px 13px;border-radius:16px;font-size:13px;line-height:1.5;word-break:break-word}
+.msg-mine{background:var(--gold);color:#000;align-self:flex-end;border-bottom-right-radius:4px}
+.msg-theirs{background:var(--surface2);color:var(--text);align-self:flex-start;border-bottom-left-radius:4px}
+.msg-time-small{font-size:10px;color:var(--muted);margin-top:2px}
+.chat-input-row{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0}
+.chat-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:9px 14px;color:var(--text);font-size:13px;outline:none;font-family:var(--fb)}
+.chat-input:focus{border-color:var(--gold)}
+.chat-send{background:var(--gold);border:none;color:#000;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+
+/* AUTH */
+.auth-screen{position:absolute;inset:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 28px;overflow-y:auto}
+.auth-logo{font-family:var(--fd);font-size:48px;font-weight:800;color:var(--text);margin-bottom:6px}
+.auth-logo em{color:var(--gold);font-style:normal}
+.auth-tagline{font-size:13px;color:var(--muted2);margin-bottom:28px;text-align:center}
+.auth-tabs{display:flex;width:100%;margin-bottom:16px;background:var(--surface);border-radius:12px;padding:4px}
+.auth-tab{flex:1;padding:8px;text-align:center;font-size:13px;cursor:pointer;border-radius:9px;color:var(--muted2);transition:all .18s;font-family:var(--fb)}
+.auth-tab.ak{background:var(--surface3);color:var(--text);font-weight:500}
+.auth-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--text);font-size:14px;outline:none;margin-bottom:10px;font-family:var(--fb)}
+.auth-input:focus{border-color:var(--gold)}
+.auth-input::placeholder{color:var(--muted)}
+.auth-btn{width:100%;background:var(--gold);color:#000;border:none;padding:13px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--fd);margin-top:4px}
+.auth-divider{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--muted);font-size:12px;width:100%}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.auth-google{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px;border-radius:12px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--fb);display:flex;align-items:center;justify-content:center;gap:10px;transition:background .15s}
+.auth-google:hover{background:var(--surface3)}
+.auth-err{color:#f87171;font-size:12px;margin-top:8px;text-align:center;min-height:18px}
+
+/* POST MODAL */
+.modal-bg{position:absolute;inset:0;background:rgba(0,0,0,.75);z-index:100;display:none;flex-direction:column;justify-content:flex-end}
+.modal-bg.on{display:flex}
+.modal-sheet{background:var(--surface);border-radius:24px 24px 0 0;padding:20px 18px 30px}
+.modal-title{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px}
+.post-ta{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--text);font-size:14px;outline:none;resize:none;height:90px;font-family:var(--fb);line-height:1.5}
+.post-ta:focus{border-color:var(--gold)}
+.post-ta::placeholder{color:var(--muted)}
+.modal-cats{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.pcat{padding:5px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border);color:var(--muted2);background:transparent;font-family:var(--fd);transition:all .15s}
+.pcat.ak{background:var(--gold);color:#000;border-color:var(--gold)}
+.modal-foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:8px}
+.upload-icon-btn{background:transparent;border:1px solid var(--border);color:var(--muted2);width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;transition:all .15s}
+.upload-icon-btn:hover{border-color:var(--gold);color:var(--gold)}
+.modal-cancel{background:transparent;border:1px solid var(--border);color:var(--muted2);padding:9px 18px;border-radius:10px;font-size:13px;cursor:pointer;font-family:var(--fb)}
+.modal-post-btn{background:var(--gold);color:#000;border:none;padding:9px 22px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--fd)}
+.upload-prev{width:60px;height:60px;border-radius:8px;object-fit:cover;margin-top:8px;display:none}
+
+/* TOAST */
+.toast{position:absolute;top:56px;left:50%;transform:translateX(-50%);background:var(--surface3);color:var(--text);padding:10px 18px;border-radius:10px;font-size:13px;z-index:300;white-space:nowrap;border:1px solid var(--border);opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+
+/* BOTTOM NAV */
+.bnav{height:72px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;flex-shrink:0;padding-bottom:6px}
+.bn{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:5px 14px;border-radius:12px;background:none;border:none;transition:all .15s}
+.bn i{font-size:22px;color:var(--muted);transition:color .15s}
+.bn span{font-size:10px;color:var(--muted);font-weight:500;transition:color .15s}
+.bn.ak i,.bn.ak span{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="shell" id="app">
+  <div class="sbar">
+    <span class="sbar-t" id="clock">9:41</span>
+    <div class="sbar-i"><i class="ti ti-wifi"></i><i class="ti ti-battery-2"></i></div>
+  </div>
+
+  <!-- AUTH -->
+  <div class="auth-screen" id="auth-screen">
+    <div class="auth-logo">J<em>L</em></div>
+    <div class="auth-tagline">Finance · Markets · Power</div>
+    <div class="auth-tabs" style="width:100%">
+      <div class="auth-tab ak" id="tab-login" onclick="authTab('login')">Anmelden</div>
+      <div class="auth-tab" id="tab-reg" onclick="authTab('reg')">Registrieren</div>
+    </div>
+    <div id="form-login" style="width:100%">
+      <input class="auth-input" id="li-email" type="email" placeholder="E-Mail">
+      <input class="auth-input" id="li-pw" type="password" placeholder="Passwort">
+      <button class="auth-btn" onclick="doLogin()">Anmelden</button>
+    </div>
+    <div id="form-reg" style="display:none;width:100%">
+      <input class="auth-input" id="re-name" type="text" placeholder="Dein Name">
+      <input class="auth-input" id="re-email" type="email" placeholder="E-Mail">
+      <input class="auth-input" id="re-pw" type="password" placeholder="Passwort (min. 6 Zeichen)">
+      <button class="auth-btn" onclick="doRegister()">Account erstellen</button>
+    </div>
+    <div class="auth-divider">oder</div>
+    <button class="auth-google" onclick="doGoogle()">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Mit Google anmelden
+    </button>
+    <div class="auth-err" id="auth-err"></div>
+  </div>
+
+  <!-- SCREEN: FEED -->
+  <div class="screen on" id="sc-feed">
+    <div class="s-head">
+      <div class="s-logo">J<em>L</em></div>
+      <div class="s-actions">
+        <button class="icon-btn" onclick="goTo('messages')"><i class="ti ti-message-circle"></i></button>
+        <div class="av" id="feed-av" onclick="goTo('profile')" style="width:32px;height:32px;font-size:10px;cursor:pointer"></div>
+      </div>
+    </div>
+    <div class="kacheln" id="feed-kacheln">
+      <button class="kachel ak" onclick="filterFeed(this,'all')">Alle</button>
+      <button class="kachel" onclick="filterFeed(this,'bitcoin')">Bitcoin</button>
+      <button class="kachel" onclick="filterFeed(this,'aktien')">Aktien</button>
+      <button class="kachel" onclick="filterFeed(this,'wirtschaft')">Wirtschaft</button>
+      <button class="kachel" onclick="filterFeed(this,'politik')">Politik</button>
+      <button class="kachel" onclick="filterFeed(this,'prognosen')">Prognosen</button>
+    </div>
+    <div class="scroll" id="feed-scroll">
+      <div class="spinner" id="feed-spinner"></div>
+      <div id="feed-posts"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN: PULS -->
+  <div class="screen" id="sc-puls">
+    <div class="s-head">
+      <div class="s-title">Puls<em style="color:var(--gold);font-style:normal">.</em></div>
+      <div class="s-actions">
+        <span style="font-size:11px;color:var(--muted2)"><span class="live-dot"></span>Live</span>
+        <button class="icon-btn" onclick="refreshPuls()"><i class="ti ti-refresh"></i></button>
+      </div>
+    </div>
+    <div class="kacheln" id="puls-kacheln">
+      <button class="kachel ak" onclick="filterPuls(this,'all')">Alle</button>
+      <button class="kachel" onclick="filterPuls(this,'crypto')">Krypto</button>
+      <button class="kachel" onclick="filterPuls(this,'stocks')">Aktien</button>
+      <button class="kachel" onclick="filterPuls(this,'pol')">Politik</button>
+    </div>
+    <div class="scroll" id="puls-scroll">
+      <!-- Krypto -->
+      <div data-pc="crypto">
+        <div class="chart-card" onclick="openChartDetail('btc')">
+          <div class="cc-top"><div><div class="cc-name">Bitcoin (BTC)</div><div class="cc-sub"><span class="live-dot"></span>CoinGecko · USD</div></div><div style="text-align:right"><div class="cc-price" id="p-btc">–</div><div class="cc-chg" id="c-btc">–</div></div></div>
+          <div class="chart-wrap"><canvas id="ch-btc"></canvas></div>
+        </div>
+        <div class="chart-card" onclick="openChartDetail('eth')">
+          <div class="cc-top"><div><div class="cc-name">Ethereum (ETH)</div><div class="cc-sub"><span class="live-dot"></span>CoinGecko · USD</div></div><div style="text-align:right"><div class="cc-price" id="p-eth">–</div><div class="cc-chg" id="c-eth">–</div></div></div>
+          <div class="chart-wrap"><canvas id="ch-eth"></canvas></div>
+        </div>
+        <div class="chart-card" onclick="openChartDetail('sol')">
+          <div class="cc-top"><div><div class="cc-name">Solana (SOL)</div><div class="cc-sub"><span class="live-dot"></span>CoinGecko · USD</div></div><div style="text-align:right"><div class="cc-price" id="p-sol">–</div><div class="cc-chg" id="c-sol">–</div></div></div>
+          <div class="chart-wrap"><canvas id="ch-sol"></canvas></div>
+        </div>
+        <div class="chart-card" onclick="openChartDetail('bnb')">
+          <div class="cc-top"><div><div class="cc-name">BNB</div><div class="cc-sub"><span class="live-dot"></span>CoinGecko · USD</div></div><div style="text-align:right"><div class="cc-price" id="p-bnb">–</div><div class="cc-chg" id="c-bnb">–</div></div></div>
+          <div class="chart-wrap"><canvas id="ch-bnb"></canvas></div>
+        </div>
+        <div class="chart-card" onclick="openChartDetail('xrp')">
+          <div class="cc-top"><div><div class="cc-name">XRP</div><div class="cc-sub"><span class="live-dot"></span>CoinGecko · USD</div></div><div style="text-align:right"><div class="cc-price" id="p-xrp">–</div><div class="cc-chg" id="c-xrp">–</div></div></div>
+          <div class="chart-wrap"><canvas id="ch-xrp"></canvas></div>
+        </div>
+        <div class="chart-card" onclick="openChartDetail('ada')">
+          <div class="cc-top"><div><div class="cc-name">Cardano (ADA)</div><div class="cc-sub"><span class="live-dot"></span>CoinGecko · USD</div></div><div style="text-align:right"><div class="cc-price" id="p-ada">–</div><div class="cc-chg" id="c-ada">–</div></div></div>
+          <div class="chart-wrap"><canvas id="ch-ada"></canvas></div>
+        </div>
+        <div class="chart-card" onclick="openChartDetail('doge')">
+          <div class="cc-top"><div><div class="cc-name">Dogecoin (DOGE)</div><div class="cc-sub"><span class="live-dot"></span>CoinGecko · USD</div></div><div style="text-align:right"><div class="cc-price" id="p-doge">–</div><div class="cc-chg" id="c-doge">–</div></div></div>
+          <div class="chart-wrap"><canvas id="ch-doge"></canvas></div>
+        </div>
+        <div class="chart-card" onclick="openChartDetail('dot')">
+          <div class="cc-top"><div><div class="cc-name">Polkadot (DOT)</div><div class="cc-sub"><span class="live-dot"></span>CoinGecko · USD</div></div><div style="text-align:right"><div class="cc-price" id="p-dot">–</div><div class="cc-chg" id="c-dot">–</div></div></div>
+          <div class="chart-wrap"><canvas id="ch-dot"></canvas></div>
+        </div>
+        <div class="chart-card" onclick="openChartDetail('avax')">
+          <div class="cc-top"><div><div class="cc-name">Avalanche (AVAX)</div><div class="cc-sub"><span class="live-dot"></span>CoinGecko · USD</div></div><div style="text-align:right"><div class="cc-price" id="p-avax">–</div><div class="cc-chg" id="c-avax">–</div></div></div>
+          <div class="chart-wrap"><canvas id="ch-avax"></canvas></div>
+        </div>
+        <div class="chart-card" onclick="openChartDetail('link')">
+          <div class="cc-top"><div><div class="cc-name">Chainlink (LINK)</div><div class="cc-sub"><span class="live-dot"></span>CoinGecko · USD</div></div><div style="text-align:right"><div class="cc-price" id="p-link">–</div><div class="cc-chg" id="c-link">–</div></div></div>
+          <div class="chart-wrap"><canvas id="ch-link"></canvas></div>
+        </div>
+      </div>
+      <!-- Aktien -->
+      <div data-pc="stocks">
+        <div class="chart-card" onclick="openChartDetail('nvda')">
+          <div class="cc-top"><div><div class="cc-name">Nvidia (NVDA)</div><div class="cc-sub">NASDAQ · Demo-Daten</div></div><div style="text-align:right"><div class="cc-price" id="p-nvda">$876</div><div class="cc-chg chg-up" id="c-nvda">+4.2%</div></div></div>
+          <div class="chart-wrap"><canvas id="ch-nvda"></canvas></div>
+        </div>
+        <div class="chart-card" onclick="openChartDetail('dax')">
+          <div class="cc-top"><div><div class="cc-name">DAX 40</div><div class="cc-sub">Frankfurt · Demo-Daten</div></div><div style="text-align:right"><div class="cc-price" id="p-dax">17,840</div><div class="cc-chg chg-dn" id="c-dax">−0.3%</div></div></div>
+          <div class="chart-wrap"><canvas id="ch-dax"></canvas></div>
+        </div>
+        <div class="chart-card" onclick="openChartDetail('aapl')">
+          <div class="cc-top"><div><div class="cc-name">Apple (AAPL)</div><div class="cc-sub">NASDAQ · Demo-Daten</div></div><div style="text-align:right"><div class="cc-price" id="p-aapl">$218</div><div class="cc-chg chg-up" id="c-aapl">+1.0%</div></div></div>
+          <div class="chart-wrap"><canvas id="ch-aapl"></canvas></div>
+        </div>
+        <div style="margin:0 14px 10px;padding:10px 12px;background:rgba(247,147,26,.06);border:1px solid rgba(247,147,26,.15);border-radius:10px;font-size:11px;color:var(--muted2);line-height:1.6">
+          💡 Für Live-Aktienkurse: <strong style="color:var(--text)">Alpha Vantage API</strong> kostenlos einrichten → später integrierbar
+        </div>
+      </div>
+      <!-- Politik -->
+      <div data-pc="pol">
+        <div style="padding:10px 14px 2px"><div style="font-size:13px;font-weight:600;color:var(--text)">Sonntagsfrage</div><div style="font-size:11px;color:var(--muted2);margin-top:2px">Community-Abstimmung · Anonym</div></div>
+        <div id="pol-list"></div>
+      </div>
+    </div>
+    <!-- Chart Detail -->
+    <div class="chart-detail" id="chart-detail">
+      <div class="cd-head">
+        <button class="cd-back" onclick="closeChartDetail()"><i class="ti ti-arrow-left"></i></button>
+        <div class="cd-title" id="cd-title">Chart</div>
+      </div>
+      <div class="scroll">
+        <div class="cd-price-big" id="cd-price">–</div>
+        <div class="cd-chg-big" id="cd-chg">–</div>
+        <div class="cd-chart-wrap"><canvas id="cd-canvas"></canvas></div>
+        <div class="cd-range-btns">
+          <button class="range-btn ak" onclick="setCdRange(this,'1d')">1T</button>
+          <button class="range-btn" onclick="setCdRange(this,'7d')">7T</button>
+          <button class="range-btn" onclick="setCdRange(this,'30d')">1M</button>
+          <button class="range-btn" onclick="setCdRange(this,'90d')">3M</button>
+          <button class="range-btn" onclick="setCdRange(this,'365d')">1J</button>
+        </div>
+        <div class="cd-stats" id="cd-stats"></div>
+      </div>
+    </div>
+    <!-- Party Detail -->
+    <div class="overlay" id="party-overlay">
+      <div class="ov-head"><button class="ov-back" onclick="closeParty()"><i class="ti ti-arrow-left"></i></button><div class="ov-title" id="ov-title"></div></div>
+      <div class="scroll" id="ov-body"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN: SUCHE -->
+  <div class="screen" id="sc-search">
+    <div class="s-head"><div class="s-title">Suche</div></div>
+    <div class="search-bar">
+      <div class="search-box">
+        <i class="ti ti-search"></i>
+        <input type="text" id="search-inp" placeholder="Creator, Themen …" oninput="doSearch()">
+      </div>
+    </div>
+    <div class="trending-pills">
+      <div class="tp" onclick="tagSearch('Bitcoin')">#Bitcoin</div>
+      <div class="tp" onclick="tagSearch('DAX')">#DAX</div>
+      <div class="tp" onclick="tagSearch('Inflation')">#Inflation</div>
+      <div class="tp" onclick="tagSearch('Nvidia')">#Nvidia</div>
+      <div class="tp" onclick="tagSearch('Bundestag')">#Bundestag</div>
+      <div class="tp" onclick="tagSearch('ETF')">#ETF</div>
+    </div>
+    <div class="scroll">
+      <div class="sec-label">Creator</div>
+      <div id="creator-list"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- SCREEN: MESSAGES -->
+  <div class="screen" id="sc-messages">
+    <div class="s-head">
+      <div class="s-title">Nachrichten</div>
+      <button class="icon-btn" onclick="openNewMsg()"><i class="ti ti-edit"></i></button>
+    </div>
+    <div class="msg-list" id="conv-list"><div class="spinner"></div></div>
+    <!-- Chat Overlay -->
+    <div class="chat-overlay" id="chat-overlay">
+      <div class="chat-head">
+        <button class="ov-back" onclick="closeChat()"><i class="ti ti-arrow-left"></i></button>
+        <div class="av" id="chat-av" style="width:34px;height:34px;font-size:11px"></div>
+        <div style="flex:1;padding-left:8px"><div style="font-size:14px;font-weight:600;color:var(--text)" id="chat-name"></div></div>
+      </div>
+      <div class="chat-messages" id="chat-msgs"></div>
+      <div class="chat-input-row">
+        <input class="chat-input" id="chat-inp" placeholder="Nachricht …" onkeydown="if(event.key==='Enter')sendMsg()">
+        <button class="chat-send" onclick="sendMsg()"><i class="ti ti-send"></i></button>
+      </div>
+    </div>
+    <!-- New Message Overlay -->
+    <div class="overlay" id="new-msg-overlay">
+      <div class="ov-head"><button class="ov-back" onclick="document.getElementById('new-msg-overlay').classList.remove('on')"><i class="ti ti-arrow-left"></i></button><div class="ov-title">Neue Nachricht</div></div>
+      <div class="search-bar"><div class="search-box"><i class="ti ti-search"></i><input type="text" id="new-msg-search" placeholder="Nutzer suchen …" oninput="searchForMsg()"></div></div>
+      <div class="scroll" id="new-msg-list"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN: PROFIL -->
+  <div class="screen" id="sc-profile">
+    <div class="s-head" style="padding-bottom:0">
+      <div class="s-title" style="font-size:16px">Profil</div>
+      <div class="s-actions">
+        <button class="icon-btn" onclick="doSignOut()"><i class="ti ti-logout"></i></button>
+        <button class="plus-btn" onclick="openPostModal()"><i class="ti ti-plus" style="font-size:19px"></i></button>
+      </div>
+    </div>
+    <div class="scroll">
+      <div class="profile-cover" id="my-cover">
+        <div class="profile-av-wrap" id="my-av" onclick="document.getElementById('av-inp').click()"></div>
+        <button class="profile-edit-btn" onclick="document.getElementById('cover-inp').click()">Cover</button>
+        <input type="file" id="av-inp" accept="image/*" style="display:none" onchange="uploadAv(this)">
+        <input type="file" id="cover-inp" accept="image/*" style="display:none" onchange="uploadCover(this)">
+      </div>
+      <div class="profile-info">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+          <div>
+            <div class="profile-name" id="my-name">–</div>
+            <div class="profile-handle"><span id="my-handle">@–</span> · <em id="my-num">#0000</em></div>
+          </div>
+        </div>
+        <div class="profile-bio" id="my-bio" onclick="editBio()">📝 Bio hinzufügen</div>
+        <div class="profile-stats">
+          <div class="pstat" id="ps-posts"><strong>0</strong> Posts</div>
+          <div class="pstat" id="ps-followers"><strong>0</strong> Follower</div>
+          <div class="pstat" id="ps-following"><strong>0</strong> Following</div>
+        </div>
+      </div>
+      <div style="padding:0 14px 4px;font-size:10px;color:var(--muted);letter-spacing:.7px;text-transform:uppercase;font-family:var(--fd);font-weight:700">Channels</div>
+      <div class="channel-grid" id="my-channels"></div>
+      <div class="profile-tabs">
+        <div class="ptab ak" onclick="profileTab(this,'posts')">Posts</div>
+        <div class="ptab" onclick="profileTab(this,'likes')">Likes</div>
+      </div>
+      <div id="my-posts-list"></div>
+      <div style="height:16px"></div>
+    </div>
+  </div>
+
+  <!-- OTHER PROFILE OVERLAY -->
+  <div class="overlay" id="other-profile">
+    <div class="ov-head">
+      <button class="ov-back" onclick="closeOther()"><i class="ti ti-arrow-left"></i></button>
+      <div class="ov-title" id="op-title">Profil</div>
+      <button class="follow-btn" id="op-follow" onclick="toggleFollow()">Folgen</button>
+    </div>
+    <div class="scroll">
+      <div class="profile-cover" id="op-cover" style="height:80px">
+        <div class="profile-av-wrap" id="op-av" style="bottom:-28px;width:56px;height:56px;font-size:18px"></div>
+      </div>
+      <div style="padding:36px 16px 10px">
+        <div class="profile-name" id="op-name"></div>
+        <div class="profile-handle"><span id="op-handle"></span></div>
+        <div class="profile-bio" id="op-bio" style="margin-top:4px;cursor:default"></div>
+        <div class="profile-stats" style="margin-top:8px">
+          <div class="pstat"><strong id="op-posts-count">0</strong> Posts</div>
+          <div class="pstat"><strong id="op-followers">0</strong> Follower</div>
+        </div>
+        <button class="follow-btn" style="margin-top:10px" id="op-msg-btn" onclick="msgUser()"><i class="ti ti-message-circle" style="font-size:13px"></i> Nachricht</button>
+      </div>
+      <div style="padding:0 14px 4px;font-size:10px;color:var(--muted);letter-spacing:.7px;text-transform:uppercase;font-family:var(--fd);font-weight:700">Channels</div>
+      <div class="channel-grid" id="op-channels"></div>
+      <div class="profile-tabs">
+        <div class="ptab ak" id="op-tab-all" onclick="filterOtherProfile(this,'all')">Alle</div>
+        <div class="ptab" id="op-tab-bitcoin" onclick="filterOtherProfile(this,'bitcoin')">Bitcoin</div>
+        <div class="ptab" id="op-tab-aktien" onclick="filterOtherProfile(this,'aktien')">Aktien</div>
+        <div class="ptab" id="op-tab-mehr" onclick="filterOtherProfile(this,'wirtschaft')">Mehr</div>
+      </div>
+      <div id="op-posts-list"></div>
+      <div style="height:16px"></div>
+    </div>
+  </div>
+
+  <!-- POST MODAL -->
+  <div class="modal-bg" id="post-modal" onclick="if(event.target===this)closePostModal()">
+    <div class="modal-sheet">
+      <div class="modal-title">Neuer Post</div>
+      <textarea class="post-ta" id="post-ta" placeholder="Was denkst du?"></textarea>
+      <img id="upload-prev" class="upload-prev">
+      <div style="font-size:11px;color:var(--muted);margin-top:10px;margin-bottom:4px">Channel:</div>
+      <div class="modal-cats" id="modal-cats">
+        <button class="pcat ak" data-cat="bitcoin" onclick="selCat(this)">Bitcoin</button>
+        <button class="pcat" data-cat="aktien" onclick="selCat(this)">Aktien</button>
+        <button class="pcat" data-cat="wirtschaft" onclick="selCat(this)">Wirtschaft</button>
+        <button class="pcat" data-cat="politik" onclick="selCat(this)">Politik</button>
+        <button class="pcat" data-cat="prognosen" onclick="selCat(this)">Prognosen</button>
+      </div>
+      <div id="custom-modal-cats"></div>
+      <div class="modal-foot">
+        <label class="upload-icon-btn" for="img-inp"><i class="ti ti-photo"></i></label>
+        <input type="file" id="img-inp" accept="image/*" style="display:none" onchange="prevImg(this)">
+        <div style="display:flex;gap:8px">
+          <button class="modal-cancel" onclick="closePostModal()">Abbrechen</button>
+          <button class="modal-post-btn" id="post-btn" onclick="submitPost()">Posten →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bnav">
+    <button class="bn ak" id="bn-feed" onclick="goTo('feed')"><i class="ti ti-home"></i><span>Feed</span></button>
+    <button class="bn" id="bn-puls" onclick="goTo('puls')"><i class="ti ti-activity"></i><span>Puls</span></button>
+    <button class="bn" id="bn-search" onclick="goTo('search')"><i class="ti ti-search"></i><span>Suche</span></button>
+    <button class="bn" id="bn-messages" onclick="goTo('messages')"><i class="ti ti-message-circle"></i><span>Nachrichten</span></button>
+    <button class="bn" id="bn-profile" onclick="goTo('profile')"><i class="ti ti-user"></i><span>Profil</span></button>
+  </div>
+</div>
+
+<script>
+// ── CLOCK ──
+function tick(){const n=new Date();document.getElementById('clock').textContent=n.getHours()+':'+(n.getMinutes()<10?'0':'')+n.getMinutes()}
+setInterval(tick,10000);tick();
+
+// ── STATE ──
+let CU=null,UP=null;
+let selCatVal='bitcoin';
+let feedUnsub=null,msgUnsub=null,chatUnsub=null;
+let chartsInited=false,chartI={};
+let allUsers=[];
+let myVote=null;
+let currentOtherUID=null;
+let currentChatUID=null,currentChatConvId=null;
+let customChs=[];
+let profileFilter='all';
+
+const DEFAULT_CHS=['bitcoin','aktien','wirtschaft','politik','prognosen'];
+const PARTIES=[
+  {id:'cdu',name:'CDU/CSU',color:'#666',pols:[{i:'FM',n:'Friedrich Merz',r:'Parteivorsitzender'},{i:'MS',n:'Markus Söder',r:'CSU-Chef Bayern'},{i:'AL',n:'Armin Laschet',r:'NRW MP a.D.'},{i:'PW',n:'Paul Ziemiak',r:'Generalsekretär'}]},
+  {id:'spd',name:'SPD',color:'#c0392b',pols:[{i:'OS',n:'Olaf Scholz',r:'Bundeskanzler'},{i:'SK',n:'Saskia Esken',r:'Parteivorsitzende'},{i:'LK',n:'Lars Klingbeil',r:'Parteivorsitzender'}]},
+  {id:'afd',name:'AfD',color:'#009ee0',pols:[{i:'AW',n:'Alice Weidel',r:'Fraktionsvorsitzende'},{i:'TC',n:'Tino Chrupalla',r:'Parteivorsitzender'},{i:'BH',n:'Björn Höcke',r:'Landesvorsitzender Thüringen'}]},
+  {id:'gru',name:'Grüne',color:'#1aad62',pols:[{i:'AB',n:'Annalena Baerbock',r:'Außenministerin'},{i:'RH',n:'Robert Habeck',r:'Wirtschaftsminister'},{i:'ON',n:'Omid Nouripour',r:'Parteivorsitzender'}]},
+  {id:'fdp',name:'FDP',color:'#d4a800',pols:[{i:'CL',n:'Christian Lindner',r:'Parteivorsitzender'},{i:'WK',n:'Wolfgang Kubicki',r:'Bundestagsvizepräsident'}]},
+  {id:'bsw',name:'BSW',color:'#7c3aed',pols:[{i:'SW',n:'Sahra Wagenknecht',r:'Parteivorsitzende'},{i:'AF',n:'Amira Mohamed Ali',r:'Fraktionsvorsitzende'}]},
+];
+
+function waitFB(cb){if(window._fbReady)cb();else document.addEventListener('fb-ready',cb,{once:true})}
+
+waitFB(()=>{
+  const{auth,onAuthStateChanged}=window._fb;
+  onAuthStateChanged(auth,async u=>{
+    if(u){
+      CU=u;
+      await loadUP(u.uid);
+      document.getElementById('auth-screen').style.display='none';
+      updateProfileUI();
+      startFeed();
+      loadCreators();
+      loadConvs();
+      renderParties();
+      loadMyVote();
+    } else {
+      CU=null;UP=null;
+      document.getElementById('auth-screen').style.display='flex';
+    }
+  });
+});
+
+// ── AUTH ──
+function authTab(t){
+  document.getElementById('tab-login').classList.toggle('ak',t==='login');
+  document.getElementById('tab-reg').classList.toggle('ak',t==='reg');
+  document.getElementById('form-login').style.display=t==='login'?'':'none';
+  document.getElementById('form-reg').style.display=t==='reg'?'':'none';
+  document.getElementById('auth-err').textContent='';
+}
+function setErr(m){document.getElementById('auth-err').textContent=m}
+async function doLogin(){
+  const{auth,signInWithEmailAndPassword}=window._fb;
+  const e=document.getElementById('li-email').value.trim(),p=document.getElementById('li-pw').value;
+  if(!e||!p){setErr('Felder ausfüllen');return}
+  try{await signInWithEmailAndPassword(auth,e,p)}catch(err){setErr(authMsg(err.code))}
+}
+async function doRegister(){
+  const{auth,db,createUserWithEmailAndPassword,updateProfile,doc,setDoc,serverTimestamp}=window._fb;
+  const name=document.getElementById('re-name').value.trim(),e=document.getElementById('re-email').value.trim(),p=document.getElementById('re-pw').value;
+  if(!name||!e||!p){setErr('Felder ausfüllen');return}
+  try{
+    const uc=await createUserWithEmailAndPassword(auth,e,p);
+    await updateProfile(uc.user,{displayName:name});
+    const handle='@'+name.toLowerCase().replace(/\s+/g,'_')+Math.floor(Math.random()*900+100);
+    const num='#'+String(Math.floor(Math.random()*9000)+1000);
+    await setDoc(doc(db,'users',uc.user.uid),{uid:uc.user.uid,name,handle,num,bio:'',avatarUrl:'',coverUrl:'',followers:0,following:0,posts:0,customChannels:[],likedPosts:[],createdAt:serverTimestamp()});
+  }catch(err){setErr(authMsg(err.code))}
+}
+async function doGoogle(){
+  const{auth,db,signInWithPopup,googleProvider,doc,setDoc,getDoc,serverTimestamp}=window._fb;
+  try{
+    const r=await signInWithPopup(auth,googleProvider);
+    const u=r.user;
+    const ref=doc(db,'users',u.uid);
+    const snap=await getDoc(ref);
+    if(!snap.exists()){
+      const handle='@'+u.displayName.toLowerCase().replace(/\s+/g,'_')+Math.floor(Math.random()*900+100);
+      const num='#'+String(Math.floor(Math.random()*9000)+1000);
+      await setDoc(ref,{uid:u.uid,name:u.displayName,handle,num,bio:'',avatarUrl:u.photoURL||'',coverUrl:'',followers:0,following:0,posts:0,customChannels:[],likedPosts:[],createdAt:serverTimestamp()});
+    }
+  }catch(err){setErr(authMsg(err.code))}
+}
+async function doSignOut(){const{auth,signOut}=window._fb;await signOut(auth)}
+function authMsg(c){
+  const m={'auth/user-not-found':'E-Mail nicht gefunden','auth/wrong-password':'Falsches Passwort','auth/email-already-in-use':'E-Mail bereits registriert','auth/weak-password':'Passwort zu kurz','auth/invalid-email':'Ungültige E-Mail','auth/popup-closed-by-user':'Popup geschlossen','auth/cancelled-popup-request':''};
+  return m[c]||'Fehler: '+c;
+}
+
+// ── USER PROFILE ──
+async function loadUP(uid){
+  const{db,doc,getDoc}=window._fb;
+  const s=await getDoc(doc(db,'users',uid));
+  if(s.exists()){UP=s.data();customChs=UP.customChannels||[]}
+}
+function updateProfileUI(){
+  if(!UP)return;
+  const av=UP.avatarUrl?`<img src="${UP.avatarUrl}">`:(UP.name||'?').substring(0,2).toUpperCase();
+  document.getElementById('feed-av').innerHTML=UP.avatarUrl?`<img src="${UP.avatarUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`:(UP.name||'?').substring(0,2).toUpperCase();
+  const myAv=document.getElementById('my-av');
+  myAv.innerHTML=UP.avatarUrl?`<img src="${UP.avatarUrl}">`:(UP.name||'?').substring(0,2).toUpperCase();
+  document.getElementById('my-name').textContent=UP.name||'';
+  document.getElementById('my-handle').textContent=UP.handle||'';
+  document.getElementById('my-num').textContent=UP.num||'';
+  document.getElementById('my-bio').textContent=UP.bio||'📝 Bio hinzufügen';
+  if(UP.coverUrl){const c=document.getElementById('my-cover');c.style.backgroundImage=`url(${UP.coverUrl})`;c.style.backgroundSize='cover'}
+  document.getElementById('ps-posts').innerHTML=`<strong>${UP.posts||0}</strong> Posts`;
+  document.getElementById('ps-followers').innerHTML=`<strong>${UP.followers||0}</strong> Follower`;
+  document.getElementById('ps-following').innerHTML=`<strong>${UP.following||0}</strong> Following`;
+  renderMyChannels();
+  renderCustomModalCats();
+}
+function renderMyChannels(){
+  const allChs=[...DEFAULT_CHS,...customChs];
+  let h=`<div class="ck ak" onclick="filterMyProfile(this,'all')"><div class="ck-name">Alle Posts</div><div class="ck-count" id="ck-all">– Posts</div></div>`;
+  allChs.forEach(ch=>{
+    const label=ch.charAt(0).toUpperCase()+ch.slice(1);
+    h+=`<div class="ck" onclick="filterMyProfile(this,'${ch}')"><div class="ck-name">${label}</div><div class="ck-count" id="ck-${ch}">– Posts</div></div>`;
+  });
+  h+=`<div class="ck" onclick="addChannel()" style="border-style:dashed;grid-column:span 2"><div class="ck-name" style="color:var(--muted2)">+ Eigenen Channel</div></div>`;
+  document.getElementById('my-channels').innerHTML=h;
+}
+function renderCustomModalCats(){
+  const c=document.getElementById('custom-modal-cats');
+  if(!c||customChs.length===0){if(c)c.innerHTML='';return}
+  c.innerHTML='<div class="modal-cats">'+customChs.map(ch=>`<button class="pcat" data-cat="${ch}" onclick="selCat(this)">${ch}</button>`).join('')+'</div>';
+}
+async function addChannel(){
+  const n=prompt('Channel-Name:');
+  if(!n||!n.trim())return;
+  const id=n.trim().toLowerCase().replace(/\s+/g,'_');
+  if(customChs.includes(id)){showToast('Channel existiert bereits');return}
+  customChs.push(id);
+  const{db,doc,updateDoc}=window._fb;
+  await updateDoc(doc(db,'users',CU.uid),{customChannels:customChs});
+  // add to feed kacheln
+  const fk=document.getElementById('feed-kacheln');
+  const btn=document.createElement('button');btn.className='kachel';btn.textContent=n.trim();btn.onclick=()=>filterFeed(btn,id);fk.appendChild(btn);
+  renderMyChannels();renderCustomModalCats();
+  showToast(`Channel "${n.trim()}" erstellt`);
+}
+
+// ── FEED ──
+function startFeed(){
+  if(!CU)return;
+  const{db,collection,query,orderBy,limit,onSnapshot}=window._fb;
+  document.getElementById('feed-spinner').style.display='block';
+  const q=query(collection(db,'posts'),orderBy('createdAt','desc'),limit(60));
+  if(feedUnsub)feedUnsub();
+  feedUnsub=onSnapshot(q,snap=>{
+    document.getElementById('feed-spinner').style.display='none';
+    const posts=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderFeedPosts(posts,'feed-posts',profileFilter==='all'?'all':profileFilter);
+  });
+}
+function filterFeed(btn,cat){
+  document.querySelectorAll('#feed-kacheln .kachel').forEach(b=>b.classList.remove('ak'));
+  btn.classList.add('ak');
+  const{db,collection,query,orderBy,limit,where,onSnapshot}=window._fb;
+  document.getElementById('feed-spinner').style.display='block';
+  document.getElementById('feed-posts').innerHTML='';
+  const q=cat==='all'?query(collection(db,'posts'),orderBy('createdAt','desc'),limit(60)):query(collection(db,'posts'),where('channel','==',cat),orderBy('createdAt','desc'),limit(60));
+  if(feedUnsub)feedUnsub();
+  feedUnsub=onSnapshot(q,snap=>{
+    document.getElementById('feed-spinner').style.display='none';
+    renderFeedPosts(snap.docs.map(d=>({id:d.id,...d.data()})),'feed-posts',cat);
+  });
+}
+
+function renderFeedPosts(posts,containerId,cat){
+  const c=document.getElementById(containerId);
+  const filtered=(!cat||cat==='all')?posts:posts.filter(p=>p.channel===cat);
+  if(filtered.length===0){c.innerHTML=`<div class="empty-state"><i class="ti ti-news"></i>Noch keine Posts hier</div>`;return}
+  c.innerHTML=filtered.map(p=>postHTML(p,true)).join('');
+}
+
+function postHTML(p,withComments){
+  const t=p.createdAt?timeAgo(p.createdAt.toDate()):'–';
+  const cb='cb-'+(p.channel||'custom');
+  const cl=p.channel?p.channel.charAt(0).toUpperCase()+p.channel.slice(1):'–';
+  const img=p.imageUrl?`<img src="${p.imageUrl}" class="post-img">`:'';
+  const init=(p.authorName||'?').substring(0,2).toUpperCase();
+  const avH=p.authorAvatar?`<img src="${p.authorAvatar}">`:`<span>${init}</span>`;
+  const liked=CU&&(p.likedBy||[]).includes(CU.uid);
+  return`<div class="post-item" data-id="${p.id}" data-ch="${p.channel||''}">
+    <div class="post-row">
+      <div class="av" onclick="openOther('${p.authorId}')" style="cursor:pointer">${avH}</div>
+      <div class="post-body">
+        <div class="post-top">
+          <span class="post-author" onclick="openOther('${p.authorId}')" style="cursor:pointer">${esc(p.authorName||'Anonym')}</span>
+          <span class="cat-badge ${cb}">${cl}</span>
+          <span class="post-time-label">${t}</span>
+        </div>
+        <div class="post-handle" onclick="openOther('${p.authorId}')" style="cursor:pointer">${esc(p.authorHandle||'')}</div>
+        <div class="post-text">${esc(p.text||'')}</div>
+        ${img}
+        <div class="post-actions-row">
+          <button class="pact${liked?' liked':''}" onclick="likePost('${p.id}',this)"><i class="ti ti-heart${liked?'-filled':''}"></i> <span class="like-count">${p.likes||0}</span></button>
+          <button class="pact" onclick="toggleComments('${p.id}',this)"><i class="ti ti-message-circle"></i> ${p.comments||0}</button>
+          <button class="pact" onclick="sharePost('${p.id}')"><i class="ti ti-share"></i></button>
+        </div>
+        <div class="comments-section" id="cmts-${p.id}" style="display:none"></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── COMMENTS ──
+async function toggleComments(postId,btn){
+  const section=document.getElementById('cmts-'+postId);
+  if(section.style.display!=='none'){section.style.display='none';return}
+  section.style.display='block';
+  section.innerHTML='<div class="spinner"></div>';
+  await loadComments(postId);
+}
+
+async function loadComments(postId){
+  const{db,collection,query,orderBy,getDocs}=window._fb;
+  const q=query(collection(db,'posts/'+postId+'/comments'),orderBy('createdAt','asc'));
+  const snap=await getDocs(q);
+  const comments=snap.docs.map(d=>({id:d.id,...d.data()}));
+  const section=document.getElementById('cmts-'+postId);
+  const avH=UP?.avatarUrl?`<img src="${UP.avatarUrl}">`:(UP?.name||'?').substring(0,2).toUpperCase();
+  section.innerHTML=comments.map(c=>{
+    const cavH=c.authorAvatar?`<img src="${c.authorAvatar}">`:(c.authorName||'?').substring(0,2).toUpperCase();
+    return`<div class="comment-item"><div class="comment-av">${cavH}</div><div class="comment-body"><div class="comment-author">${esc(c.authorName||'')}</div><div class="comment-text">${esc(c.text||'')}</div><div class="comment-time">${c.createdAt?timeAgo(c.createdAt.toDate()):''}</div></div></div>`;
+  }).join('')+`<div class="comment-input-row"><div class="comment-av">${avH}</div><input class="comment-input" id="ci-${postId}" placeholder="Kommentar …" onkeydown="if(event.key==='Enter')submitComment('${postId}')"><button class="comment-send" onclick="submitComment('${postId}')"><i class="ti ti-send"></i></button></div>`;
+}
+
+async function submitComment(postId){
+  if(!CU||!UP)return;
+  const inp=document.getElementById('ci-'+postId);
+  const text=inp.value.trim();if(!text)return;
+  inp.value='';
+  const{db,collection,addDoc,doc,updateDoc,increment,serverTimestamp}=window._fb;
+  await addDoc(collection(db,'posts/'+postId+'/comments'),{text,authorId:CU.uid,authorName:UP.name||'',authorHandle:UP.handle||'',authorAvatar:UP.avatarUrl||'',createdAt:serverTimestamp()});
+  await updateDoc(doc(db,'posts',postId),{comments:increment(1)});
+  await loadComments(postId);
+}
+
+// ── LIKE ──
+async function likePost(postId,btn){
+  if(!CU)return;
+  const{db,doc,getDoc,updateDoc,increment}=window._fb;
+  const ref=doc(db,'posts',postId);
+  const snap=await getDoc(ref);if(!snap.exists())return;
+  const likedBy=snap.data().likedBy||[];
+  const liked=likedBy.includes(CU.uid);
+  const newArr=liked?likedBy.filter(x=>x!==CU.uid):[...likedBy,CU.uid];
+  await updateDoc(ref,{likes:increment(liked?-1:1),likedBy:newArr});
+  btn.classList.toggle('liked',!liked);
+  btn.innerHTML=`<i class="ti ti-heart${!liked?'-filled':''}"></i> <span class="like-count">${(snap.data().likes||0)+(liked?-1:1)}</span>`;
+}
+
+// ── SUBMIT POST ──
+async function submitPost(){
+  if(!CU||!UP){showToast('Bitte anmelden');return}
+  const text=document.getElementById('post-ta').value.trim();
+  if(!text){showToast('Text eingeben');return}
+  const btn=document.getElementById('post-btn');btn.textContent='…';btn.disabled=true;
+  try{
+    const{db,storage,collection,addDoc,doc,updateDoc,increment,serverTimestamp}=window._fb;
+    const post={text,channel:selCatVal,imageUrl:'',authorId:CU.uid,authorName:UP.name||'',authorHandle:UP.handle||'',authorAvatar:UP.avatarUrl||'',likes:0,likedBy:[],comments:0,createdAt:serverTimestamp()};
+    const file=document.getElementById('img-inp').files[0];
+    if(file){
+      try{
+        const{ref,uploadBytes,getDownloadURL}=window._fb;
+        const r=window._fb.ref(window._fb.storage,`posts/${CU.uid}/${Date.now()}`);
+        await uploadBytes(r,file);
+        post.imageUrl=await getDownloadURL(r);
+      }catch(e){} // storage might not be enabled
+    }
+    await addDoc(collection(db,'posts'),post);
+    await updateDoc(doc(db,'users',CU.uid),{posts:increment(1)});
+    UP.posts=(UP.posts||0)+1;
+    document.getElementById('post-ta').value='';
+    document.getElementById('img-inp').value='';
+    document.getElementById('upload-prev').style.display='none';
+    closePostModal();showToast('✓ Post in #'+selCatVal);goTo('feed');
+    if(CU)loadMyPosts('all');
+  }catch(e){showToast('Fehler: '+e.message)}
+  btn.textContent='Posten →';btn.disabled=false;
+}
+
+// ── MY PROFILE ──
+async function loadMyPosts(ch){
+  if(!CU)return;
+  const{db,collection,query,where,orderBy,getDocs}=window._fb;
+  const c=document.getElementById('my-posts-list');
+  c.innerHTML='<div class="spinner"></div>';
+  const q=ch==='all'?query(collection(db,'posts'),where('authorId','==',CU.uid),orderBy('createdAt','desc')):query(collection(db,'posts'),where('authorId','==',CU.uid),where('channel','==',ch),orderBy('createdAt','desc'));
+  const snap=await getDocs(q);
+  const posts=snap.docs.map(d=>({id:d.id,...d.data()}));
+  // update counts
+  const allSnap=await getDocs(query(collection(db,'posts'),where('authorId','==',CU.uid)));
+  const allP=allSnap.docs.map(d=>d.data());
+  const ckAll=document.getElementById('ck-all');if(ckAll)ckAll.textContent=allP.length+' Posts';
+  const ps=document.getElementById('ps-posts');if(ps)ps.innerHTML=`<strong>${allP.length}</strong> Posts`;
+  [...DEFAULT_CHS,...customChs].forEach(ch2=>{
+    const el=document.getElementById('ck-'+ch2);
+    if(el)el.textContent=allP.filter(p=>p.channel===ch2).length+' Posts';
+  });
+  c.innerHTML=posts.length?posts.map(p=>postHTML(p,true)).join(''):`<div class="empty-state"><i class="ti ti-pencil-off"></i>Noch keine Posts</div>`;
+}
+function filterMyProfile(el,ch){
+  document.querySelectorAll('#my-channels .ck').forEach(c=>c.classList.remove('ak'));
+  el.classList.add('ak');profileFilter=ch;loadMyPosts(ch);
+}
+function profileTab(el,tab){
+  document.querySelectorAll('.profile-tabs .ptab').forEach(t=>t.classList.remove('ak'));
+  el.classList.add('ak');
+  if(tab==='posts')loadMyPosts(profileFilter);
+  else{document.getElementById('my-posts-list').innerHTML='<div class="empty-state"><i class="ti ti-heart"></i>Likes kommen bald</div>'}
+}
+async function editBio(){
+  const bio=prompt('Deine Bio:',UP?.bio||'');if(bio===null)return;
+  const{db,doc,updateDoc}=window._fb;
+  await updateDoc(doc(db,'users',CU.uid),{bio});UP.bio=bio;
+  document.getElementById('my-bio').textContent=bio||'📝 Bio hinzufügen';showToast('Bio gespeichert');
+}
+async function uploadAv(inp){
+  if(!inp.files[0]||!CU)return;
+  showToast('Wird hochgeladen…');
+  try{
+    const{storage,db,doc,updateDoc,ref,uploadBytes,getDownloadURL}=window._fb;
+    const r=ref(storage,`avatars/${CU.uid}`);
+    await uploadBytes(r,inp.files[0]);
+    const url=await getDownloadURL(r);
+    await updateDoc(doc(db,'users',CU.uid),{avatarUrl:url});
+    UP.avatarUrl=url;updateProfileUI();showToast('Foto gespeichert');
+  }catch(e){showToast('Storage nicht verfügbar – bitte Upgrade')}
+}
+async function uploadCover(inp){
+  if(!inp.files[0]||!CU)return;
+  showToast('Wird hochgeladen…');
+  try{
+    const{storage,db,doc,updateDoc,ref,uploadBytes,getDownloadURL}=window._fb;
+    const r=ref(storage,`covers/${CU.uid}`);
+    await uploadBytes(r,inp.files[0]);
+    const url=await getDownloadURL(r);
+    await updateDoc(doc(db,'users',CU.uid),{coverUrl:url});
+    UP.coverUrl=url;
+    const cov=document.getElementById('my-cover');cov.style.backgroundImage=`url(${url})`;cov.style.backgroundSize='cover';
+    showToast('Cover gespeichert');
+  }catch(e){showToast('Storage nicht verfügbar – bitte Upgrade')}
+}
+
+// ── OTHER PROFILE ──
+async function openOther(uid){
+  if(uid===CU?.uid){goTo('profile');return}
+  currentOtherUID=uid;
+  const{db,doc,getDoc,collection,query,where,orderBy,getDocs}=window._fb;
+  const snap=await getDoc(doc(db,'users',uid));if(!snap.exists())return;
+  const u=snap.data();
+  document.getElementById('op-title').textContent=u.name||'Profil';
+  document.getElementById('op-name').textContent=u.name||'';
+  document.getElementById('op-handle').textContent=u.handle||'';
+  document.getElementById('op-bio').textContent=u.bio||'';
+  document.getElementById('op-followers').textContent=u.followers||0;
+  const opAv=document.getElementById('op-av');
+  opAv.innerHTML=u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase();
+  // channels
+  const chs=[...DEFAULT_CHS,...(u.customChannels||[])];
+  document.getElementById('op-channels').innerHTML=chs.map(ch=>`<div class="ck" onclick="opCh(this,'${uid}','${ch}')"><div class="ck-name">${ch.charAt(0).toUpperCase()+ch.slice(1)}</div></div>`).join('');
+  // posts
+  const q=query(collection(db,'posts'),where('authorId','==',uid),orderBy('createdAt','desc'));
+  const pSnap=await getDocs(q);
+  const posts=pSnap.docs.map(d=>({id:d.id,...d.data()}));
+  document.getElementById('op-posts-count').textContent=posts.length;
+  document.getElementById('op-posts-list').innerHTML=posts.length?posts.map(p=>postHTML(p,true)).join(''):`<div class="empty-state">Noch keine Posts</div>`;
+  document.getElementById('other-profile').classList.add('on');
+}
+async function opCh(el,uid,ch){
+  document.querySelectorAll('#op-channels .ck').forEach(c=>c.classList.remove('ak'));
+  el.classList.add('ak');
+  const{db,collection,query,where,orderBy,getDocs}=window._fb;
+  const q=query(collection(db,'posts'),where('authorId','==',uid),where('channel','==',ch),orderBy('createdAt','desc'));
+  const snap=await getDocs(q);
+  const posts=snap.docs.map(d=>({id:d.id,...d.data()}));
+  document.getElementById('op-posts-list').innerHTML=posts.length?posts.map(p=>postHTML(p,true)).join(''):`<div class="empty-state">Keine Posts in #${ch}</div>`;
+}
+async function filterOtherProfile(el,ch){
+  if(!currentOtherUID)return;
+  document.querySelectorAll('#other-profile .profile-tabs .ptab').forEach(t=>t.classList.remove('ak'));
+  el.classList.add('ak');
+  const{db,collection,query,where,orderBy,getDocs}=window._fb;
+  let q;
+  if(ch==='all'){const{limit}=window._fb;q=query(collection(db,'posts'),where('authorId','==',currentOtherUID),orderBy('createdAt','desc'));}
+  else{q=query(collection(db,'posts'),where('authorId','==',currentOtherUID),where('channel','==',ch),orderBy('createdAt','desc'));}
+  const snap=await getDocs(q);
+  const posts=snap.docs.map(d=>({id:d.id,...d.data()}));
+  document.getElementById('op-posts-list').innerHTML=posts.length?posts.map(p=>postHTML(p,true)).join(''):`<div class="empty-state">Keine Posts</div>`;
+}
+async function toggleFollow(){
+  if(!CU||!currentOtherUID)return;
+  const{db,doc,updateDoc,increment}=window._fb;
+  const btn=document.getElementById('op-follow');
+  const following=btn.classList.contains('following');
+  btn.classList.toggle('following',!following);
+  btn.textContent=following?'Folgen':'Folge ich ✓';
+  await updateDoc(doc(db,'users',currentOtherUID),{followers:increment(following?-1:1)});
+  await updateDoc(doc(db,'users',CU.uid),{following:increment(following?-1:1)});
+  UP.following=(UP.following||0)+(following?-1:1);
+  document.getElementById('ps-following').innerHTML=`<strong>${UP.following}</strong> Following`;
+}
+function closeOther(){document.getElementById('other-profile').classList.remove('on');currentOtherUID=null}
+
+// ── SEARCH ──
+async function loadCreators(){
+  const{db,collection,getDocs,query,limit}=window._fb;
+  const q=query(collection(db,'users'),limit(30));
+  const snap=await getDocs(q);
+  allUsers=snap.docs.map(d=>d.data()).filter(u=>u.uid!==CU?.uid);
+  renderCreators(allUsers);
+}
+function renderCreators(users){
+  const c=document.getElementById('creator-list');
+  if(!users.length){c.innerHTML='<div class="empty-state">Keine gefunden</div>';return}
+  c.innerHTML=users.map(u=>`
+    <div class="creator-row" onclick="openOther('${u.uid}')">
+      <div class="av" style="width:38px;height:38px">${u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase()}</div>
+      <div class="cr-meta"><div class="cr-name">${esc(u.name||'')}</div><div class="cr-desc">${esc(u.handle||'')} · ${u.followers||0} Follower</div></div>
+      <button class="follow-btn" onclick="event.stopPropagation();quickFollow('${u.uid}',this)">Folgen</button>
+    </div>`).join('');
+}
+function doSearch(){
+  const q=document.getElementById('search-inp').value.toLowerCase();
+  renderCreators(!q?allUsers:allUsers.filter(u=>(u.name||'').toLowerCase().includes(q)||(u.handle||'').toLowerCase().includes(q)));
+}
+function tagSearch(tag){document.getElementById('search-inp').value=tag;goTo('search');doSearch()}
+async function quickFollow(uid,btn){
+  if(!CU)return;
+  const{db,doc,updateDoc,increment}=window._fb;
+  const f=btn.classList.contains('following');
+  btn.classList.toggle('following',!f);btn.textContent=f?'Folgen':'Folge ich ✓';
+  await updateDoc(doc(db,'users',uid),{followers:increment(f?-1:1)});
+  await updateDoc(doc(db,'users',CU.uid),{following:increment(f?-1:1)});
+}
+
+// ── MESSAGES ──
+async function loadConvs(){
+  if(!CU)return;
+  const{db,collection,query,where,orderBy,onSnapshot}=window._fb;
+  const q=query(collection(db,'conversations'),where('members','array-contains',CU.uid),orderBy('lastAt','desc'));
+  if(msgUnsub)msgUnsub();
+  msgUnsub=onSnapshot(q,snap=>{
+    const convs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderConvs(convs);
+  });
+}
+function renderConvs(convs){
+  const c=document.getElementById('conv-list');
+  if(!convs.length){c.innerHTML='<div class="empty-state"><i class="ti ti-message-circle-off"></i>Noch keine Nachrichten</div>';return}
+  c.innerHTML=convs.map(cv=>{
+    const otherId=cv.members.find(m=>m!==CU.uid);
+    const name=cv.memberNames?cv.memberNames[otherId]||'–':'–';
+    const av=cv.memberAvatars?cv.memberAvatars[otherId]||'':'';
+    const avH=av?`<img src="${av}">`:(name||'?').substring(0,2).toUpperCase();
+    return`<div class="conv-item" onclick="openChat('${cv.id}','${otherId}')">
+      <div class="av" style="width:42px;height:42px">${avH}</div>
+      <div class="conv-meta"><div class="conv-name">${esc(name)}</div><div class="conv-preview">${esc(cv.lastMsg||'')}</div></div>
+      <div class="conv-time">${cv.lastAt?timeAgo(cv.lastAt.toDate()):''}</div>
+    </div>`;
+  }).join('');
+}
+async function openChat(convId,otherId){
+  currentChatConvId=convId;currentChatUID=otherId;
+  const{db,doc,getDoc,collection,query,orderBy,onSnapshot}=window._fb;
+  const uSnap=await getDoc(doc(db,'users',otherId));
+  const u=uSnap.exists()?uSnap.data():{name:'–',avatarUrl:''};
+  document.getElementById('chat-name').textContent=u.name||'–';
+  const chatAv=document.getElementById('chat-av');
+  chatAv.innerHTML=u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase();
+  document.getElementById('chat-overlay').classList.add('on');
+  // listen messages
+  const q=query(collection(db,'conversations/'+convId+'/messages'),orderBy('createdAt','asc'));
+  if(chatUnsub)chatUnsub();
+  chatUnsub=onSnapshot(q,snap=>{
+    const msgs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderChatMsgs(msgs);
+  });
+}
+function renderChatMsgs(msgs){
+  const c=document.getElementById('chat-msgs');
+  c.innerHTML=msgs.map(m=>{
+    const mine=m.senderId===CU.uid;
+    return`<div style="display:flex;flex-direction:column;align-items:${mine?'flex-end':'flex-start'}">
+      <div class="msg-bubble ${mine?'msg-mine':'msg-theirs'}">${esc(m.text||'')}</div>
+      <div class="msg-time-small" style="text-align:${mine?'right':'left'}">${m.createdAt?timeAgo(m.createdAt.toDate()):''}</div>
+    </div>`;
+  }).join('');
+  c.scrollTop=c.scrollHeight;
+}
+async function sendMsg(){
+  if(!CU||!currentChatConvId)return;
+  const inp=document.getElementById('chat-inp');const text=inp.value.trim();if(!text)return;
+  inp.value='';
+  const{db,collection,addDoc,doc,updateDoc,serverTimestamp}=window._fb;
+  await addDoc(collection(db,'conversations/'+currentChatConvId+'/messages'),{text,senderId:CU.uid,createdAt:serverTimestamp()});
+  await updateDoc(doc(db,'conversations',currentChatConvId),{lastMsg:text,lastAt:serverTimestamp()});
+}
+function closeChat(){
+  document.getElementById('chat-overlay').classList.remove('on');
+  if(chatUnsub)chatUnsub();chatUnsub=null;currentChatConvId=null;currentChatUID=null;
+}
+async function openNewMsg(){
+  await loadCreators();
+  const list=document.getElementById('new-msg-list');
+  list.innerHTML=allUsers.map(u=>`
+    <div class="creator-row" onclick="startConv('${u.uid}')">
+      <div class="av" style="width:38px;height:38px">${u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase()}</div>
+      <div class="cr-meta"><div class="cr-name">${esc(u.name||'')}</div><div class="cr-desc">${esc(u.handle||'')}</div></div>
+    </div>`).join('');
+  document.getElementById('new-msg-overlay').classList.add('on');
+}
+function searchForMsg(){
+  const q=document.getElementById('new-msg-search').value.toLowerCase();
+  const filtered=!q?allUsers:allUsers.filter(u=>(u.name||'').toLowerCase().includes(q));
+  document.getElementById('new-msg-list').innerHTML=filtered.map(u=>`
+    <div class="creator-row" onclick="startConv('${u.uid}')">
+      <div class="av" style="width:38px;height:38px">${u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase()}</div>
+      <div class="cr-meta"><div class="cr-name">${esc(u.name||'')}</div></div>
+    </div>`).join('');
+}
+async function startConv(otherId){
+  if(!CU||!UP)return;
+  const{db,collection,query,where,getDocs,addDoc,serverTimestamp,doc,getDoc}=window._fb;
+  document.getElementById('new-msg-overlay').classList.remove('on');
+  // check existing conv
+  const q=query(collection(db,'conversations'),where('members','array-contains',CU.uid));
+  const snap=await getDocs(q);
+  let convId=null;
+  snap.docs.forEach(d=>{const data=d.data();if(data.members.includes(otherId))convId=d.id;});
+  if(!convId){
+    const oSnap=await getDoc(doc(db,'users',otherId));
+    const o=oSnap.exists()?oSnap.data():{name:'–',avatarUrl:''};
+    const newConv=await addDoc(collection(db,'conversations'),{
+      members:[CU.uid,otherId],
+      memberNames:{[CU.uid]:UP.name||'',[otherId]:o.name||''},
+      memberAvatars:{[CU.uid]:UP.avatarUrl||'',[otherId]:o.avatarUrl||''},
+      lastMsg:'',lastAt:serverTimestamp()
+    });
+    convId=newConv.id;
+  }
+  openChat(convId,otherId);
+}
+async function msgUser(){
+  if(!CU||!currentOtherUID)return;
+  closeOther();goTo('messages');await startConv(currentOtherUID);
+}
+
+// ── POLITIK ──
+async function renderParties(){
+  const{db,collection,getDocs}=window._fb;
+  let votes={};
+  try{const s=await getDocs(collection(db,'votes'));s.docs.forEach(d=>votes[d.id]=d.data().count||0)}catch(e){}
+  const total=Object.values(votes).reduce((a,b)=>a+b,0)||1;
+  document.getElementById('pol-list').innerHTML=PARTIES.map(p=>{
+    const pct=votes[p.id]?Math.round(votes[p.id]/total*100):0;
+    return`<div class="pol-card">
+      <div class="pol-top"><div class="pol-dot" style="background:${p.color}"></div><div class="pol-name">${p.name}</div><div class="pol-pct" id="pct-${p.id}">${pct}%</div></div>
+      <div class="bar-track"><div class="bar-fill" id="bar-${p.id}" style="width:${pct}%;background:${p.color}"></div></div>
+      <div class="pol-btns">
+        <button class="pol-btn${myVote===p.id?' voted':''}" id="vbtn-${p.id}" onclick="voteParty('${p.id}')">${myVote===p.id?'Gewählt ✓':'Anonym wählen'}</button>
+        <button class="pol-btn detail" onclick="showParty('${p.id}')">Politiker →</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function voteParty(id){
+  if(!CU)return;
+  if(myVote===id){showToast('Bereits gewählt');return}
+  const{db,doc,setDoc,updateDoc,increment,getDoc}=window._fb;
+  if(myVote){try{await updateDoc(doc(db,'votes',myVote),{count:increment(-1)})}catch(e){}}
+  const vRef=doc(db,'votes',id);
+  const vSnap=await getDoc(vRef);
+  if(vSnap.exists())await updateDoc(vRef,{count:increment(1)});
+  else await setDoc(vRef,{count:1});
+  await setDoc(doc(db,'userVotes',CU.uid),{partyId:id});
+  myVote=id;showToast('Stimme abgegeben ✓');renderParties();
+}
+async function loadMyVote(){
+  if(!CU)return;
+  const{db,doc,getDoc}=window._fb;
+  try{const s=await getDoc(doc(db,'userVotes',CU.uid));if(s.exists())myVote=s.data().partyId}catch(e){}
+}
+function showParty(id){
+  const p=PARTIES.find(x=>x.id===id);if(!p)return;
+  document.getElementById('ov-title').textContent=p.name;
+  document.getElementById('ov-body').innerHTML=p.pols.map(pp=>`
+    <div class="pol-person">
+      <div class="pp-av" style="background:${p.color};color:#fff">${pp.i}</div>
+      <div class="pp-meta"><div class="pp-name">${pp.n}</div><div class="pp-role">${pp.r}</div></div>
+      <button class="dl-btn" onclick="dlPolitiker('${pp.n}')"><i class="ti ti-download"></i> Info</button>
+    </div>`).join('');
+  document.getElementById('party-overlay').classList.add('on');
+}
+function dlPolitiker(name){
+  const b=new Blob([`JL – Politiker Info\n\nName: ${name}\nQuelle: Öffentliche Daten\nhttps://www.bundestag.de`],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name.replace(/\s/g,'_')+'_Info.txt';a.click();
+}
+function closeParty(){document.getElementById('party-overlay').classList.remove('on')}
+
+// ── CHARTS ──
+const GOLD='#F7931A';
+const COIN_IDS={btc:'bitcoin',eth:'ethereum',sol:'solana',bnb:'binancecoin',xrp:'ripple',ada:'cardano',doge:'dogecoin',dot:'polkadot',avax:'avalanche-2',link:'chainlink'};
+const COIN_NAMES={btc:'Bitcoin (BTC)',eth:'Ethereum (ETH)',sol:'Solana (SOL)',bnb:'BNB',xrp:'XRP',ada:'Cardano (ADA)',doge:'Dogecoin (DOGE)',dot:'Polkadot (DOT)',avax:'Avalanche (AVAX)',link:'Chainlink (LINK)'};
+let currentCdCoin=null,currentCdRange='1d',cdChart=null;
+
+function gradFill(ctx){
+  const g=ctx.createLinearGradient(0,0,0,80);
+  g.addColorStop(0,GOLD+'55');g.addColorStop(1,GOLD+'00');return g;
+}
+function mkChart(id,data,height){
+  const el=document.getElementById(id);if(!el)return;
+  if(chartI[id])chartI[id].destroy();
+  const h=height||80;
+  chartI[id]=new Chart(el,{type:'line',data:{labels:data.map((_,i)=>i),datasets:[{data,borderColor:GOLD,borderWidth:2,fill:true,backgroundColor:gradFill(el.getContext('2d')),pointRadius:0,tension:.42}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:400},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.parsed.y.toLocaleString('de-DE',{maximumFractionDigits:4})},backgroundColor:'#1a1a1a',borderColor:'#333',borderWidth:1}},scales:{x:{display:false},y:{display:false}}}
+  });
+}
+function demoData(base,n){let v=base,d=[];for(let i=0;i<n;i++){v+=(Math.random()-.48)*base*.012;d.push(Math.round(v*100)/100)}return d}
+
+async function fetchPuls(){
+  const ids=Object.values(COIN_IDS).join(',');
+  try{
+    const r=await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&sparkline=true&price_change_percentage=24h`);
+    if(!r.ok)throw new Error();
+    const data=await r.json();
+    data.forEach(coin=>{
+      const k=Object.entries(COIN_IDS).find(([,v])=>v===coin.id)?.[0];if(!k)return;
+      const pel=document.getElementById('p-'+k),cel=document.getElementById('c-'+k);
+      if(pel)pel.textContent=fmtP(coin.current_price);
+      if(cel){const up=coin.price_change_percentage_24h>=0;cel.textContent=(up?'+':'')+coin.price_change_percentage_24h.toFixed(2)+'%';cel.className='cc-chg '+(up?'chg-up':'chg-dn')}
+      const sp=coin.sparkline_in_7d?.price;
+      if(sp&&sp.length)mkChart('ch-'+k,sp.slice(-40));
+    });
+  }catch(e){
+    Object.entries(COIN_IDS).forEach(([k])=>{mkChart('ch-'+k,demoData({btc:94000,eth:3200,sol:190,bnb:400,xrp:0.6,ada:0.45,doge:0.15,dot:8,avax:35,link:18}[k]||100,40))});
+  }
+  ['nvda','dax','aapl'].forEach(k=>mkChart('ch-'+k,demoData({nvda:840,dax:17800,aapl:216}[k],40)));
+}
+
+async function openChartDetail(coin){
+  currentCdCoin=coin;currentCdRange='1d';
+  document.getElementById('cd-title').textContent=COIN_NAMES[coin]||coin.toUpperCase();
+  document.getElementById('chart-detail').classList.add('on');
+  document.querySelectorAll('.range-btn').forEach(b=>b.classList.toggle('ak',b.textContent==='1T'));
+  await loadCdChart(coin,'1');
+}
+async function loadCdChart(coin,days){
+  const cgId=COIN_IDS[coin];if(!cgId)return;
+  const priceEl=document.getElementById('cd-price'),chgEl=document.getElementById('cd-chg');
+  try{
+    const r=await fetch(`https://api.coingecko.com/api/v3/coins/${cgId}/market_chart?vs_currency=usd&days=${days}`);
+    if(!r.ok)throw new Error();
+    const data=await r.json();
+    const prices=data.prices.map(p=>p[1]);
+    const first=prices[0],last=prices[prices.length-1];
+    const chg=((last-first)/first*100).toFixed(2);
+    if(priceEl)priceEl.textContent=fmtP(last);
+    if(chgEl){chgEl.textContent=(chg>=0?'+':'')+chg+'%';chgEl.className='cd-chg-big '+(chg>=0?'chg-up':'chg-dn')}
+    // full chart
+    const canvas=document.getElementById('cd-canvas');
+    if(canvas){
+      if(cdChart)cdChart.destroy();
+      const g=canvas.getContext('2d').createLinearGradient(0,0,0,200);
+      g.addColorStop(0,GOLD+'66');g.addColorStop(1,GOLD+'00');
+      cdChart=new Chart(canvas,{type:'line',data:{labels:prices.map((_,i)=>i),datasets:[{data:prices,borderColor:GOLD,borderWidth:2,fill:true,backgroundColor:g,pointRadius:0,tension:.3}]},
+        options:{responsive:true,maintainAspectRatio:false,animation:{duration:500},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.parsed.y.toLocaleString('de-DE',{maximumFractionDigits:4})},backgroundColor:'#1a1a1a',borderColor:'#333',borderWidth:1}},scales:{x:{display:false},y:{position:'right',ticks:{color:'#666',font:{size:10}},grid:{color:'#222'}}}}
+      });
+    }
+    // stats
+    const high=Math.max(...prices),low=Math.min(...prices);
+    document.getElementById('cd-stats').innerHTML=`
+      <div class="cd-stat"><div class="cd-stat-label">Hoch</div><div class="cd-stat-val">${fmtP(high)}</div></div>
+      <div class="cd-stat"><div class="cd-stat-label">Tief</div><div class="cd-stat-val">${fmtP(low)}</div></div>
+      <div class="cd-stat"><div class="cd-stat-label">Änderung</div><div class="cd-stat-val" style="color:${chg>=0?'#4ade80':'#f87171'}">${(chg>=0?'+':'')+chg}%</div></div>
+      <div class="cd-stat"><div class="cd-stat-label">Kurs</div><div class="cd-stat-val">${fmtP(last)}</div></div>`;
+  }catch(e){
+    if(priceEl)priceEl.textContent='–';
+    if(chgEl)chgEl.textContent='Daten nicht verfügbar';
+  }
+}
+async function setCdRange(btn,range){
+  document.querySelectorAll('.range-btn').forEach(b=>b.classList.remove('ak'));
+  btn.classList.add('ak');currentCdRange=range;
+  const daysMap={'1d':'1','7d':'7','30d':'30','90d':'90','365d':'365'};
+  await loadCdChart(currentCdCoin,daysMap[range]||'1');
+}
+function closeChartDetail(){document.getElementById('chart-detail').classList.remove('on')}
+function filterPuls(btn,cat){
+  document.querySelectorAll('#puls-kacheln .kachel').forEach(b=>b.classList.remove('ak'));
+  btn.classList.add('ak');
+  document.querySelectorAll('#puls-scroll [data-pc]').forEach(el=>{el.style.display=(cat==='all'||el.dataset.pc===cat)?'':'none'});
+}
+function refreshPuls(){chartsInited=false;initPuls()}
+function initPuls(){if(chartsInited)return;chartsInited=true;fetchPuls();setInterval(fetchPuls,60000)}
+
+// ── MODAL ──
+function openPostModal(){if(!CU){showToast('Bitte anmelden');return}document.getElementById('post-modal').classList.add('on')}
+function closePostModal(){document.getElementById('post-modal').classList.remove('on')}
+function selCat(btn){document.querySelectorAll('#post-modal .pcat').forEach(b=>b.classList.remove('ak'));btn.classList.add('ak');selCatVal=btn.dataset.cat}
+function prevImg(inp){if(!inp.files[0])return;const p=document.getElementById('upload-prev');p.src=URL.createObjectURL(inp.files[0]);p.style.display='block'}
+
+// ── NAV ──
+function goTo(s){
+  document.querySelectorAll('.screen').forEach(e=>e.classList.remove('on'));
+  document.querySelectorAll('.bn').forEach(e=>e.classList.remove('ak'));
+  document.getElementById('sc-'+s).classList.add('on');
+  document.getElementById('bn-'+s).classList.add('ak');
+  if(s==='puls')setTimeout(initPuls,100);
+  if(s==='profile'&&CU){updateProfileUI();loadMyPosts('all')}
+  if(s==='search')loadCreators();
+  if(s==='messages')loadConvs();
+}
+
+// ── TOAST ──
+let toastT;
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800)}
+
+// ── HELPERS ──
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function timeAgo(d){const s=Math.floor((new Date()-d)/1000);if(s<60)return'Jetzt';if(s<3600)return Math.floor(s/60)+' Min';if(s<86400)return Math.floor(s/3600)+' Std';return Math.floor(s/86400)+' T'}
+function fmtP(n){if(n>=1000)return'$'+n.toLocaleString('de-DE',{maximumFractionDigits:0});if(n>=1)return'$'+n.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});return'$'+n.toLocaleString('de-DE',{minimumFractionDigits:4,maximumFractionDigits:4})}
+function sharePost(id){if(navigator.share)navigator.share({title:'JL Post',url:location.href+'#'+id});else showToast('Link kopiert!')}
+</script>
+</body>
+</html>
