@@ -194,6 +194,26 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .bn{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:5px 10px;border-radius:10px;background:none;border:none;position:relative}
 .bn i{font-size:21px;color:var(--mu)}.bn span{font-size:9px;color:var(--mu);font-weight:500}.bn.ak i,.bn.ak span{color:var(--gold)}
 .nbadge{position:absolute;top:2px;right:6px;min-width:16px;height:16px;border-radius:8px;background:var(--gold);color:#000;font-size:9px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--bg)}.nbadge.show{display:flex}
+
+@media(min-width:600px){
+  body{background:var(--bg)}
+  .shell{width:100%;max-width:100%;height:100vh;border-radius:0;border:none;flex-direction:row}
+  .bnav{flex-direction:column;width:220px;height:100vh;border-top:none;border-right:1px solid var(--bd);justify-content:flex-start;padding:20px 12px;gap:4px;flex-shrink:0}
+  .bn{flex-direction:row;justify-content:flex-start;gap:12px;padding:10px 14px;width:100%;border-radius:10px}
+  .bn i{font-size:20px}.bn span{font-size:13px;font-weight:500}
+  .bn.ak{background:var(--gdim)}
+  .shell>div:not(.bnav){flex:1;min-width:0}
+  .sbar{display:none}
+  .shell>.bnav{order:1}
+  .shell>.sc{order:2}
+  .toast{top:20px}
+  .asc{max-width:400px;margin:0 auto;border-right:1px solid var(--bd)}
+}
+@media(min-width:900px){
+  .shell{max-width:1200px;margin:0 auto}
+  .bnav{width:250px}
+  .sc{max-width:600px;border-right:1px solid var(--bd)}
+}
 </style>
 </head>
 <body>
@@ -206,7 +226,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 <div class="sbar"><span class="sbar-t" id="clk">9:41</span><div class="sbar-i"><i class="ti ti-wifi"></i><i class="ti ti-battery-2"></i></div></div>
 <div class="asc" id="asc">
   <div class="alogo">J<em>L</em></div>
-  <div class="atag">Analytics . Finance . Markets</div>
+  <div class="atag">Analytics</div>
   <div class="atabs"><div class="atab ak" id="at-li" onclick="atab('li')">Sign In</div><div class="atab" id="at-re" onclick="atab('re')">Sign Up</div></div>
   <div id="fl" style="width:100%">
     <input class="ainp" id="li-e" type="email" placeholder="Email">
@@ -243,9 +263,13 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 </div>
 
 <div class="sc on" id="sc-feed">
-  <div class="sh" style="justify-content:center"><div class="logo">J<em>L</em></div></div>
+  <div class="sh" style="justify-content:center;position:relative">
+    <button onclick="showInstPage()" style="position:absolute;left:0;background:none;border:none;cursor:pointer;color:var(--mu2);font-size:18px;padding:4px" title="Install App"><i class="ti ti-download"></i></button>
+    <div class="logo">J<em>L</em></div>
+  </div>
   <div class="krow" id="fk">
-    <button class="kachel ak" onclick="filterFeed(this,'all')">All</button>
+    <button class="kachel ak" onclick="filterFeed(this,'all')">Following</button>
+    <button class="kachel" onclick="filterFeed(this,'discover')">Discover</button>
     <button class="kachel" onclick="filterFeed(this,'bitcoin')">Bitcoin</button>
     <button class="kachel" onclick="filterFeed(this,'aktien')">Stocks</button>
     <button class="kachel" onclick="filterFeed(this,'etf')">ETF</button>
@@ -660,6 +684,19 @@ function startFeed(){
   },err=>{document.getElementById('fspin').style.display='none';document.getElementById('fposts').innerHTML=`<div class="empty"><i class="ti ti-alert-circle"></i><p>${err.message}</p></div>`});
 }
 function filterFeed(btn,cat){
+  // 'discover' shows all posts from everyone (explore/for-you)
+  if(cat==='discover'){
+    document.querySelectorAll('#fk .kachel').forEach(b=>b.classList.remove('ak'));btn.classList.add('ak');
+    const{db,collection,query,orderBy,limit,onSnapshot}=window._fb;
+    document.getElementById('fspin').style.display='block';document.getElementById('fposts').innerHTML='';
+    const q=query(collection(db,'posts'),orderBy('createdAt','desc'),limit(60));
+    if(feedUnsub)feedUnsub();
+    feedUnsub=onSnapshot(q,snap=>{
+      document.getElementById('fspin').style.display='none';
+      renderPosts(snap.docs.map(d=>({id:d.id,...d.data()})),'fposts','all');
+    });
+    return;
+  }
   document.querySelectorAll('#fk .kachel').forEach(b=>b.classList.remove('ak'));btn.classList.add('ak');
   if(cat==='all'){startFeed();return}
   const{db,collection,query,orderBy,limit,onSnapshot}=window._fb;
@@ -741,7 +778,12 @@ async function likeP(pid,btn){
   const nArr=liked?lb.filter(x=>x!==CU.uid):[...lb,CU.uid];
   const nCount=(d.likes||0)+(liked?-1:1);
   await updateDoc(ref,{likes:increment(liked?-1:1),likedBy:nArr});
-  document.querySelectorAll(`[id="lb-${pid}"]`).forEach(b=>{b.classList.toggle('liked',!liked);b.innerHTML=`<i class="ti ${!liked?'ti-heart-filled':'ti-heart'}"></i><span id="lc-${pid}">${nCount}</span>`});
+  document.querySelectorAll(`[id="lb-${pid}"]`).forEach(b=>{
+    b.classList.toggle('liked',!liked);
+    const icon=b.querySelector('i');const cnt=b.querySelector('span');
+    if(icon)icon.className=`ti ${!liked?'ti-heart-filled':'ti-heart'}`;
+    if(cnt)cnt.textContent=nCount;
+  });
   if(!liked&&d.authorId!==CU.uid)await addNotif(d.authorId,'like',`${UP?.name} liked your post`,pid);
 }
 
@@ -788,7 +830,7 @@ function switchMT(tab){
   const baseStyle='padding:5px 16px;border-radius:8px;font-size:12px;border:none;cursor:pointer;';
   document.getElementById('tab-notif').style.cssText=baseStyle+(tab==='notif'?'background:var(--sf3);color:var(--tx);font-weight:500':'background:transparent;color:var(--mu2)');
   document.getElementById('tab-msgs').style.cssText=baseStyle+(tab==='msgs'?'background:var(--sf3);color:var(--tx);font-weight:500':'background:transparent;color:var(--mu2)');
-  document.getElementById('msgs-panel').style.display=tab==='msgs'?'flex':'none';
+  document.getElementById('msgs-panel').style.display=tab==='msgs'?'flex':'none';document.getElementById('msgs-panel').style.flexDirection='column';
   document.getElementById('notif-panel').style.display=tab==='notif'?'flex':'none';
   if(tab==='notif'){
     const{db,collection,getDocs,query,where,updateDoc,doc}=window._fb;
@@ -943,9 +985,7 @@ async function togFollow(){
     await updateDoc(doc(db,'users',CU.uid),{following:increment(1)});
     btn.classList.add('following');btn.textContent='Following';
     // Reload UP to get accurate counts
-    const freshUP=await window._fb.getDoc(window._fb.doc(window._fb.db,'users',CU.uid));
-    if(freshUP.exists()){UP.following=freshUP.data().following||0}
-    else{UP.following=(UP.following||0)+1}
+    UP.following=(UP.following||0)+1;
     await addNotif(curOP,'follow',`${UP.name} started following you`,'');
   }
   document.getElementById('ps-f').innerHTML=`<strong>${UP.followers||0}</strong> Followers`;
@@ -977,7 +1017,6 @@ async function qFol(uid,btn){
 }
 
 async function loadConvs(){
-  // Reload all conversations on mount
   if(!CU)return;
   const{db,collection,query,where,orderBy,onSnapshot}=window._fb;
   const q=query(collection(db,'conversations'),where('members','array-contains',CU.uid),orderBy('lastAt','desc'));
@@ -1152,6 +1191,11 @@ function showToast(m){const t=document.getElementById('toast');t.textContent=m;t
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function tAgo(d){const s=Math.floor((new Date()-d)/1000);if(s<60)return'now';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';return Math.floor(s/86400)+'d'}
+function repostP(pid,originalText){
+  if(!CU||!UP){showToast('Please sign in');return}
+  document.getElementById('pta').value='Repost: '+originalText.substring(0,100);
+  openPM();showToast('Edit and post to repost');
+}
 function shareP(id){if(navigator.share)navigator.share({title:'JL',url:location.href+'#'+id});else showToast('Link copied!')}
 </script>
 </body>
