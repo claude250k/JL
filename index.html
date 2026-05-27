@@ -206,7 +206,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 <div class="sbar"><span class="sbar-t" id="clk">9:41</span><div class="sbar-i"><i class="ti ti-wifi"></i><i class="ti ti-battery-2"></i></div></div>
 <div class="asc" id="asc">
   <div class="alogo">J<em>L</em></div>
-  <div class="atag">Finance . Markets . Analytics</div>
+  <div class="atag">Analytics . Finance . Markets</div>
   <div class="atabs"><div class="atab ak" id="at-li" onclick="atab('li')">Sign In</div><div class="atab" id="at-re" onclick="atab('re')">Sign Up</div></div>
   <div id="fl" style="width:100%">
     <input class="ainp" id="li-e" type="email" placeholder="Email">
@@ -258,7 +258,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 
 <div class="sc" id="sc-puls">
   <div class="sh" style="justify-content:center;position:relative">
-    <div class="logo" style="font-size:20px">Puls<em>.</em></div>
+    <div class="stitle">Puls<em style="color:var(--gold);font-style:normal">.</em></div>
     <div style="position:absolute;right:16px;display:flex;gap:8px;align-items:center">
       <span style="font-size:10px;color:var(--mu2);display:flex;align-items:center"><span class="ldot"></span>Live</span>
       <button class="ib2" onclick="rfPuls()"><i class="ti ti-refresh"></i></button>
@@ -320,7 +320,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       <div id="pol-list"></div>
     </div>
   </div>
-  <div class="cd" id="cd"><div class="cdh"><button class="cdb2" onclick="closeCD()"><i class="ti ti-arrow-left"></i></button><div class="cdt" id="cd-t">Chart</div></div><div class="scroll"><div class="cdp" id="cd-p">-</div><div class="cdchg" id="cd-c">-</div><div class="cdcw"><canvas id="cd-cv"></canvas></div><div class="rbs"><button class="rb ak" onclick="setCDR(this,'1')">1D</button><button class="rb" onclick="setCDR(this,'7')">7D</button><button class="rb" onclick="setCDR(this,'30')">1M</button><button class="rb" onclick="setCDR(this,'90')">3M</button><button class="rb" onclick="setCDR(this,'365')">1Y</button></div><div class="cdst" id="cd-st"></div></div></div>
+  <div class="cd" id="cd"><div class="cdh"><button class="cdb2" onclick="closeCD()"><i class="ti ti-arrow-left"></i></button><div class="cdt" id="cd-t">Chart</div></div><div class="scroll"><div class="cdp" id="cd-p">-</div><div class="cdchg" id="cd-c">-</div><div class="cdcw"><canvas id="cd-cv"></canvas></div><div class="rbs"><button class="rb ak" onclick="setCDR(this,'1')">1D</button><button class="rb" onclick="setCDR(this,'7')">7D</button><button class="rb" onclick="setCDR(this,'30')">1M</button><button class="rb" onclick="setCDR(this,'90')">3M</button><button class="rb" onclick="setCDR(this,'max')">Max</button></div><div class="cdst" id="cd-st"></div></div></div>
   <div class="ov" id="pov"><div class="ovh"><button class="ovb" onclick="document.getElementById('pov').classList.remove('on')"><i class="ti ti-arrow-left"></i></button><div class="ovt" id="pov-t"></div></div><div class="scroll" id="pov-b"></div></div>
 </div>
 
@@ -334,8 +334,8 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 <div class="sc" id="sc-messages">
   <div class="sh" style="justify-content:center;position:relative">
     <div style="display:flex;gap:0;background:var(--sf);border-radius:10px;padding:3px">
-      <button id="tab-msgs" onclick="switchMT('msgs')" style="padding:5px 16px;border-radius:8px;font-size:12px;border:none;cursor:pointer;background:var(--sf3);color:var(--tx);font-weight:500">Messages</button>
       <button id="tab-notif" onclick="switchMT('notif')" style="padding:5px 16px;border-radius:8px;font-size:12px;border:none;cursor:pointer;background:transparent;color:var(--mu2)">Notifications</button>
+      <button id="tab-msgs" onclick="switchMT('msgs')" style="padding:5px 16px;border-radius:8px;font-size:12px;border:none;cursor:pointer;background:var(--sf3);color:var(--tx);font-weight:500">Messages</button>
     </div>
     <button class="ib2" style="position:absolute;right:16px" onclick="openNM()"><i class="ti ti-edit"></i></button>
   </div>
@@ -784,8 +784,10 @@ async function openNotif(nid,refId,type){
   if(refId&&['like','comment','mention'].includes(type))openPD(refId);
 }
 function switchMT(tab){
-  document.getElementById('tab-msgs').style.cssText=tab==='msgs'?'padding:5px 16px;border-radius:8px;font-size:12px;border:none;cursor:pointer;background:var(--sf3);color:var(--tx);font-weight:500':'padding:5px 16px;border-radius:8px;font-size:12px;border:none;cursor:pointer;background:transparent;color:var(--mu2)';
-  document.getElementById('tab-notif').style.cssText=tab==='notif'?'padding:5px 16px;border-radius:8px;font-size:12px;border:none;cursor:pointer;background:var(--sf3);color:var(--tx);font-weight:500':'padding:5px 16px;border-radius:8px;font-size:12px;border:none;cursor:pointer;background:transparent;color:var(--mu2)';
+  // Notifications is LEFT tab, Messages is RIGHT tab
+  const baseStyle='padding:5px 16px;border-radius:8px;font-size:12px;border:none;cursor:pointer;';
+  document.getElementById('tab-notif').style.cssText=baseStyle+(tab==='notif'?'background:var(--sf3);color:var(--tx);font-weight:500':'background:transparent;color:var(--mu2)');
+  document.getElementById('tab-msgs').style.cssText=baseStyle+(tab==='msgs'?'background:var(--sf3);color:var(--tx);font-weight:500':'background:transparent;color:var(--mu2)');
   document.getElementById('msgs-panel').style.display=tab==='msgs'?'flex':'none';
   document.getElementById('notif-panel').style.display=tab==='notif'?'flex':'none';
   if(tab==='notif'){
@@ -940,7 +942,10 @@ async function togFollow(){
     await updateDoc(doc(db,'users',curOP),{followers:increment(1)});
     await updateDoc(doc(db,'users',CU.uid),{following:increment(1)});
     btn.classList.add('following');btn.textContent='Following';
-    UP.following=(UP.following||0)+1;
+    // Reload UP to get accurate counts
+    const freshUP=await window._fb.getDoc(window._fb.doc(window._fb.db,'users',CU.uid));
+    if(freshUP.exists()){UP.following=freshUP.data().following||0}
+    else{UP.following=(UP.following||0)+1}
     await addNotif(curOP,'follow',`${UP.name} started following you`,'');
   }
   document.getElementById('ps-f').innerHTML=`<strong>${UP.followers||0}</strong> Followers`;
@@ -972,6 +977,7 @@ async function qFol(uid,btn){
 }
 
 async function loadConvs(){
+  // Reload all conversations on mount
   if(!CU)return;
   const{db,collection,query,where,orderBy,onSnapshot}=window._fb;
   const q=query(collection(db,'conversations'),where('members','array-contains',CU.uid),orderBy('lastAt','desc'));
@@ -1030,7 +1036,13 @@ async function renderParties(){
     return`<div class="poc"><div class="potop"><div class="podot" style="background:${p.color}"></div><div class="pon">${p.name}</div><div class="popct">${pct}%</div></div><div class="bt"><div class="bf" style="width:${pct}%;background:${p.color}"></div></div><div class="pbs"><button class="pb2${isV?' voted':''}" id="vb-${p.id}" onclick="voteP('${p.id}')">${isV?'Voted':'Vote'}</button>${isV?`<button class="pb2" onclick="abstainP('${p.id}')">Abstain</button>`:''}<button class="pb2 det" onclick="togPD('${p.id}')">Politicians</button></div><div id="pd-${p.id}" style="display:none;margin-top:8px;border-top:1px solid var(--bd);padding-top:8px">${polsH}</div></div>`;
   }).join('');
 }
-function togPD(id){const el=document.getElementById('pd-'+id);if(el)el.style.display=el.style.display==='none'?'block':'none'}
+function togPD(id){
+  const el=document.getElementById('pd-'+id);if(!el)return;
+  const isOpen=el.style.display!=='none';
+  // Don't close when re-clicking same party
+  if(!isOpen)el.style.display='block';
+  else el.style.display='none';
+}
 async function voteP(id){
   if(!CU)return;if(myVote===id){showToast('Already voted for this party');return}
   const{db,doc,setDoc,updateDoc,increment,getDoc}=window._fb;
