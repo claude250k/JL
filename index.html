@@ -1457,6 +1457,15 @@ async function showFL(type){
 }
 
 async function openOP(uid){
+  // Close any overlays that may be stacked underneath
+  document.getElementById('pdov')?.classList.remove('on');curPD=null;
+  document.getElementById('fl-ov')?.classList.remove('on');
+  const _chov=document.getElementById('chov');
+  if(_chov?.classList.contains('on')){
+    _chov.classList.remove('on');
+    if(chatUnsub){chatUnsub();chatUnsub=null;}
+    curConv=null;curChatOid=null;
+  }
   if(uid===CU?.uid){goTo('profile');return}
   curOP=uid;
   if(opUnsub){opUnsub();opUnsub=null;}
