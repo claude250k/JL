@@ -883,7 +883,7 @@ async function doReg(){
     let userNum=1;
     await runTransaction(db,async tx=>{const snap=await tx.get(counterRef);if(snap.exists())userNum=snap.data().count+1;tx.set(counterRef,{count:userNum})});
     const num='#'+String(userNum);
-    await setDoc(doc(db,'users',uc.user.uid),{uid:uc.user.uid,name,num,bio:'',avatarUrl:'',coverUrl:'',followers:0,following:0,posts:0,customChannels:[],createdAt:serverTimestamp()});
+    await setDoc(doc(db,'users',uc.user.uid),{uid:uc.user.uid,name,num,userNumber:userNum,bio:'',avatarUrl:'',coverUrl:'',followers:0,following:0,posts:0,customChannels:[],createdAt:serverTimestamp()});
     await setDoc(doc(db,'nameIndex',name.toLowerCase()),{uid:uc.user.uid});
   }catch(err){setAErr(am(err.code))}
 }
@@ -898,8 +898,8 @@ async function doGoogle(){
       while(true){const nc=await getDocs(query(collection(db,'users'),where('name','==',name)));if(nc.empty)break;name=base+s;s++;}
       const cr=doc(db,'meta','userCount');let n=1;
       await runTransaction(db,async tx=>{const sn=await tx.get(cr);if(sn.exists())n=sn.data().count+1;tx.set(cr,{count:n})});
-      const num='#'+String(n).padStart(4,'0');
-      await setDoc(ref,{uid:u.uid,name,num,bio:'',avatarUrl:u.photoURL||'',coverUrl:'',followers:0,following:0,posts:0,customChannels:[],createdAt:serverTimestamp()});
+      const num='#'+String(n);
+      await setDoc(ref,{uid:u.uid,name,num,userNumber:n,bio:'',avatarUrl:u.photoURL||'',coverUrl:'',followers:0,following:0,posts:0,customChannels:[],createdAt:serverTimestamp()});
       await setDoc(doc(db,'nameIndex',name.toLowerCase()),{uid:u.uid});
     }
   }catch(err){setAErr(am(err.code))}
@@ -962,7 +962,25 @@ async function saveProfile(){
 async function loadUP(uid){
   const{db,doc,getDoc}=window._fb;
   const s=await getDoc(doc(db,'users',uid));
-  if(s.exists()){UP=s.data();customChs=UP.customChannels||[]}
+  if(s.exists()){UP=s.data();customChs=UP.customChannels||[];if(!UP.userNumber)await assignUserNumber(uid);}
+}
+async function assignUserNumber(uid){
+  const{db,doc,updateDoc,getDocs,collection,query,orderBy,runTransaction}=window._fb;
+  try{
+    const allSnap=await getDocs(query(collection(db,'users'),orderBy('createdAt','asc')));
+    const uids=allSnap.docs.map(d=>d.data().uid||d.id);
+    const rank=uids.indexOf(uid)+1;
+    if(rank<1)return;
+    const counterRef=doc(db,'meta','userCount');
+    await runTransaction(db,async tx=>{
+      const cSnap=await tx.get(counterRef);
+      const cur=cSnap.exists()?cSnap.data().count:0;
+      tx.update(doc(db,'users',uid),{userNumber:rank,num:'#'+rank});
+      if(rank>cur)tx.set(counterRef,{count:rank});
+    });
+    UP.userNumber=rank;UP.num='#'+rank;
+    updateUI();
+  }catch(e){console.error('assignUserNumber:',e);}
 }
 async function loadFollowing(){
   if(!CU)return;
