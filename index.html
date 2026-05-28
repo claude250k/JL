@@ -420,7 +420,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
     <div style="display:flex;align-items:center;justify-content:center"><svg width="72" height="32" viewBox="0 0 72 32" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="0,16 8,16 11,5 14,27 17,11 20,21 23,16 32,16" stroke="#F7931A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="36" y="23" font-family="Syne,sans-serif" font-weight="800" font-size="20" fill="#f0ede6">J<tspan fill="#F7931A">L</tspan></text></svg></div>
     <div style="position:absolute;right:16px"><button class="ib2" onclick="startFeed()" title="Refresh"><i class="ti ti-refresh"></i></button></div>
   </div>
-  <div class="krow"<div class="krow" id="fk">
+  <div class="krow" id="fk">
     <button class="kachel ak" onclick="filterFeed(this,'all')">Following</button>
     <button class="kachel" onclick="filterFeed(this,'discover')">Discover ✦</button>
     <button class="kachel" onclick="filterFeed(this,'bitcoin')">Bitcoin</button>
@@ -501,50 +501,16 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       <div id="pol-list"></div>
     </div>
     <div data-pc="tcg">
-      <div style="padding:10px 14px 4px"><div style="font-size:13px;font-weight:700;color:var(--tx)">Pokémon TCG</div><div style="font-size:11px;color:var(--mu2);margin-top:2px">Set prices &amp; card values · Demo data</div></div>
-      <div class="tcg-set">
-        <div class="tcg-set-hd" onclick="togTCG('sv08')"><div><div class="ccn">Scarlet &amp; Violet — Surging Sparks</div><div class="ccs">SV08 · Nov 2024</div></div><i class="ti ti-chevron-down" id="tcgi-sv08" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div>
-        <div class="tcg-prod-row"><span style="font-size:12px;color:var(--tx2)">Booster Pack</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--tx)">~$4.99</span><span class="ccc up">+1.2%</span></div></div>
-        <div class="tcg-prod-row"><span style="font-size:12px;color:var(--tx2)">Elite Trainer Box</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--tx)">~$64.99</span><span class="ccc up">+3.5%</span></div></div>
-        <div class="tcg-prod-row"><span style="font-size:12px;color:var(--tx2)">Booster Bundle</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--tx)">~$29.99</span><span class="ccc dn">-0.8%</span></div></div>
-        <div class="cw"><canvas id="ch-sv08"></canvas></div>
-        <div class="tcg-cards-body" id="tcg-sv08" style="display:none">
-          <div style="padding:7px 13px 4px;font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.7px;text-transform:uppercase">Top Cards</div>
-          <div class="tcg-card-row"><span class="tcg-card-name">Pikachu ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$280</span></div>
-          <div class="tcg-card-row"><span class="tcg-card-name">Umbreon ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$185</span></div>
-          <div class="tcg-card-row"><span class="tcg-card-name">Raichu ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$125</span></div>
-          <div class="tcg-card-row"><span class="tcg-card-name">Latios ex</span><span class="tcg-card-rare">HR</span><span class="tcg-card-val">~$95</span></div>
-          <div class="tcg-card-row"><span class="tcg-card-name">Terapagos ex</span><span class="tcg-card-rare">IR</span><span class="tcg-card-val">~$65</span></div>
-          <div class="tcg-card-row"><span class="tcg-card-name">Bianca's Devotion</span><span class="tcg-card-rare">HR</span><span class="tcg-card-val">~$55</span></div>
-          <div class="tcg-card-row" style="border-bottom:none"><span class="tcg-card-name">Darkrai ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$40</span></div>
-        </div>
-      </div>
-      <div class="tcg-set">
-        <div class="tcg-set-hd" onclick="togTCG('sv07')"><div><div class="ccn">Scarlet &amp; Violet — Stellar Crown</div><div class="ccs">SV07 · Sep 2024</div></div><i class="ti ti-chevron-down" id="tcgi-sv07" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div>
-        <div class="tcg-prod-row"><span style="font-size:12px;color:var(--tx2)">Booster Pack</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--tx)">~$4.99</span><span class="ccc up">+0.8%</span></div></div>
-        <div class="tcg-prod-row"><span style="font-size:12px;color:var(--tx2)">Elite Trainer Box</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--tx)">~$59.99</span><span class="ccc dn">-1.2%</span></div></div>
-        <div class="cw"><canvas id="ch-sv07"></canvas></div>
-        <div class="tcg-cards-body" id="tcg-sv07" style="display:none">
-          <div style="padding:7px 13px 4px;font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.7px;text-transform:uppercase">Top Cards</div>
-          <div class="tcg-card-row"><span class="tcg-card-name">Ceruledge ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$220</span></div>
-          <div class="tcg-card-row"><span class="tcg-card-name">Milotic ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$165</span></div>
-          <div class="tcg-card-row"><span class="tcg-card-name">Cobalion ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$110</span></div>
-          <div class="tcg-card-row" style="border-bottom:none"><span class="tcg-card-name">Pecharunt ex</span><span class="tcg-card-rare">IR</span><span class="tcg-card-val">~$75</span></div>
-        </div>
-      </div>
-      <div class="tcg-set">
-        <div class="tcg-set-hd" onclick="togTCG('svpf')"><div><div class="ccn">Scarlet &amp; Violet — Paldean Fates</div><div class="ccs">SV4.5 · Jan 2024</div></div><i class="ti ti-chevron-down" id="tcgi-svpf" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div>
-        <div class="tcg-prod-row"><span style="font-size:12px;color:var(--tx2)">Booster Pack</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--tx)">~$6.50</span><span class="ccc up">+8.2%</span></div></div>
-        <div class="tcg-prod-row"><span style="font-size:12px;color:var(--tx2)">Elite Trainer Box</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--tx)">~$85.00</span><span class="ccc up">+12.4%</span></div></div>
-        <div class="cw"><canvas id="ch-svpf"></canvas></div>
-        <div class="tcg-cards-body" id="tcg-svpf" style="display:none">
-          <div style="padding:7px 13px 4px;font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.7px;text-transform:uppercase">Top Cards</div>
-          <div class="tcg-card-row"><span class="tcg-card-name">Shiny Charizard ex</span><span class="tcg-card-rare">SSR</span><span class="tcg-card-val">~$450</span></div>
-          <div class="tcg-card-row"><span class="tcg-card-name">Shiny Gardevoir ex</span><span class="tcg-card-rare">SSR</span><span class="tcg-card-val">~$280</span></div>
-          <div class="tcg-card-row"><span class="tcg-card-name">Shiny Mewtwo ex</span><span class="tcg-card-rare">SSR</span><span class="tcg-card-val">~$210</span></div>
-          <div class="tcg-card-row" style="border-bottom:none"><span class="tcg-card-name">Shiny Pikachu ex</span><span class="tcg-card-rare">SSR</span><span class="tcg-card-val">~$180</span></div>
-        </div>
-      </div>
+      <div class="watch-soon"><i class="ti ti-cards" style="color:var(--gold);font-size:16px;flex-shrink:0"></i><div><div style="font-size:12px;font-weight:700;color:var(--gold)">Coming Soon</div><div style="font-size:11px;color:var(--mu2);margin-top:1px">Live TCG market data in development · Prices are approximate</div></div></div>
+      <div style="padding:6px 14px 4px"><div style="font-size:13px;font-weight:700;color:var(--tx)">Trading Card Games</div><div style="font-size:11px;color:var(--mu2);margin-top:2px">Set prices &amp; card values · Demo data</div></div>
+      <div class="watch-brand"><div class="watch-brand-top" onclick="togTCGSub('pokemon')"><div class="watch-bi" style="background:#e63946">Pk</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">Pokémon</div><div style="font-size:11px;color:var(--mu2)">Nintendo / The Pokémon Company</div></div><i class="ti ti-chevron-down" id="tcgsubi-pokemon" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div>
+      <div id="tcgsub-pokemon" style="display:none;border-top:1px solid var(--bd)">
+        <div class="tcg-set" style="margin:8px 8px 4px"><div class="tcg-set-hd" onclick="togTCG('sv08')"><div><div class="ccn">Scarlet &amp; Violet — Surging Sparks</div><div class="ccs">SV08 · Nov 2024</div></div><i class="ti ti-chevron-down" id="tcgi-sv08" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div><div class="tcg-prod-row"><span style="font-size:12px;color:var(--tx2)">Booster Pack</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--tx)">~$4.99</span><span class="ccc up">+1.2%</span></div></div><div class="tcg-prod-row"><span style="font-size:12px;color:var(--tx2)">Elite Trainer Box</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--tx)">~$64.99</span><span class="ccc up">+3.5%</span></div></div><div class="tcg-prod-row"><span style="font-size:12px;color:var(--tx2)">Booster Bundle</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--tx)">~$29.99</span><span class="ccc dn">-0.8%</span></div></div><div class="cw"><canvas id="ch-sv08"></canvas></div><div class="tcg-cards-body" id="tcg-sv08" style="display:none"><div style="padding:7px 13px 4px;font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.7px;text-transform:uppercase">Top Cards</div><div class="tcg-card-row"><span class="tcg-card-name">Pikachu ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$280</span></div><div class="tcg-card-row"><span class="tcg-card-name">Umbreon ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$185</span></div><div class="tcg-card-row"><span class="tcg-card-name">Raichu ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$125</span></div><div class="tcg-card-row"><span class="tcg-card-name">Latios ex</span><span class="tcg-card-rare">HR</span><span class="tcg-card-val">~$95</span></div><div class="tcg-card-row"><span class="tcg-card-name">Terapagos ex</span><span class="tcg-card-rare">IR</span><span class="tcg-card-val">~$65</span></div><div class="tcg-card-row"><span class="tcg-card-name">Bianca's Devotion</span><span class="tcg-card-rare">HR</span><span class="tcg-card-val">~$55</span></div><div class="tcg-card-row" style="border-bottom:none"><span class="tcg-card-name">Darkrai ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$40</span></div></div></div>
+        <div class="tcg-set" style="margin:4px 8px 8px"><div class="tcg-set-hd" onclick="togTCG('sv07')"><div><div class="ccn">Scarlet &amp; Violet — Stellar Crown</div><div class="ccs">SV07 · Sep 2024</div></div><i class="ti ti-chevron-down" id="tcgi-sv07" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div><div class="tcg-prod-row"><span style="font-size:12px;color:var(--tx2)">Booster Pack</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--tx)">~$4.99</span><span class="ccc up">+0.8%</span></div></div><div class="tcg-prod-row"><span style="font-size:12px;color:var(--tx2)">Elite Trainer Box</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--tx)">~$59.99</span><span class="ccc dn">-1.2%</span></div></div><div class="cw"><canvas id="ch-sv07"></canvas></div><div class="tcg-cards-body" id="tcg-sv07" style="display:none"><div style="padding:7px 13px 4px;font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.7px;text-transform:uppercase">Top Cards</div><div class="tcg-card-row"><span class="tcg-card-name">Ceruledge ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$220</span></div><div class="tcg-card-row"><span class="tcg-card-name">Milotic ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$165</span></div><div class="tcg-card-row"><span class="tcg-card-name">Cobalion ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$110</span></div><div class="tcg-card-row" style="border-bottom:none"><span class="tcg-card-name">Pecharunt ex</span><span class="tcg-card-rare">IR</span><span class="tcg-card-val">~$75</span></div></div></div>
+      </div></div>
+      <div class="watch-brand"><div class="watch-brand-top" onclick="togTCGSub('topps')"><div class="watch-bi" style="background:#1d3557">To</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">Topps</div><div style="font-size:11px;color:var(--mu2)">Basketball · Baseball · Football</div></div><i class="ti ti-chevron-down" id="tcgsubi-topps" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div><div id="tcgsub-topps" style="display:none;padding:10px 13px;border-top:1px solid var(--bd)"><div class="watch-soon" style="margin:0"><i class="ti ti-clock" style="color:var(--gold);font-size:16px;flex-shrink:0"></i><div><div style="font-size:12px;font-weight:700;color:var(--gold)">Coming Soon</div><div style="font-size:11px;color:var(--mu2);margin-top:1px">Topps sports card data in development</div></div></div></div></div>
+      <div class="watch-brand"><div class="watch-brand-top" onclick="togTCGSub('mtg')"><div class="watch-bi" style="background:#7b2d8b">MTG</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">Magic the Gathering</div><div style="font-size:11px;color:var(--mu2)">Wizards of the Coast</div></div><i class="ti ti-chevron-down" id="tcgsubi-mtg" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div><div id="tcgsub-mtg" style="display:none;padding:10px 13px;border-top:1px solid var(--bd)"><div class="watch-soon" style="margin:0"><i class="ti ti-clock" style="color:var(--gold);font-size:16px;flex-shrink:0"></i><div><div style="font-size:12px;font-weight:700;color:var(--gold)">Coming Soon</div><div style="font-size:11px;color:var(--mu2);margin-top:1px">MTG card market data in development</div></div></div></div></div>
+      <div class="watch-brand" style="margin-bottom:8px"><div class="watch-brand-top" onclick="togTCGSub('yugioh')"><div class="watch-bi" style="background:#1a1a3a">YGO</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">Yu-Gi-Oh</div><div style="font-size:11px;color:var(--mu2)">Konami</div></div><i class="ti ti-chevron-down" id="tcgsubi-yugioh" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div><div id="tcgsub-yugioh" style="display:none;padding:10px 13px;border-top:1px solid var(--bd)"><div class="watch-soon" style="margin:0"><i class="ti ti-clock" style="color:var(--gold);font-size:16px;flex-shrink:0"></i><div><div style="font-size:12px;font-weight:700;color:var(--gold)">Coming Soon</div><div style="font-size:11px;color:var(--mu2);margin-top:1px">Yu-Gi-Oh card market data in development</div></div></div></div></div>
     </div>
     <div data-pc="watches">
       <div class="watch-soon"><i class="ti ti-clock" style="color:var(--gold);font-size:16px;flex-shrink:0"></i><div><div style="font-size:12px;font-weight:700;color:var(--gold)">Coming Soon</div><div style="font-size:11px;color:var(--mu2);margin-top:1px">Live watch market data in development · Prices are approximate</div></div></div>
@@ -751,6 +717,14 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
         <button class="mpost" onclick="saveHolding()">Add</button>
       </div>
     </div>
+  </div>
+</div>
+<div class="ov" id="hold-ov">
+  <div class="ovh"><button class="ovb" onclick="closeHoldOv()"><i class="ti ti-arrow-left"></i></button><div class="ovt" id="hold-ov-title">Holding</div></div>
+  <div class="scroll" id="hold-ov-body" style="padding:16px"></div>
+  <div id="hold-ov-footer" style="padding:12px 16px;display:flex;gap:10px;flex-shrink:0;border-top:1px solid var(--bd)">
+    <button onclick="editHolding()" style="flex:1;background:var(--sf2);border:1px solid var(--bd);color:var(--tx);padding:11px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-edit"></i> Edit Position</button>
+    <button onclick="removeHolding()" style="flex:1;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;padding:11px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-trash"></i> Remove Position</button>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -1822,6 +1796,7 @@ function linkText(s){
 function goToPuls(asset){goTo('puls');setTimeout(()=>openCD(asset),120);}
 function togTCG(id){const body=document.getElementById('tcg-'+id);const icon=document.getElementById('tcgi-'+id);if(!body)return;const open=body.style.display!=='none';body.style.display=open?'none':'block';if(icon)icon.style.transform=open?'':'rotate(180deg)';}
 function togWatch(id){const body=document.getElementById('watch-'+id);const icon=document.getElementById('watchi-'+id);if(!body)return;const open=body.style.display!=='none';body.style.display=open?'none':'block';if(icon)icon.style.transform=open?'':'rotate(180deg)';}
+function togTCGSub(id){const body=document.getElementById('tcgsub-'+id);const icon=document.getElementById('tcgsubi-'+id);if(!body)return;const open=body.style.display!=='none';body.style.display=open?'none':'block';if(icon)icon.style.transform=open?'':'rotate(180deg)';}
 function searchWatch(brand,q){const c=document.getElementById('wmodels-'+brand);if(!c)return;c.querySelectorAll('.watch-model').forEach(m=>{const name=(m.querySelector('.watch-model-name')?.textContent||'').toLowerCase();m.style.display=!q||name.includes(q.toLowerCase())?'':'none';});}
 async function repostP(pid,btn){
   if(!CU||!UP){showToast('Please sign in');return}
@@ -1857,7 +1832,7 @@ async function repostP(pid,btn){
 function shareP(id){const url='https://claude250k.github.io/JL/#post?id='+id;navigator.clipboard?.writeText(url).then(()=>showToast('Link copied!')).catch(()=>showToast('Link: '+url));}
 
 // ── PORTFOLIO ──────────────────────────────────────────────────────────────
-let portCat='crypto',portHoldings=[],portUnsub2=null;
+let portCat='crypto',portHoldings=[],portUnsub2=null,curHoldId=null;
 const PHCID={btc:'bitcoin',eth:'ethereum',sol:'solana',bnb:'binancecoin',xrp:'ripple',ada:'cardano',doge:'dogecoin',dot:'polkadot',avax:'avalanche-2',link:'chainlink'};
 const PHDEMO={nvda:876,aapl:218,msft:415,amzn:186,goog:174,meta:512,tsla:248,sap:182,asml:820,novo:780,iwda:98,vwrl:105,acwi:108,spy:524,qqq:448,voo:481,stoxx:52,veur:68,exsa:77,ewj:68,mchi:48,aaxj:72};
 
@@ -1967,14 +1942,66 @@ async function saveHolding(){
   closeAddHolding();showToast(`${name} added to portfolio`);
 }
 
-function showHoldMenu(id){
-  const h=portHoldings.find(x=>x.id===id);if(!h)return;
-  if(confirm(`Remove ${h.name||h.symbol} from portfolio?`))delHolding(id);
-}
+function showHoldMenu(id){showHoldDetail(id)}
 async function delHolding(id){
   const{db,doc,deleteDoc}=window._fb;
   await deleteDoc(doc(db,`users/${CU.uid}/holdings`,id));
   showToast(t('removed'));
+}
+function showHoldDetail(id){
+  const h=portHoldings.find(x=>x.id===id);if(!h)return;
+  curHoldId=id;
+  const fmt=n=>Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const lp=h.livePrice||h.buyPrice||0,cv=lp*h.amount,cost=h.buyPrice*h.amount,pl=cv-cost,pp=cost>0?(pl/cost*100):0;
+  const plCol=pl>=0?'#4ade80':'#f87171',sg=pl>=0?'+':'';
+  document.getElementById('hold-ov-title').textContent=h.name||h.symbol||'Holding';
+  document.getElementById('hold-ov-footer').style.display='flex';
+  const row=(l,v)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--bd)"><span style="font-size:12px;color:var(--mu2)">${l}</span><span style="font-size:13px;font-weight:600;color:var(--tx)">${v}</span></div>`;
+  document.getElementById('hold-ov-body').innerHTML=`
+    <div style="text-align:center;padding:20px 0 24px">
+      <div style="font-family:var(--fd);font-size:32px;font-weight:800;color:var(--tx);letter-spacing:-.5px">$${fmt(cv)}</div>
+      <div style="font-size:14px;color:${plCol};font-weight:600;margin-top:4px">${sg}$${fmt(Math.abs(pl))} (${sg}${pp.toFixed(2)}%) all time</div>
+    </div>
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:13px;overflow:hidden;margin-bottom:16px">
+      ${row('Asset',esc(h.name||h.symbol||'-'))}
+      ${row('Ticker',esc((h.symbol||'-').toUpperCase()))}
+      ${row('Amount Held',h.amount+' '+(h.symbol||'').toUpperCase())}
+      ${row('Avg Buy Price','$'+fmt(h.buyPrice))}
+      ${row('Current Price','$'+fmt(lp))}
+      ${row('Total Value','$'+fmt(cv))}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px"><span style="font-size:12px;color:var(--mu2)">P&amp;L</span><span style="font-size:13px;font-weight:600;color:${plCol}">${sg}$${fmt(Math.abs(pl))} (${sg}${pp.toFixed(2)}%)</span></div>
+    </div>`;
+  document.getElementById('hold-ov').classList.add('on');
+}
+function closeHoldOv(){document.getElementById('hold-ov').classList.remove('on');curHoldId=null}
+function editHolding(){
+  const h=portHoldings.find(x=>x.id===curHoldId);if(!h)return;
+  document.getElementById('hold-ov-footer').style.display='none';
+  document.getElementById('hold-ov-body').innerHTML=`
+    <div style="padding:8px 0">
+      <div class="elabel">Amount (units)</div>
+      <input class="einp" id="hold-edit-amount" type="number" step="any" min="0" value="${h.amount}">
+      <div class="elabel">Avg Buy Price ($)</div>
+      <input class="einp" id="hold-edit-price" type="number" step="any" min="0" value="${h.buyPrice}">
+      <button class="savebtn" onclick="saveHoldEdit()">Save Changes</button>
+      <button onclick="showHoldDetail('${h.id}')" style="width:100%;background:transparent;border:1px solid var(--bd);color:var(--mu2);padding:11px;border-radius:10px;font-size:13px;cursor:pointer;margin-top:8px">Cancel</button>
+    </div>`;
+  setTimeout(()=>document.getElementById('hold-edit-amount')?.focus(),100);
+}
+async function saveHoldEdit(){
+  if(!CU||!curHoldId)return;
+  const amount=parseFloat(document.getElementById('hold-edit-amount')?.value);
+  const price=parseFloat(document.getElementById('hold-edit-price')?.value);
+  if(isNaN(amount)||amount<=0){showToast('Enter a valid amount');return}
+  if(isNaN(price)||price<0){showToast('Enter a valid price');return}
+  const{db,doc,updateDoc}=window._fb;
+  await updateDoc(doc(db,`users/${CU.uid}/holdings`,curHoldId),{amount,buyPrice:price});
+  showToast('Position updated!');closeHoldOv();
+}
+async function removeHolding(){
+  const h=portHoldings.find(x=>x.id===curHoldId);if(!h)return;
+  if(!confirm(`Remove ${h.name||h.symbol||'holding'} from portfolio?`))return;
+  const id=curHoldId;closeHoldOv();await delHolding(id);
 }
 
 // ── i18n ───────────────────────────────────────────────────────────────────
@@ -2193,6 +2220,7 @@ function swipeBack(){
     ['fl-ov',()=>document.getElementById('fl-ov').classList.remove('on')],
     ['pov',()=>document.getElementById('pov').classList.remove('on')],
     ['inst-ov',()=>closeInstPage()],
+    ['hold-ov',()=>closeHoldOv()],
   ];
   for(const[id,fn]of checks){const el=document.getElementById(id);if(el&&el.classList.contains('on')){fn();return;}}
 }
