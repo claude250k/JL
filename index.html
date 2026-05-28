@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
+<link rel="manifest" href="data:application/json,{%22name%22:%22JL%20Finance%22,%22short_name%22:%22JL%22,%22start_url%22:%22/%22,%22display%22:%22standalone%22,%22background_color%22:%22%230c0c0c%22,%22theme_color%22:%22%23F7931A%22,%22icons%22:[{%22src%22:%22https://via.placeholder.com/192x192/F7931A/000000?text=JL%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22}]}">
+<meta name="theme-color" content="#F7931A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="JL">
 <title>JL - Finance. Markets. Analytics.</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
@@ -67,7 +73,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .cmtav{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#000;background:linear-gradient(135deg,var(--gold),#b06010);overflow:hidden}
 .cmtav img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .cmtnm{font-size:12px;font-weight:600;color:var(--tx)}.cmttx{font-size:12px;color:var(--tx2);line-height:1.5;margin-top:1px;word-break:break-word}.cmttm{font-size:10px;color:var(--mu);margin-top:2px}
-.cmtir{display:flex;gap:8px;padding:9px 14px;border-top:1px solid var(--bd);background:var(--sf2);flex-shrink:0}
+.cmtir{display:flex;gap:8px;padding:9px 14px;border-top:1px solid var(--bd);background:var(--sf2);flex-shrink:0;position:sticky;bottom:0;z-index:2}
 .cmti{flex:1;background:var(--sf3);border:1px solid var(--bd);border-radius:18px;padding:7px 12px;color:var(--tx);font-size:12px;outline:none}.cmti:focus{border-color:var(--gold)}.cmti::placeholder{color:var(--mu)}
 .cmts{background:var(--gold);border:none;color:#000;width:30px;height:30px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
 .empty{text-align:center;padding:36px 20px;color:var(--mu2)}.empty i{font-size:32px;color:var(--mu);margin-bottom:10px;display:block}.empty p{font-size:12px;line-height:1.6}
@@ -238,6 +244,41 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .ch-modal-cancel{flex:1;background:transparent;border:1px solid var(--bd);color:var(--mu2);padding:9px;border-radius:9px;cursor:pointer;font-size:12px;font-family:var(--fb)}
 .ch-modal-ok{flex:1;background:var(--gold);border:none;color:#000;padding:9px;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700;font-family:var(--fb)}
 .update-toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--gold);color:#000;padding:10px 18px;border-radius:10px;font-size:12px;font-weight:700;z-index:400;cursor:pointer;box-shadow:0 4px 20px rgba(247,147,26,.4)}
+
+/* ── DESKTOP LAYOUT ── */
+@media(min-width:600px){
+  html,body{background:var(--bg);justify-content:flex-start}
+  .shell{width:100%;max-width:1200px;height:100vh;border-radius:0;border:none;flex-direction:row;margin:0 auto;box-shadow:none}
+  /* Sidebar nav */
+  .bnav{flex-direction:column;width:220px;height:100vh;border-top:none;border-right:1px solid var(--bd);justify-content:flex-start;align-items:flex-start;padding:16px 10px;gap:2px;flex-shrink:0;overflow-y:auto;position:sticky;top:0}
+  .bn{flex-direction:row;justify-content:flex-start;gap:14px;padding:11px 14px;width:100%;border-radius:12px;min-width:0}
+  .bn i{font-size:22px}.bn span{font-size:14px;font-weight:500;display:block}
+  .bn.ak{background:var(--gdim)}
+  .bn:hover{background:var(--sf)}
+  .nbadge{top:6px;right:6px}
+  /* Main content */
+  .shell>.sc{order:2;flex:1;min-width:0;max-width:640px;border-right:1px solid var(--bd)}
+  .shell>.asc{order:2;max-width:480px;border-right:1px solid var(--bd)}
+  /* Right panel */
+  .shell::after{content:'';flex:1;min-width:0}
+  /* Status bar hidden on desktop */
+  .sbar{display:none}
+  /* Nav order */
+  .bnav{order:1}
+  /* Overlays full height */
+  .ov,.pdov,.setov,.editov,.chov,.inst-ov,.ch-modal{border-radius:0}
+  /* Toast position */
+  .toast{top:20px;left:50%;transform:translateX(-50%);position:fixed}
+  /* Install banner */
+  .ibanner{max-width:640px}
+  /* Desktop: add JL logo top of sidebar */
+  .bnav::before{content:'';display:block;height:50px}
+}
+@media(min-width:900px){
+  .bnav{width:240px}
+  .shell>.sc{max-width:680px}
+}
+@media(min-width:600px){.desk-logo{display:block!important}}
 </style>
 </head>
 <body>
@@ -457,6 +498,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
     <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700">Account</div>
     <div class="seti" onclick="openEditProf()"><i class="ti ti-user-edit"></i><div class="setin"><div class="setit">Edit Profile</div><div class="setis">Name, bio and photo</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
     <div class="seti" onclick="showInstPage();closeSet()"><i class="ti ti-download"></i><div class="setin"><div class="setit">Install App</div><div class="setis">Add to home screen</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
+    <div class="seti" onclick="openChSettings()"><i class="ti ti-hash"></i><div class="setin"><div class="setit">Manage Channels</div><div class="setis">Add or remove your channels</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
     <div class="seti" onclick="showToast('Privacy settings coming soon')"><i class="ti ti-shield"></i><div class="setin"><div class="setit">Privacy</div><div class="setis">Visibility and data</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
     <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px">Session</div>
     <div class="seti" onclick="confirmOut()"><i class="ti ti-logout" style="color:#f87171"></i><div class="setin"><div class="setit" style="color:#f87171">Sign Out</div><div class="setis">Log out of your account</div></div></div>
@@ -524,6 +566,9 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 </div>
 <div class="toast" id="toast"></div>
 <div class="bnav">
+  <div style="padding:8px 14px 16px;display:none" class="desk-logo">
+    <svg width="60" height="28" viewBox="0 0 72 32" fill="none"><polyline points="0,16 8,16 11,5 14,27 17,11 20,21 23,16 32,16" stroke="#F7931A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="36" y="23" font-family="Syne,sans-serif" font-weight="800" font-size="20" fill="#f0ede6">J<tspan fill="#F7931A">L</tspan></text></svg>
+  </div>
   <button class="bn ak" id="bn-feed" onclick="goTo('feed')"><i class="ti ti-home"></i><span>Feed</span></button>
   <button class="bn" id="bn-puls" onclick="goTo('puls')"><i class="ti ti-activity"></i><span>Puls</span></button>
   <button class="bn" id="bn-search" onclick="goTo('search')"><i class="ti ti-search"></i><span>Search</span></button>
@@ -631,6 +676,32 @@ async function doGoogle(){
 }
 function am(c){const m={'auth/user-not-found':'Email not found','auth/wrong-password':'Wrong password','auth/email-already-in-use':'Email already registered','auth/weak-password':'Password too short (min 6)','auth/invalid-email':'Invalid email','auth/popup-closed-by-user':''};return m[c]||'Error: '+c}
 
+function openChSettings(){
+  closeSet();
+  const all=[...DCH,...customChs];
+  const html=`<div style="padding:16px">
+    <div style="font-size:13px;font-weight:600;color:var(--tx);margin-bottom:12px">Your Channels</div>
+    ${all.map(ch=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bd)">
+      <span style="font-size:13px;color:var(--tx)">${chLbl(ch)}</span>
+      ${DCH.includes(ch)?'<span style="font-size:11px;color:var(--mu2)">Default</span>':
+        `<button onclick="removeCh('${ch}')" style="background:none;border:1px solid #ef4444;color:#ef4444;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:11px">Remove</button>`}
+    </div>`).join('')}
+    <button onclick="addCh()" style="width:100%;background:var(--gold);color:#000;border:none;padding:10px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;margin-top:12px">+ Add Channel</button>
+  </div>`;
+  // Show in a temp overlay
+  const ov=document.createElement('div');
+  ov.className='ov on';ov.style.zIndex='200';
+  ov.innerHTML=`<div class="ovh"><button class="ovb" onclick="this.closest('.ov').remove();openSet()"><i class="ti ti-arrow-left"></i></button><div class="ovt">Manage Channels</div></div><div class="scroll">${html}</div>`;
+  document.getElementById('app').appendChild(ov);
+}
+async function removeCh(ch){
+  if(!CU)return;
+  customChs=customChs.filter(c=>c!==ch);
+  const{db,doc,updateDoc}=window._fb;
+  await updateDoc(doc(db,'users',CU.uid),{customChannels:customChs});
+  renderMyChs();renderCCats();showToast('Channel removed');
+  document.querySelector('.ov[style*="200"]')?.remove();openSet();
+}
 function openSet(){document.getElementById('setov').classList.add('on')}
 function closeSet(){document.getElementById('setov').classList.remove('on')}
 function confirmOut(){if(confirm('Sign out?')){const{auth,signOut}=window._fb;signOut(auth);closeSet();}}
@@ -841,11 +912,12 @@ async function likeP(pid,btn){
   const nArr=liked?lb.filter(x=>x!==CU.uid):[...lb,CU.uid];
   const nCount=(d.likes||0)+(liked?-1:1);
   await updateDoc(ref,{likes:increment(liked?-1:1),likedBy:nArr});
-  document.querySelectorAll(`[id="lb-${pid}"]`).forEach(b=>{
+  document.querySelectorAll('[id="lb-'+pid+'"]').forEach(b=>{
     b.classList.toggle('liked',!liked);
     const icon=b.querySelector('i');const cnt=b.querySelector('span');
-    if(icon)icon.className='ti '+((!liked)?'ti-heart-filled':'ti-heart');
+    if(icon){icon.className='';icon.className='ti ti-'+((!liked)?'heart-filled':'heart');}
     if(cnt)cnt.textContent=nCount;
+    if(!liked)b.style.color='var(--gold)';else b.style.color='';
   });
   if(!liked&&d.authorId!==CU.uid)await addNotif(d.authorId,'like',`${UP?.name} liked your post`,pid);
 }
@@ -886,13 +958,15 @@ function renderNotifs(notifs){
 async function openNotif(nid,refId,type){
   const{db,doc,updateDoc}=window._fb;
   try{await updateDoc(doc(db,`users/${CU.uid}/notifications`,nid),{read:true})}catch(e){}
-  if(refId&&['like','comment','mention'].includes(type))openPD(refId);
+  if(refId&&['like','comment','mention','repost'].includes(type))openPD(refId);
 }
 function switchMT(tab){
-  // Notifications is LEFT tab, Messages is RIGHT tab
-  const baseStyle='padding:5px 16px;border-radius:8px;font-size:12px;border:none;cursor:pointer;';
-  document.getElementById('tab-notif').style.cssText=baseStyle+(tab==='notif'?'background:var(--sf3);color:var(--tx);font-weight:500':'background:transparent;color:var(--mu2)');
-  document.getElementById('tab-msgs').style.cssText=baseStyle+(tab==='msgs'?'background:var(--sf3);color:var(--tx);font-weight:500':'background:transparent;color:var(--mu2)');
+  const base='padding:5px 16px;border-radius:8px;font-size:12px;border:none;cursor:pointer;';
+  const on=base+'background:var(--sf3);color:var(--tx);font-weight:500';
+  const off=base+'background:transparent;color:var(--mu2)';
+  const tn=document.getElementById('tab-notif');const tm=document.getElementById('tab-msgs');
+  if(tn)tn.style.cssText=tab==='notif'?on:off;
+  if(tm)tm.style.cssText=tab==='msgs'?on:off;
   document.getElementById('msgs-panel').style.display=tab==='msgs'?'flex':'none';
   document.getElementById('notif-panel').style.display=tab==='notif'?'flex':'none';
   if(tab==='notif'){
@@ -1293,6 +1367,28 @@ function goTo(s){
   if(s==='messages')loadConvs();
 }
 
+
+// Version check for PWA update notification
+const APP_VERSION = '2.0';
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/JL/sw.js').catch(()=>{});
+}
+// Check for updates every 5 min
+function checkForUpdate(){
+  fetch(location.href+'?v='+Date.now(),{cache:'no-store'})
+    .then(r=>r.text()).then(html=>{
+      const m=html.match(/APP_VERSION = '([^']+)'/);
+      if(m&&m[1]!==APP_VERSION){
+        const bar=document.createElement('div');
+        bar.style.cssText='position:fixed;top:0;left:0;right:0;background:var(--gold);color:#000;padding:10px 16px;text-align:center;z-index:9999;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--fb)';
+        bar.innerHTML='Update available! Tap to refresh. <span style="text-decoration:underline">Refresh</span>';
+        bar.onclick=()=>location.reload(true);
+        document.body.appendChild(bar);
+      }
+    }).catch(()=>{});
+}
+setTimeout(()=>setInterval(checkForUpdate,300000),10000);
+
 let toastT;
 // Simple rate limit for posts
 const _postTimes=[];
@@ -1304,29 +1400,37 @@ function checkRateLimit(){
 }
 function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800)}
 
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;')}
 function tAgo(d){const s=Math.floor((new Date()-d)/1000);if(s<60)return'now';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';return Math.floor(s/86400)+'d'}
 async function repostP(pid,btn){
   if(!CU||!UP){showToast('Please sign in');return}
-  const{db,collection,addDoc,doc,updateDoc,increment,serverTimestamp,getDoc}=window._fb;
-  const snap=await getDoc(doc(db,'posts',pid));if(!snap.exists())return;
-  const orig=snap.data();
-  // Toggle repost
-  const rpId=`${CU.uid}_rp_${pid}`;
+  const{db,doc,getDoc,setDoc,deleteDoc,updateDoc,increment,serverTimestamp}=window._fb;
+  const pSnap=await getDoc(doc(db,'posts',pid));if(!pSnap.exists())return;
+  const orig=pSnap.data();
+  const rpId=CU.uid+'_rp_'+pid;
   const rpRef=doc(db,'reposts',rpId);
   const rpSnap=await getDoc(rpRef);
+  const icon=btn?btn.querySelector('i'):null;
+  const cnt=btn?btn.querySelector('span'):null;
   if(rpSnap.exists()){
-    // Undo repost
-    await window._fb.deleteDoc(rpRef);
-    await updateDoc(doc(db,'posts',pid),{reposts:increment(-1)});
-    btn.classList.remove('reposted');showToast('Repost removed');
+    await deleteDoc(rpRef);
+    try{await updateDoc(doc(db,'posts',pid),{reposts:increment(-1)})}catch(e){}
+    if(btn)btn.style.color='';
+    if(icon)icon.style.color='';
+    if(cnt)cnt.textContent=Math.max(0,(orig.reposts||1)-1);
+    showToast('Repost removed');
   } else {
-    await window._fb.setDoc(rpRef,{uid:CU.uid,postId:pid,authorId:orig.authorId,createdAt:serverTimestamp()});
-    await updateDoc(doc(db,'posts',pid),{reposts:increment(1)});
-    btn.classList.add('reposted');showToast('Reposted!');
-    if(orig.authorId!==CU.uid)await addNotif(orig.authorId,'repost',`${UP.name} reposted your post`,pid);
+    await setDoc(rpRef,{uid:CU.uid,postId:pid,authorId:orig.authorId,createdAt:serverTimestamp()});
+    try{await updateDoc(doc(db,'posts',pid),{reposts:increment(1)})}catch(e){}
+    if(btn)btn.style.color='var(--gn)';
+    if(icon)icon.style.color='var(--gn)';
+    if(cnt)cnt.textContent=(orig.reposts||0)+1;
+    showToast('Reposted!');
+    if(orig.authorId!==CU.uid)await addNotif(orig.authorId,'repost',UP.name+' reposted your post',pid);
   }
 }
+// placeholder to avoid duplicate
+
 function shareP(id){if(navigator.share)navigator.share({title:'JL',url:location.href+'#'+id});else showToast('Link copied!')}
 </script>
 </body>
