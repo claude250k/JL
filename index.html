@@ -788,7 +788,7 @@ let CU=null,UP=null,selCat='all';
 let feedUnsub=null,chatUnsub=null,msgUnsub=null,notifUnsub=null,opUnsub=null;
 let pulsInited=false,chartI={},cdChart=null,curCDCoin=null;
 let allUsers=[],myVote=null,curOP=null,curConv=null,curChatOid=null;
-let customChs=[],myPFilt='all',curPD=null;
+let customChs=[],myPFilt='all',myTab='posts',curPD=null;
 let _notifUnread=0,_msgUnread=0,_lastRead={};
 let followingIds=new Set();
 let repostIds=new Set();
@@ -1398,17 +1398,28 @@ async function submitPost(){
   btn.textContent='Post';btn.disabled=false;
 }
 
-async function loadMyReposts(cid){
+async function loadMyReposts(){
   if(!CU)return;
-  const{db,collection,query,where,orderBy,getDocs,doc,getDoc}=window._fb;
-  const c=document.getElementById(cid);c.innerHTML='<div class="spin"></div>';
+  const{db,collection,query,where,getDocs,doc,getDoc}=window._fb;
+  const c=document.getElementById('myposts');c.innerHTML='<div class="spin"></div>';
   const snap=await getDocs(query(collection(db,'reposts'),where('uid','==',CU.uid)));
   if(!snap.docs.length){c.innerHTML='<div class="empty"><i class="ti ti-repeat"></i><p>No reposts yet</p></div>';return}
   const posts=await Promise.all(snap.docs.map(async d=>{
     const ps=await getDoc(doc(db,'posts',d.data().postId));
     return ps.exists()?{id:ps.id,...ps.data()}:null;
   }));
-  c.innerHTML=posts.filter(Boolean).map(p=>pH(p)).join('');
+  const valid=posts.filter(p=>p&&p.authorId!==CU.uid);
+  c.innerHTML=valid.length?valid.map(p=>pH(p)).join(''):'<div class="empty"><i class="ti ti-repeat"></i><p>No reposts yet</p></div>';
+}
+async function loadMyLikes(){
+  if(!CU)return;
+  const{db,collection,query,where,getDocs}=window._fb;
+  const c=document.getElementById('myposts');c.innerHTML='<div class="spin"></div>';
+  const snap=await getDocs(query(collection(db,'posts'),where('likedBy','array-contains',CU.uid)));
+  if(!snap.docs.length){c.innerHTML='<div class="empty"><i class="ti ti-heart"></i><p>No liked posts yet</p></div>';return}
+  const posts=snap.docs.map(d=>({id:d.id,...d.data()}))
+    .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+  c.innerHTML=posts.map(p=>pH(p)).join('');
 }
 async function loadMyPosts(ch){
   if(!CU)return;
@@ -1423,12 +1434,13 @@ async function loadMyPosts(ch){
   if(!posts.length){c.innerHTML=`<div class="empty"><i class="ti ti-pencil-off"></i><p>${ch==='all'?'No posts yet. Tap + to post!':'No posts in this channel yet.'}</p></div>`;return}
   c.innerHTML=posts.map(p=>pH(p)).join('');
 }
-function myCFilt(el,ch){document.querySelectorAll('#mychs .ck').forEach(c=>c.classList.remove('ak'));el.classList.add('ak');myPFilt=ch;loadMyPosts(ch)}
+function myCFilt(el,ch){document.querySelectorAll('#mychs .ck').forEach(c=>c.classList.remove('ak'));el.classList.add('ak');myPFilt=ch;if(myTab==='posts')loadMyPosts(ch);}
 function ptab(el,tab){
   document.querySelectorAll('#sc-profile .ptabs .ptab').forEach(t=>t.classList.remove('ak'));el.classList.add('ak');
+  myTab=tab;
   if(tab==='posts')loadMyPosts(myPFilt);
-  else if(tab==='reposts')loadMyReposts('myposts');
-  else document.getElementById('myposts').innerHTML='<div class="empty"><i class="ti ti-heart"></i><p>Likes coming soon</p></div>';
+  else if(tab==='reposts')loadMyReposts();
+  else loadMyLikes();
 }
 
 async function showFL(type){
@@ -1927,7 +1939,7 @@ function goTo(s){
   document.getElementById('sc-'+s).classList.add('on');
   document.getElementById('bn-'+s).classList.add('ak');
   if(s==='puls')setTimeout(initPuls,80);
-  if(s==='profile'&&CU){updateUI();loadMyPosts('all');if(CU.email==='claude250k@gmail.com'&&!sessionStorage.getItem('jl_recounted'))recountFollowers();}
+  if(s==='profile'&&CU){document.querySelectorAll('#sc-profile .ptabs .ptab').forEach((t,i)=>t.classList.toggle('ak',i===0));myTab='posts';myPFilt='all';updateUI();loadMyPosts('all');if(CU.email==='claude250k@gmail.com'&&!sessionStorage.getItem('jl_recounted'))recountFollowers();}
   if(s==='search')loadUsers();
   if(s==='messages'){document.getElementById('chov').classList.remove('on');if(chatUnsub){chatUnsub();chatUnsub=null;}curConv=null;loadConvs();switchMT('msgs');}
   if(s==='portfolio'){const ptog=document.getElementById('ptog');if(ptog)ptog.checked=UP?.portfolioPublic===true;const ptogLbl=document.getElementById('ptog-lbl');if(ptogLbl)ptogLbl.textContent=t(UP?.portfolioPublic?'portfolio_public':'portfolio_private');renderPortfolio();refreshPortPrices().then(renderPortfolio)}
