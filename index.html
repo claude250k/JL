@@ -600,9 +600,9 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       <div class="pbio" id="mybio">Add bio</div>
       <div class="pstats"><div class="pst" id="ps-p"><strong>0</strong> Posts</div><div class="pst" onclick="showFL('followers')" id="ps-f"><strong>0</strong> Followers</div><div class="pst" onclick="showFL('following')" id="ps-g"><strong>0</strong> Following</div></div>
     </div>
-    <div style="padding:0 14px 3px;font-size:10px;color:var(--mu);letter-spacing:.7px;text-transform:uppercase;font-weight:700">Channels</div>
+    <div style="padding:0 14px 3px;font-size:10px;color:var(--mu);letter-spacing:.7px;text-transform:uppercase;font-weight:700" data-i18n="channels_lbl">Channels</div>
     <div class="chgrid" id="mychs"></div>
-    <div class="ptabs"><div class="ptab ak" onclick="ptab(this,'posts')">Posts</div><div class="ptab" onclick="ptab(this,'reposts')">Reposts</div><div class="ptab" onclick="ptab(this,'likes')">Likes</div></div>
+    <div class="ptabs"><div class="ptab ak" onclick="ptab(this,'posts')" data-i18n="tab_posts">Posts</div><div class="ptab" onclick="ptab(this,'reposts')" data-i18n="tab_reposts">Reposts</div><div class="ptab" onclick="ptab(this,'likes')" data-i18n="tab_likes">Likes</div></div>
     <div id="myposts"></div><div style="height:16px"></div>
   </div>
   <div class="fl-ov" id="fl-ov"><div class="ovh"><button class="ovb" onclick="document.getElementById('fl-ov').classList.remove('on')"><i class="ti ti-arrow-left"></i></button><div class="ovt" id="fl-title">Followers</div></div><div class="scroll" id="fl-content"></div></div>
@@ -754,7 +754,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 <div class="toast" id="toast"></div>
 <div class="bnav">
   <div style="padding:8px 14px 20px;display:none" class="desk-logo"><svg width="72" height="32" viewBox="0 0 72 32" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="0,16 8,16 11,5 14,27 17,11 20,21 23,16 32,16" stroke="#F7931A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="36" y="23" font-family="Syne,sans-serif" font-weight="800" font-size="20" fill="#f0ede6">J<tspan fill="#F7931A">L</tspan></text></svg></div>
-  <div class="cfdlg" id="cfdlg"><div class="cfdlg-box"><div class="cfdlg-ico"><i class="ti ti-trash"></i></div><div class="cfdlg-msg" id="cfdlg-msg">Löschen?</div><div class="cfdlg-btns"><button class="cfdlg-cancel" onclick="_cfCancel()">Abbrechen</button><button class="cfdlg-ok" onclick="_cfOk()">Löschen</button></div></div></div>
+  <div class="cfdlg" id="cfdlg"><div class="cfdlg-box"><div class="cfdlg-ico"><i class="ti ti-trash"></i></div><div class="cfdlg-msg" id="cfdlg-msg">Löschen?</div><div class="cfdlg-btns"><button class="cfdlg-cancel" onclick="_cfCancel()" data-i18n="dlg_cancel">Cancel</button><button class="cfdlg-ok" onclick="_cfOk()" data-i18n="dlg_delete">Delete</button></div></div></div>
   <button class="bn ak" id="bn-feed" onclick="goTo('feed')"><i class="ti ti-home"></i><span data-i18n="nav_feed">Feed</span></button>
   <button class="bn" id="bn-puls" onclick="goTo('puls')"><i class="ti ti-activity"></i><span data-i18n="nav_puls">Puls</span></button>
   <button class="bn" id="bn-search" onclick="goTo('search')"><i class="ti ti-search"></i><span data-i18n="nav_search">Search</span></button>
@@ -949,7 +949,7 @@ async function removeCh(ch){
 }
 function openSet(){document.getElementById('setov').classList.add('on')}
 function closeSet(){document.getElementById('setov').classList.remove('on')}
-function confirmOut(){if(confirm('Sign out?')){const{auth,signOut}=window._fb;signOut(auth);closeSet();}}
+function confirmOut(){if(confirm(t('signout_confirm'))){const{auth,signOut}=window._fb;signOut(auth);closeSet();}}
 function openEditProf(){
   document.getElementById('ep-name').value=UP?.name||'';
   document.getElementById('ep-bio').value=UP?.bio||'';
@@ -1035,7 +1035,7 @@ function updateUI(){
 
 function renderMyChs(){
   const all=[...DCH,...customChs];
-  let h=`<div class="ck ak" onclick="myCFilt(this,'all')"><div class="ckn">All Posts</div><div class="ckc" id="ck-all">- posts</div></div>`;
+  let h=`<div class="ck ak" onclick="myCFilt(this,'all')"><div class="ckn">${t('all_posts')}</div><div class="ckc" id="ck-all">- posts</div></div>`;
   all.forEach(ch=>{h+=`<div class="ck" onclick="myCFilt(this,'${ch}')"><div class="ckn">${chLbl(ch)}</div><div class="ckc" id="ck-${ch}">-</div></div>`});
   h+=`<div class="ck-add" onclick="addCh()"><i class="ti ti-plus"></i><span>Create channel</span></div>`;
   document.getElementById('mychs').innerHTML=h;
@@ -1177,7 +1177,7 @@ function filterFeed(btn,cat){
 function renderPosts(posts,cid,cat){
   const c=document.getElementById(cid);if(!c)return;
   if(!posts.length){
-    const msg=followingIds.size===0&&cat==='all'?'Follow people to see their posts here!\nTap Search to find creators.':'No posts in this channel from people you follow yet.';
+    const msg=followingIds.size===0&&cat==='all'?t('follow_to_see'):t('no_ch_posts');
     c.innerHTML=`<div class="empty"><i class="ti ti-news"></i><p>${msg}</p></div>`;return;
   }
   c.innerHTML=posts.map(p=>pH(p)).join('');
@@ -1206,7 +1206,7 @@ function pH(p){
         ${img}
         <div class="pacts">
           <button class="pa${liked?' liked':''}" id="lb-${p.id}" onclick="likeP('${p.id}',this)">
-            <i class="ti ${liked?'ti-heart-filled':'ti-heart'}"${liked?' style="color:var(--gold)"':''}></i>
+            <i class="ti ${liked?'ti-heart-filled':'ti-heart'}"></i>
             <span>${p.likes||0}</span>
           </button>
           <button class="pa" onclick="toggleQC('${p.id}')"><i class="ti ti-message-circle"></i> <span>${p.comments||0}</span></button>
@@ -1248,8 +1248,8 @@ async function likeP(pid,btn){
   const newCount=Math.max(0,curCount+(nowLiked?1:-1));
   document.querySelectorAll('[id="lb-'+pid+'"]').forEach(b=>{
     const ic=b.querySelector('i');const sp=b.querySelector('span');
-    if(nowLiked){b.classList.add('liked');if(ic)ic.className='ti ti-heart-filled';if(sp)sp.textContent=newCount;}
-    else{b.classList.remove('liked');if(ic)ic.className='ti ti-heart';if(sp)sp.textContent=newCount;}
+    if(nowLiked){b.classList.add('liked');if(ic){ic.className='ti ti-heart-filled';ic.style.color='';}if(sp)sp.textContent=newCount;}
+    else{b.classList.remove('liked');if(ic){ic.className='ti ti-heart';ic.style.color='';}if(sp)sp.textContent=newCount;}
   });
   // Persist to Firestore in background
   const{db,doc,getDoc,updateDoc,increment}=window._fb;
@@ -1403,20 +1403,20 @@ async function loadMyReposts(){
   const{db,collection,query,where,getDocs,doc,getDoc}=window._fb;
   const c=document.getElementById('myposts');c.innerHTML='<div class="spin"></div>';
   const snap=await getDocs(query(collection(db,'reposts'),where('uid','==',CU.uid)));
-  if(!snap.docs.length){c.innerHTML='<div class="empty"><i class="ti ti-repeat"></i><p>No reposts yet</p></div>';return}
+  if(!snap.docs.length){c.innerHTML=`<div class="empty"><i class="ti ti-repeat"></i><p>${t('no_reposts_yet')}</p></div>`;return}
   const posts=await Promise.all(snap.docs.map(async d=>{
     const ps=await getDoc(doc(db,'posts',d.data().postId));
     return ps.exists()?{id:ps.id,...ps.data()}:null;
   }));
   const valid=posts.filter(p=>p&&p.authorId!==CU.uid);
-  c.innerHTML=valid.length?valid.map(p=>pH(p)).join(''):'<div class="empty"><i class="ti ti-repeat"></i><p>No reposts yet</p></div>';
+  c.innerHTML=valid.length?valid.map(p=>pH(p)).join(''):`<div class="empty"><i class="ti ti-repeat"></i><p>${t('no_reposts_yet')}</p></div>`;
 }
 async function loadMyLikes(){
   if(!CU)return;
   const{db,collection,query,where,getDocs}=window._fb;
   const c=document.getElementById('myposts');c.innerHTML='<div class="spin"></div>';
   const snap=await getDocs(query(collection(db,'posts'),where('likedBy','array-contains',CU.uid)));
-  if(!snap.docs.length){c.innerHTML='<div class="empty"><i class="ti ti-heart"></i><p>No liked posts yet</p></div>';return}
+  if(!snap.docs.length){c.innerHTML=`<div class="empty"><i class="ti ti-heart"></i><p>${t('no_likes_yet')}</p></div>`;return}
   const posts=snap.docs.map(d=>({id:d.id,...d.data()}))
     .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
   c.innerHTML=posts.map(p=>pH(p)).join('');
@@ -1431,10 +1431,10 @@ async function loadMyPosts(ch){
   const ckall=document.getElementById('ck-all');if(ckall)ckall.textContent=all.length+' posts';
   document.getElementById('ps-p').innerHTML=`<strong>${all.length}</strong> Posts`;
   [...DCH,...customChs].forEach(ch2=>{const el=document.getElementById('ck-'+ch2);if(el)el.textContent=all.filter(p=>p.channel===ch2).length+' posts'});
-  if(!posts.length){c.innerHTML=`<div class="empty"><i class="ti ti-pencil-off"></i><p>${ch==='all'?'No posts yet. Tap + to post!':'No posts in this channel yet.'}</p></div>`;return}
+  if(!posts.length){c.innerHTML=`<div class="empty"><i class="ti ti-pencil-off"></i><p>${ch==='all'?t('no_posts_yet'):t('no_posts_ch')}</p></div>`;return}
   c.innerHTML=posts.map(p=>pH(p)).join('');
 }
-function myCFilt(el,ch){document.querySelectorAll('#mychs .ck').forEach(c=>c.classList.remove('ak'));el.classList.add('ak');myPFilt=ch;if(myTab==='posts')loadMyPosts(ch);}
+function myCFilt(el,ch){if(myTab!=='posts')return;document.querySelectorAll('#mychs .ck').forEach(c=>c.classList.remove('ak'));el.classList.add('ak');myPFilt=ch;loadMyPosts(ch);}
 function ptab(el,tab){
   document.querySelectorAll('#sc-profile .ptabs .ptab').forEach(t=>t.classList.remove('ak'));el.classList.add('ak');
   myTab=tab;
@@ -1996,7 +1996,7 @@ function linkText(s){
   while((m=urlRe.exec(s))!==null){parts.push({t:'tx',v:s.slice(li,m.index)});parts.push({t:'url',v:m[1]});li=m.index+m[1].length;}
   parts.push({t:'tx',v:s.slice(li)});
   return parts.map(p=>{
-    if(p.t==='url'){try{const dom=new URL(p.v).hostname.replace(/^www\./,'');return`<a href="${esc(p.v)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" style="background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:2px 8px;font-size:11px;color:var(--gold);text-decoration:none">[${esc(dom)}]</a>`}catch(e){return esc(p.v)}}
+    if(p.t==='url'){try{new URL(p.v);return`<a href="${esc(p.v)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="${esc(p.v)}" style="display:inline-flex;align-items:center;gap:3px;background:rgba(247,147,26,.1);border:1px solid rgba(247,147,26,.28);border-radius:5px;padding:1px 7px;font-size:11px;color:rgba(247,147,26,.75);text-decoration:none;vertical-align:middle"><i class="ti ti-link" style="font-size:11px"></i>Link</a>`}catch(e){return esc(p.v)}}
     return esc(p.v).replace(/#(\w+)/g,(m,tag)=>{const k=tag.toLowerCase();const a=HASH_MAP[k];return a?`<span class="htag" onclick="event.stopPropagation();goToPuls('${a}')">${m}</span>`:`<span class="htag">${m}</span>`;});
   }).join('');
 }
@@ -2060,7 +2060,7 @@ async function togglePortPublic(checked){
   UP.portfolioPublic=checked;
   const ptogLbl=document.getElementById('ptog-lbl');
   if(ptogLbl)ptogLbl.textContent=t(checked?'portfolio_public':'portfolio_private');
-  showToast(checked?'Portfolio ist jetzt öffentlich':'Portfolio ist jetzt privat');
+  showToast(t(checked?'port_now_public':'port_now_private'));
 }
 
 async function refreshPortPrices(){
@@ -2235,6 +2235,14 @@ const I18N={
     newPost:'New Post',post_btn:'Post',cancel:'Cancel',
     copied:'Username copied!',removed:'Removed',
     portfolio_public:'Public',portfolio_private:'Private',
+    tab_posts:'Posts',tab_reposts:'Reposts',tab_likes:'Likes',
+    channels_lbl:'Channels',all_posts:'All Posts',
+    dlg_cancel:'Cancel',dlg_delete:'Delete',
+    port_now_public:'Portfolio is now public',port_now_private:'Portfolio is now private',
+    signout_confirm:'Sign out?',
+    no_posts_yet:'No posts yet. Tap + to post!',no_posts_ch:'No posts in this channel yet.',
+    no_reposts_yet:'No reposts yet',no_likes_yet:'No liked posts yet',
+    follow_to_see:'Follow people to see their posts here!',no_ch_posts:'No posts in this channel from people you follow yet.',
   },
   de:{
     nav_feed:'Feed',nav_puls:'Puls',nav_search:'Suche',nav_messages:'Nachrichten',nav_portfolio:'Portfolio',nav_profile:'Profil',
@@ -2249,6 +2257,14 @@ const I18N={
     newPost:'Neuer Beitrag',post_btn:'Posten',cancel:'Abbrechen',
     copied:'Benutzername kopiert!',removed:'Entfernt',
     portfolio_public:'Öffentlich',portfolio_private:'Privat',
+    tab_posts:'Posts',tab_reposts:'Reposts',tab_likes:'Likes',
+    channels_lbl:'Kanäle',all_posts:'Alle Beiträge',
+    dlg_cancel:'Abbrechen',dlg_delete:'Löschen',
+    port_now_public:'Portfolio ist jetzt öffentlich',port_now_private:'Portfolio ist jetzt privat',
+    signout_confirm:'Abmelden?',
+    no_posts_yet:'Noch keine Beiträge. Tippe + zum Posten!',no_posts_ch:'Noch keine Beiträge in diesem Kanal.',
+    no_reposts_yet:'Noch keine Reposts',no_likes_yet:'Noch keine gelikten Beiträge',
+    follow_to_see:'Folge Personen, um ihre Beiträge zu sehen!',no_ch_posts:'Keine Beiträge in diesem Kanal von Personen, denen du folgst.',
   },
   es:{
     nav_feed:'Feed',nav_puls:'Pulso',nav_search:'Buscar',nav_messages:'Mensajes',nav_portfolio:'Cartera',nav_profile:'Perfil',
@@ -2263,6 +2279,14 @@ const I18N={
     newPost:'Nueva publicación',post_btn:'Publicar',cancel:'Cancelar',
     copied:'¡Usuario copiado!',removed:'Eliminado',
     portfolio_public:'Público',portfolio_private:'Privado',
+    tab_posts:'Posts',tab_reposts:'Reposts',tab_likes:'Likes',
+    channels_lbl:'Canales',all_posts:'Todos los posts',
+    dlg_cancel:'Cancelar',dlg_delete:'Eliminar',
+    port_now_public:'Portfolio ahora público',port_now_private:'Portfolio ahora privado',
+    signout_confirm:'¿Cerrar sesión?',
+    no_posts_yet:'Sin publicaciones. Toca + para publicar!',no_posts_ch:'Sin publicaciones en este canal aún.',
+    no_reposts_yet:'Sin reposts aún',no_likes_yet:'Sin publicaciones con me gusta',
+    follow_to_see:'¡Sigue a personas para ver sus publicaciones!',no_ch_posts:'No hay publicaciones en este canal de personas que sigues.',
   }
 };
 let curLang=localStorage.getItem('jl_lang')||'en';
@@ -2294,6 +2318,7 @@ function applyLang(){
   const ptogLblI18n=document.getElementById('ptog-lbl');
   if(ptogLblI18n&&UP!=null)ptogLblI18n.textContent=t(UP.portfolioPublic?'portfolio_public':'portfolio_private');
   // Re-render visible dynamic screens
+  if(CU&&document.getElementById('mychs'))renderMyChs();
   if(document.getElementById('sc-portfolio')?.classList.contains('on'))renderPortfolio();
   if(document.getElementById('sc-search')?.classList.contains('on'))renderUsers(allUsers);
 }
