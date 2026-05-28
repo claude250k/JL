@@ -288,6 +288,21 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   .bnav{width:240px;min-width:240px}
   .shell>.sc{max-width:720px}
 }
+.ptot{background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:16px 18px;margin:12px 14px 8px}
+.ptot-v{font-size:28px;font-weight:800;color:var(--tx);font-family:var(--fd);letter-spacing:-.5px}
+.ptot-chg{font-size:13px;font-weight:600;margin-top:3px}
+.phold{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bd);cursor:pointer}
+.phold:hover{background:var(--sf)}
+.phold-icon{width:38px;height:38px;border-radius:10px;background:var(--sf2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--gold);flex-shrink:0}
+.phold-info{flex:1;min-width:0}
+.phold-name{font-size:13px;font-weight:600;color:var(--tx)}
+.phold-amt{font-size:11px;color:var(--mu2);margin-top:1px}
+.phold-val{text-align:right;flex-shrink:0}
+.phold-cur{font-size:13px;font-weight:600;color:var(--tx)}
+.phold-pnl{font-size:11px;font-weight:600;margin-top:1px}
+.padd{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px 14px;background:var(--gold);color:#000;border:none;padding:12px;border-radius:12px;width:calc(100% - 28px);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--fb)}
+.pform-sel{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap}
+.pcat-btn{padding:5px 13px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--bd);color:var(--mu2);background:transparent}.pcat-btn.ak{background:var(--gold);color:#000;border-color:var(--gold)}
 </style>
 </head>
 <body>
@@ -444,6 +459,18 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   <div class="ov" id="nmov"><div class="ovh"><button class="ovb" onclick="document.getElementById('nmov').classList.remove('on')"><i class="ti ti-arrow-left"></i></button><div class="ovt">New Message</div></div><div class="sbar2"><div class="sbox"><i class="ti ti-search"></i><input type="text" id="nms" placeholder="Search users ..." oninput="searchNM()"></div></div><div class="scroll" id="nmlist"></div></div>
 </div>
 
+<div class="sc" id="sc-portfolio">
+  <div class="sh" style="justify-content:center">
+    <div class="stitle">Portfolio<em style="color:var(--gold);font-style:normal">.</em></div>
+  </div>
+  <div class="scroll">
+    <div id="port-total-box"></div>
+    <div id="port-list"></div>
+    <button class="padd" onclick="openAddHolding()"><i class="ti ti-plus"></i> Add Holding</button>
+    <div style="height:16px"></div>
+  </div>
+</div>
+
 <div class="sc" id="sc-profile">
   <div class="sh" style="padding-bottom:0;justify-content:center;position:relative">
     <div class="stitle">My Profile<em style="color:var(--gold);font-style:normal">.</em></div>
@@ -558,6 +585,30 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
     </div>
   </div>
 </div>
+<div class="mbg" id="port-pm" onclick="if(event.target===this)closeAddHolding()">
+  <div class="msh">
+    <div class="mtitle">Add Holding</div>
+    <div class="pform-sel" id="port-cats">
+      <button class="pcat-btn ak" data-cat="crypto" onclick="selPCat(this)">Crypto</button>
+      <button class="pcat-btn" data-cat="stocks" onclick="selPCat(this)">Stocks</button>
+      <button class="pcat-btn" data-cat="etf" onclick="selPCat(this)">ETF</button>
+      <button class="pcat-btn" data-cat="tcg" onclick="selPCat(this)">TCG</button>
+    </div>
+    <input class="ainp" id="port-name" placeholder="Name (e.g. Bitcoin, Apple, Pikachu)">
+    <input class="ainp" id="port-symbol" placeholder="Ticker symbol (e.g. BTC, AAPL) — optional">
+    <div style="display:flex;gap:8px">
+      <input class="ainp" id="port-amount" type="number" step="any" min="0" placeholder="Amount (units)" style="flex:1;margin-bottom:0">
+      <input class="ainp" id="port-buyprice" type="number" step="any" min="0" placeholder="Avg buy price ($)" style="flex:1;margin-bottom:0">
+    </div>
+    <div class="mft" style="margin-top:12px">
+      <div></div>
+      <div style="display:flex;gap:7px">
+        <button class="mcancel" onclick="closeAddHolding()">Cancel</button>
+        <button class="mpost" onclick="saveHolding()">Add</button>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 <div class="bnav">
   <div style="padding:8px 14px 20px;display:none" class="desk-logo"><svg width="72" height="32" viewBox="0 0 72 32" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="0,16 8,16 11,5 14,27 17,11 20,21 23,16 32,16" stroke="#F7931A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="36" y="23" font-family="Syne,sans-serif" font-weight="800" font-size="20" fill="#f0ede6">J<tspan fill="#F7931A">L</tspan></text></svg></div>
@@ -565,13 +616,14 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   <button class="bn" id="bn-puls" onclick="goTo('puls')"><i class="ti ti-activity"></i><span>Puls</span></button>
   <button class="bn" id="bn-search" onclick="goTo('search')"><i class="ti ti-search"></i><span>Search</span></button>
   <button class="bn" id="bn-messages" onclick="goTo('messages')"><i class="ti ti-message-circle"></i><span>Messages</span><div class="nbadge" id="nbadge"></div></button>
+  <button class="bn" id="bn-portfolio" onclick="goTo('portfolio')"><i class="ti ti-briefcase"></i><span>Portfolio</span></button>
   <button class="bn" id="bn-profile" onclick="goTo('profile')"><i class="ti ti-user"></i><span>Profile</span></button>
 </div>
 </div>
 
 <script>
 function updateHash(s){try{history.replaceState(null,'','#'+s)}catch(e){}}
-const _validScreens=['feed','puls','search','messages','profile'];
+const _validScreens=['feed','puls','search','messages','portfolio','profile'];
 function tick(){const n=new Date();document.getElementById('clk').textContent=n.getHours()+':'+(n.getMinutes()<10?'0':'')+n.getMinutes()}
 setInterval(tick,10000);tick();
 
@@ -650,7 +702,7 @@ function wFB(cb){if(window._fbReady)cb();else document.addEventListener('fb-read
 wFB(()=>{
   const{auth,onAuthStateChanged}=window._fb;
   onAuthStateChanged(auth,async u=>{
-    if(u){CU=u;await loadUP(u.uid);document.getElementById('asc').style.display='none';updateUI();startFeed();loadUsers();loadConvs();loadNotifs();renderParties();loadMyVote();loadFollowing();}
+    if(u){CU=u;await loadUP(u.uid);document.getElementById('asc').style.display='none';updateUI();startFeed();loadUsers();loadConvs();loadNotifs();renderParties();loadMyVote();loadFollowing();loadPortfolio();}
     else{CU=null;UP=null;followingIds=new Set();document.getElementById('asc').style.display='flex';}
   });
 });
@@ -1484,6 +1536,7 @@ function goTo(s){
   if(s==='profile'&&CU){updateUI();loadMyPosts('all')}
   if(s==='search')loadUsers();
   if(s==='messages'){loadConvs();switchMT('msgs');}
+  if(s==='portfolio'){renderPortfolio();refreshPortPrices().then(renderPortfolio)}
 }
 
 
@@ -1551,6 +1604,116 @@ async function repostP(pid,btn){
 // placeholder to avoid duplicate
 
 function shareP(id){if(navigator.share)navigator.share({title:'JL',url:location.href+'#'+id});else showToast('Link copied!')}
+
+// ── PORTFOLIO ──────────────────────────────────────────────────────────────
+let portCat='crypto',portHoldings=[],portUnsub2=null;
+const PHCID={btc:'bitcoin',eth:'ethereum',sol:'solana',bnb:'binancecoin',xrp:'ripple',ada:'cardano',doge:'dogecoin',dot:'polkadot',avax:'avalanche-2',link:'chainlink'};
+const PHDEMO={nvda:876,aapl:218,msft:415,amzn:186,goog:174,meta:512,tsla:248,sap:182,asml:820,novo:780,iwda:98,vwrl:105,acwi:108,spy:524,qqq:448,voo:481,stoxx:52,veur:68,exsa:77,ewj:68,mchi:48,aaxj:72};
+
+async function loadPortfolio(){
+  if(!CU)return;
+  const{db,collection,query,orderBy,onSnapshot}=window._fb;
+  const q=query(collection(db,`users/${CU.uid}/holdings`),orderBy('addedAt','desc'));
+  if(portUnsub2)portUnsub2();
+  portUnsub2=onSnapshot(q,snap=>{
+    portHoldings=snap.docs.map(d=>({id:d.id,...d.data()}));
+    refreshPortPrices().then(renderPortfolio);
+  });
+}
+
+async function refreshPortPrices(){
+  const cgIds=[...new Set(portHoldings.filter(h=>h.category==='crypto').map(h=>PHCID[h.symbol?.toLowerCase()]).filter(Boolean))];
+  if(cgIds.length){
+    try{
+      const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cgIds.join(',')}&vs_currencies=usd`);
+      if(r.ok){
+        const data=await r.json();
+        portHoldings.forEach(h=>{if(h.category==='crypto'){const cid=PHCID[h.symbol?.toLowerCase()];if(cid&&data[cid])h.livePrice=data[cid].usd;}});
+      }
+    }catch(e){}
+  }
+  portHoldings.forEach(h=>{
+    if((h.category==='stocks'||h.category==='etf')&&PHDEMO[h.symbol?.toLowerCase()])h.livePrice=PHDEMO[h.symbol.toLowerCase()];
+    if(!h.livePrice)h.livePrice=h.buyPrice;
+  });
+}
+
+function renderPortfolio(){
+  const fmt=n=>Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  let totalVal=0,totalCost=0;
+  portHoldings.forEach(h=>{totalVal+=(h.livePrice||h.buyPrice||0)*h.amount;totalCost+=h.buyPrice*h.amount});
+  const pnl=totalVal-totalCost,pct=totalCost>0?(pnl/totalCost*100):0;
+  const pnlCol=pnl>=0?'#4ade80':'#f87171',sg=pnl>=0?'+':'';
+  const tb=document.getElementById('port-total-box');
+  if(tb)tb.innerHTML=`<div class="ptot">
+    <div style="font-size:10px;color:var(--mu2);letter-spacing:.7px;text-transform:uppercase;margin-bottom:5px">Total Portfolio Value</div>
+    <div class="ptot-v">$${fmt(totalVal)}</div>
+    ${totalCost>0?`<div class="ptot-chg" style="color:${pnlCol}">${sg}$${fmt(Math.abs(pnl))} (${sg}${pct.toFixed(2)}%) all time</div>`:'<div style="font-size:12px;color:var(--mu2);margin-top:4px">Add holdings to track P&L</div>'}
+  </div>`;
+  if(!portHoldings.length){
+    const pl=document.getElementById('port-list');
+    if(pl)pl.innerHTML='<div class="empty"><i class="ti ti-briefcase-off"></i><p>No holdings yet.<br>Tap Add Holding to get started.</p></div>';
+    return;
+  }
+  const cats=[['crypto','Crypto'],['stocks','Stocks'],['etf','ETF'],['tcg','TCG Cards']];
+  let html='';
+  cats.forEach(([cat,lbl])=>{
+    const items=portHoldings.filter(h=>h.category===cat);
+    if(!items.length)return;
+    html+=`<div class="sl">${lbl}</div>`;
+    items.forEach(h=>{
+      const lp=h.livePrice||h.buyPrice||0,cv=lp*h.amount,cost=h.buyPrice*h.amount,pl=cv-cost,pp=cost>0?(pl/cost*100):0;
+      const pc=pl>=0?'#4ade80':'#f87171',s2=pl>=0?'+':'';
+      const ini=(h.symbol||h.name||'?').substring(0,3).toUpperCase();
+      html+=`<div class="phold" onclick="showHoldMenu('${h.id}')">
+        <div class="phold-icon">${ini}</div>
+        <div class="phold-info">
+          <div class="phold-name">${esc(h.name||h.symbol||'')}</div>
+          <div class="phold-amt">${h.amount} ${(h.symbol||'').toUpperCase()} &middot; avg $${fmt(h.buyPrice)}</div>
+        </div>
+        <div class="phold-val">
+          <div class="phold-cur">$${fmt(cv)}</div>
+          <div class="phold-pnl" style="color:${pc}">${s2}$${fmt(Math.abs(pl))} (${s2}${pp.toFixed(1)}%)</div>
+        </div>
+      </div>`;
+    });
+  });
+  const pl2=document.getElementById('port-list');if(pl2)pl2.innerHTML=html;
+}
+
+function openAddHolding(){
+  if(!CU){showToast('Please sign in');return}
+  portCat='crypto';
+  document.querySelectorAll('#port-cats .pcat-btn').forEach(b=>b.classList.toggle('ak',b.dataset.cat==='crypto'));
+  ['port-name','port-symbol','port-amount','port-buyprice'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('port-pm').classList.add('on');
+  setTimeout(()=>document.getElementById('port-name').focus(),120);
+}
+function closeAddHolding(){document.getElementById('port-pm').classList.remove('on')}
+function selPCat(btn){portCat=btn.dataset.cat;document.querySelectorAll('#port-cats .pcat-btn').forEach(b=>b.classList.toggle('ak',b===btn))}
+
+async function saveHolding(){
+  const name=document.getElementById('port-name').value.trim();
+  const symbol=document.getElementById('port-symbol').value.trim();
+  const amount=parseFloat(document.getElementById('port-amount').value);
+  const buyPrice=parseFloat(document.getElementById('port-buyprice').value);
+  if(!name){showToast('Enter asset name');return}
+  if(isNaN(amount)||amount<=0){showToast('Enter a valid amount');return}
+  if(isNaN(buyPrice)||buyPrice<0){showToast('Enter a valid buy price');return}
+  const{db,collection,addDoc,serverTimestamp}=window._fb;
+  await addDoc(collection(db,`users/${CU.uid}/holdings`),{name,symbol:symbol||name,category:portCat,amount,buyPrice,addedAt:serverTimestamp()});
+  closeAddHolding();showToast(`${name} added to portfolio`);
+}
+
+function showHoldMenu(id){
+  const h=portHoldings.find(x=>x.id===id);if(!h)return;
+  if(confirm(`Remove ${h.name||h.symbol} from portfolio?`))delHolding(id);
+}
+async function delHolding(id){
+  const{db,doc,deleteDoc}=window._fb;
+  await deleteDoc(doc(db,`users/${CU.uid}/holdings`,id));
+  showToast('Holding removed');
+}
 </script>
 </body>
 </html>
