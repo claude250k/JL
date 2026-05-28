@@ -1028,6 +1028,7 @@ function updateUI(){
   document.getElementById('ps-p').innerHTML=`<strong>${UP.posts||0}</strong> Posts`;
   document.getElementById('ps-f').innerHTML=`<strong>${UP.followers||0}</strong> Followers`;
   document.getElementById('ps-g').innerHTML=`<strong>${UP.following||0}</strong> Following`;
+  if(window._fb&&CU){const{db,collection,query,where,getDocs}=window._fb;getDocs(query(collection(db,'follows'),where('followingId','==',CU.uid))).then(s=>{const el=document.getElementById('ps-f');if(el)el.innerHTML=`<strong>${s.size}</strong> Followers`;});getDocs(query(collection(db,'follows'),where('followerId','==',CU.uid))).then(s=>{const el=document.getElementById('ps-g');if(el)el.innerHTML=`<strong>${s.size}</strong> Following`;});}
   const ptog=document.getElementById('ptog');if(ptog)ptog.checked=UP.portfolioPublic===true;
   const ptogLbl=document.getElementById('ptog-lbl');if(ptogLbl)ptogLbl.textContent=t(UP.portfolioPublic?'portfolio_public':'portfolio_private');
   const pav=document.getElementById('pd-myav');
@@ -1265,6 +1266,25 @@ async function likeP(pid,btn){
   }catch(e){}
 }
 
+async function likeCmt(pid,cmid,btn){
+  if(!CU)return;
+  const wasLiked=btn.classList.contains('liked');
+  const nowLiked=!wasLiked;
+  const cnt=btn.querySelector('span');
+  const curCount=parseInt(cnt?.textContent||'0');
+  const newCount=Math.max(0,curCount+(nowLiked?1:-1));
+  const ic=btn.querySelector('i');const sp=btn.querySelector('span');
+  if(nowLiked){btn.classList.add('liked');if(ic)ic.className='ti ti-heart-filled';if(sp)sp.textContent=newCount;}
+  else{btn.classList.remove('liked');if(ic)ic.className='ti ti-heart';if(sp)sp.textContent=newCount;}
+  const{db,doc,getDoc,updateDoc,increment}=window._fb;
+  const ref=doc(db,`posts/${pid}/comments`,cmid);
+  try{
+    const snap=await getDoc(ref);if(!snap.exists())return;
+    const d=snap.data(),lb=d.likedBy||[],liked=lb.includes(CU.uid);
+    const nArr=liked?lb.filter(x=>x!==CU.uid):[...lb,CU.uid];
+    await updateDoc(ref,{likes:increment(liked?-1:1),likedBy:nArr});
+  }catch(e){}
+}
 async function addNotif(toUid,type,msg,refId=''){
   if(!toUid||toUid===CU?.uid)return;
   const{db,collection,addDoc,serverTimestamp}=window._fb;
@@ -1291,7 +1311,7 @@ function loadNotifs(){
     renderNotifs(notifs);
   });
 }
-function updateNavBadge(){const b=document.getElementById('nbadge');const n=_notifUnread+_msgUnread;if(n>0){b.textContent=n>9?'9+':n;b.classList.add('show')}else{b.classList.remove('show')}}
+function updateNavBadge(){const b=document.getElementById('nbadge');const n=_msgUnread;if(n>0){b.textContent=n>9?'9+':n;b.classList.add('show')}else{b.classList.remove('show')}}
 function renderNotifs(notifs){
   const c=document.getElementById('notif-list');if(!c)return;
   if(!notifs.length){c.innerHTML='<div class="empty"><i class="ti ti-bell-off"></i><p>No notifications yet</p></div>';return}
@@ -1342,7 +1362,7 @@ async function loadCmts(pid,cid){
   const snap=await getDocs(query(collection(db,`posts/${pid}/comments`),orderBy('createdAt','asc')));
   const cmts=snap.docs.map(d=>({id:d.id,...d.data()}));
   if(!cmts.length){c.innerHTML='<div class="empty" style="padding:18px 20px 10px"><p>No comments yet. Be the first!</p></div>';return}
-  c.innerHTML=cmts.map(cm=>{const cav=cm.authorAvatar?`<img src="${cm.authorAvatar}">`:(cm.authorName||'?').substring(0,2).toUpperCase();const ownCmt=CU&&cm.authorId===CU.uid;return`<div class="cmt"><div class="cmtav">${cav}</div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:4px"><div class="cmtnm">${esc(cm.authorName||'')}</div>${ownCmt?`<button onclick="delCmt('${pid}','${cm.id}')" style="background:none;border:none;color:var(--mu);cursor:pointer;margin-left:auto;padding:2px 3px;line-height:1" title="Delete comment"><i class="ti ti-trash" style="font-size:12px"></i></button>`:''}</div><div class="cmttx">${linkText(cm.text||'')}</div><div class="cmttm">${cm.createdAt?tAgo(cm.createdAt.toDate()):''}</div></div></div>`}).join('');
+  c.innerHTML=cmts.map(cm=>{const cav=cm.authorAvatar?`<img src="${cm.authorAvatar}">`:(cm.authorName||'?').substring(0,2).toUpperCase();const ownCmt=CU&&cm.authorId===CU.uid;const cmLiked=CU&&(cm.likedBy||[]).includes(CU.uid);return`<div class="cmt"><div class="cmtav">${cav}</div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:4px"><div class="cmtnm">${esc(cm.authorName||'')}</div>${ownCmt?`<button onclick="delCmt('${pid}','${cm.id}')" style="background:none;border:none;color:var(--mu);cursor:pointer;margin-left:auto;padding:2px 3px;line-height:1" title="Delete comment"><i class="ti ti-trash" style="font-size:12px"></i></button>`:''}</div><div class="cmttx">${linkText(cm.text||'')}</div><div style="display:flex;align-items:center;gap:10px;margin-top:2px"><div class="cmttm">${cm.createdAt?tAgo(cm.createdAt.toDate()):''}</div><button class="pa${cmLiked?' liked':''}" id="clb-${cm.id}" onclick="likeCmt('${pid}','${cm.id}',this)"><i class="ti ${cmLiked?'ti-heart-filled':'ti-heart'}"></i><span>${cm.likes||0}</span></button></div></div></div>`}).join('');
 }
 async function submitCmt(){
   if(!CU||!UP||!curPD)return;
@@ -1400,7 +1420,7 @@ async function submitPost(){
   btn.textContent='Post';btn.disabled=false;
 }
 
-async function loadMyReposts(){
+async function loadMyReposts(ch='all'){
   if(!CU)return;
   const{db,collection,query,where,getDocs,doc,getDoc}=window._fb;
   const c=document.getElementById('myposts');c.innerHTML='<div class="spin"></div>';
@@ -1410,18 +1430,20 @@ async function loadMyReposts(){
     const ps=await getDoc(doc(db,'posts',d.data().postId));
     return ps.exists()?{id:ps.id,...ps.data()}:null;
   }));
-  const valid=posts.filter(p=>p&&p.authorId!==CU.uid);
+  let valid=posts.filter(p=>p&&p.authorId!==CU.uid);
+  if(ch!=='all')valid=valid.filter(p=>p.channel===ch);
   c.innerHTML=valid.length?valid.map(p=>pH(p)).join(''):`<div class="empty"><i class="ti ti-repeat"></i><p>${t('no_reposts_yet')}</p></div>`;
 }
-async function loadMyLikes(){
+async function loadMyLikes(ch='all'){
   if(!CU)return;
   const{db,collection,query,where,getDocs}=window._fb;
   const c=document.getElementById('myposts');c.innerHTML='<div class="spin"></div>';
   const snap=await getDocs(query(collection(db,'posts'),where('likedBy','array-contains',CU.uid)));
   if(!snap.docs.length){c.innerHTML=`<div class="empty"><i class="ti ti-heart"></i><p>${t('no_likes_yet')}</p></div>`;return}
-  const posts=snap.docs.map(d=>({id:d.id,...d.data()}))
+  let posts=snap.docs.map(d=>({id:d.id,...d.data()}))
     .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-  c.innerHTML=posts.map(p=>pH(p)).join('');
+  if(ch!=='all')posts=posts.filter(p=>p.channel===ch);
+  c.innerHTML=posts.length?posts.map(p=>pH(p)).join(''):`<div class="empty"><i class="ti ti-heart"></i><p>${t('no_likes_yet')}</p></div>`;
 }
 async function loadMyPosts(ch){
   if(!CU)return;
@@ -1436,13 +1458,13 @@ async function loadMyPosts(ch){
   if(!posts.length){c.innerHTML=`<div class="empty"><i class="ti ti-pencil-off"></i><p>${ch==='all'?t('no_posts_yet'):t('no_posts_ch')}</p></div>`;return}
   c.innerHTML=posts.map(p=>pH(p)).join('');
 }
-function myCFilt(el,ch){if(myTab!=='posts')return;document.querySelectorAll('#mychs .ck').forEach(c=>c.classList.remove('ak'));el.classList.add('ak');myPFilt=ch;loadMyPosts(ch);}
+function myCFilt(el,ch){document.querySelectorAll('#mychs .ck').forEach(c=>c.classList.remove('ak'));el.classList.add('ak');myPFilt=ch;if(myTab==='posts')loadMyPosts(ch);else if(myTab==='reposts')loadMyReposts(ch);else loadMyLikes(ch);}
 function ptab(el,tab){
   document.querySelectorAll('#sc-profile .ptabs .ptab').forEach(t=>t.classList.remove('ak'));el.classList.add('ak');
   myTab=tab;
   if(tab==='posts')loadMyPosts(myPFilt);
-  else if(tab==='reposts')loadMyReposts();
-  else loadMyLikes();
+  else if(tab==='reposts')loadMyReposts(myPFilt);
+  else loadMyLikes(myPFilt);
 }
 
 async function showFL(type){
@@ -1508,9 +1530,6 @@ async function openOP(uid){
   document.getElementById('opov').classList.add('on');
   opUnsub=onSnapshot(doc(db,'users',uid),sn=>{
     if(!sn.exists())return;
-    const d=sn.data();
-    document.getElementById('op-fc').textContent=d.followers||0;
-    document.getElementById('op-gc').textContent=d.following||0;
   });
 }
 async function opAllCk(el,uid){
