@@ -328,6 +328,10 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .watch-model{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bd)}.watch-model:last-child{border-bottom:none}
 .watch-model-name{font-size:12px;font-weight:500;color:var(--tx)}.watch-model-price{font-size:12px;font-weight:600;color:var(--tx2)}
 .htag{color:var(--gold);cursor:pointer;font-weight:500}.htag:hover{opacity:.8}
+.post-link{display:inline-flex;align-items:center;background:rgba(247,147,26,.12);border:1px solid rgba(247,147,26,.25);color:var(--gold);padding:1px 7px;border-radius:5px;font-size:11px;font-weight:600;text-decoration:none;margin:0 2px;cursor:pointer;vertical-align:middle}.post-link:hover{background:rgba(247,147,26,.2)}
+.ac-drop{display:none;position:absolute;top:calc(100% + 2px);left:0;right:0;background:var(--sf2);border:1px solid var(--gold);border-radius:10px;z-index:300;max-height:180px;overflow-y:auto}
+.ac-item{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--bd);font-size:12px;color:var(--tx)}.ac-item:last-child{border-bottom:none}.ac-item:hover{background:var(--gdim)}
+.ac-sym{font-size:10px;color:var(--gold);font-weight:700;min-width:36px}.ac-cat{font-size:10px;color:var(--mu2)}
 </style>
 </head>
 <body>
@@ -580,7 +584,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   <div class="scroll">
     <div id="port-total-box"></div>
     <div id="port-list"></div>
-    <button class="padd" onclick="openAddHolding()"><i class="ti ti-plus"></i> Add Holding</button>
+    <div id="port-add-wrap"><button class="padd" onclick="openAddHolding()"><i class="ti ti-plus"></i> Add Holding</button></div>
     <div style="height:16px"></div>
   </div>
 </div>
@@ -717,7 +721,10 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       <button class="pcat-btn" data-cat="etf" onclick="selPCat(this)">ETF</button>
       <button class="pcat-btn" data-cat="tcg" onclick="selPCat(this)">TCG</button>
     </div>
-    <input class="ainp" id="port-name" placeholder="Name (e.g. Bitcoin, Apple, Pikachu)">
+    <div style="position:relative;margin-bottom:8px">
+      <input class="ainp" id="port-name" placeholder="Name (e.g. Bitcoin, Apple, SPY)" autocomplete="off" oninput="portAC(this.value)" style="margin-bottom:0;width:100%">
+      <div class="ac-drop" id="port-ac"></div>
+    </div>
     <input class="ainp" id="port-symbol" placeholder="Ticker symbol (e.g. BTC, AAPL) — optional">
     <div style="display:flex;gap:8px">
       <input class="ainp" id="port-amount" type="number" step="any" min="0" placeholder="Amount (units)" style="flex:1;margin-bottom:0">
@@ -1762,7 +1769,16 @@ function showToast(m){const t=document.getElementById('toast');t.textContent=m;t
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;')}
 function tAgo(d){const s=Math.floor((new Date()-d)/1000);if(s<60)return'now';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';return Math.floor(s/86400)+'d'}
 const HASH_MAP={bitcoin:'btc',btc:'btc',ethereum:'eth',eth:'eth',solana:'sol',sol:'sol',bnb:'bnb',xrp:'xrp',ripple:'xrp',ada:'ada',cardano:'ada',doge:'doge',dogecoin:'doge',dot:'dot',polkadot:'dot',avax:'avax',avalanche:'avax',link:'link',chainlink:'link',nvidia:'nvda',nvda:'nvda',apple:'aapl',aapl:'aapl',microsoft:'msft',msft:'msft',amazon:'amzn',amzn:'amzn',google:'goog',alphabet:'goog',goog:'goog',meta:'meta',tesla:'tsla',tsla:'tsla',sap:'sap',spy:'spy',sp500:'spy',qqq:'qqq',voo:'voo',iwda:'iwda',vwrl:'vwrl'};
-function linkText(s){return esc(s).replace(/#(\w+)/g,(m,tag)=>{const key=tag.toLowerCase();const asset=HASH_MAP[key];if(asset)return`<span class="htag" onclick="event.stopPropagation();goToPuls('${asset}')">${m}</span>`;return`<span class="htag">${m}</span>`;});}
+function linkText(s){
+  const urlRe=/(https?:\/\/[^\s<>"']+)/g;
+  const parts=[];let li=0,m;
+  while((m=urlRe.exec(s))!==null){parts.push({t:'tx',v:s.slice(li,m.index)});parts.push({t:'url',v:m[1]});li=m.index+m[1].length;}
+  parts.push({t:'tx',v:s.slice(li)});
+  return parts.map(p=>{
+    if(p.t==='url'){try{const dom=new URL(p.v).hostname.replace(/^www\./,'');return`<a class="post-link" href="${esc(p.v)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">[${esc(dom)}]</a>`}catch(e){return esc(p.v)}}
+    return esc(p.v).replace(/#(\w+)/g,(m,tag)=>{const k=tag.toLowerCase();const a=HASH_MAP[k];return a?`<span class="htag" onclick="event.stopPropagation();goToPuls('${a}')">${m}</span>`:`<span class="htag">${m}</span>`;});
+  }).join('');
+}
 function goToPuls(asset){goTo('puls');setTimeout(()=>openCD(asset),120);}
 function togTCG(id){const body=document.getElementById('tcg-'+id);const icon=document.getElementById('tcgi-'+id);if(!body)return;const open=body.style.display!=='none';body.style.display=open?'none':'block';if(icon)icon.style.transform=open?'':'rotate(180deg)';}
 function togWatch(id){const body=document.getElementById('watch-'+id);const icon=document.getElementById('watchi-'+id);if(!body)return;const open=body.style.display!=='none';body.style.display=open?'none':'block';if(icon)icon.style.transform=open?'':'rotate(180deg)';}
@@ -1798,7 +1814,7 @@ async function repostP(pid,btn){
 }
 // placeholder to avoid duplicate
 
-function shareP(id){if(navigator.share)navigator.share({title:'JL',url:location.href+'#'+id});else showToast('Link copied!')}
+function shareP(id){const url='https://claude250k.github.io/JL/#post?id='+id;navigator.clipboard?.writeText(url).then(()=>showToast('Link copied!')).catch(()=>showToast('Link: '+url));}
 
 // ── PORTFOLIO ──────────────────────────────────────────────────────────────
 let portCat='crypto',portHoldings=[],portUnsub2=null;
@@ -1874,6 +1890,12 @@ function renderPortfolio(){
     });
   });
   const pl2=document.getElementById('port-list');if(pl2)pl2.innerHTML=html;
+  const cc=portHoldings.filter(h=>h.category==='crypto').length,sc=portHoldings.filter(h=>h.category==='stocks').length,ec=portHoldings.filter(h=>h.category==='etf').length;
+  const lim=cc>=1&&sc>=1&&ec>=1;
+  const aw=document.getElementById('port-add-wrap');
+  if(aw)aw.innerHTML=lim
+    ?`<div style="margin:12px 14px;padding:14px;background:linear-gradient(135deg,rgba(247,147,26,.08),rgba(247,147,26,.03));border:1px solid rgba(247,147,26,.25);border-radius:12px;text-align:center"><div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:4px"><i class="ti ti-crown"></i> Pro coming soon</div><div style="font-size:11px;color:var(--mu2)">Unlimited tracking for all your holdings</div></div>`
+    :`<button class="padd" onclick="openAddHolding()"><i class="ti ti-plus"></i> ${t('addHolding')}</button>`;
 }
 
 function openAddHolding(){
@@ -1881,6 +1903,7 @@ function openAddHolding(){
   portCat='crypto';
   document.querySelectorAll('#port-cats .pcat-btn').forEach(b=>b.classList.toggle('ak',b.dataset.cat==='crypto'));
   ['port-name','port-symbol','port-amount','port-buyprice'].forEach(id=>document.getElementById(id).value='');
+  const ac=document.getElementById('port-ac');if(ac)ac.style.display='none';
   document.getElementById('port-pm').classList.add('on');
   setTimeout(()=>document.getElementById('port-name').focus(),120);
 }
@@ -1895,6 +1918,10 @@ async function saveHolding(){
   if(!name){showToast('Enter asset name');return}
   if(isNaN(amount)||amount<=0){showToast('Enter a valid amount');return}
   if(isNaN(buyPrice)||buyPrice<0){showToast('Enter a valid buy price');return}
+  if(['crypto','stocks','etf'].includes(portCat)){
+    const cnt=portHoldings.filter(h=>h.category===portCat).length;
+    if(cnt>=1){showToast('Pro coming soon — upgrade for unlimited holdings');closeAddHolding();return}
+  }
   const{db,collection,addDoc,serverTimestamp}=window._fb;
   await addDoc(collection(db,`users/${CU.uid}/holdings`),{name,symbol:symbol||name,category:portCat,amount,buyPrice,addedAt:serverTimestamp()});
   closeAddHolding();showToast(`${name} added to portfolio`);
@@ -1983,12 +2010,70 @@ function applyLang(){
 }
 function setLang(l){curLang=l;localStorage.setItem('jl_lang',l);applyLang();showToast(l==='de'?'Sprache geändert':l==='es'?'Idioma cambiado':'Language changed')}
 function shareOP(){
-  const nm=document.getElementById('op-nm')?.textContent||'';
-  const url=location.href.split('#')[0];
-  if(navigator.share)navigator.share({title:nm+' on JL',text:'Check out '+nm+' on JL',url});
-  else navigator.clipboard?.writeText(url).then(()=>showToast('Link copied!')).catch(()=>showToast('Link: '+url));
+  const url='https://claude250k.github.io/JL/#profile?u='+(curOP||'');
+  navigator.clipboard?.writeText(url).then(()=>showToast('Link copied!')).catch(()=>showToast('Link: '+url));
 }
 applyLang();
+
+// ── PORTFOLIO AUTOCOMPLETE ──────────────────────────────────────────────────
+const PORT_ASSETS=[
+  {name:'Bitcoin',symbol:'BTC',cat:'crypto'},{name:'Ethereum',symbol:'ETH',cat:'crypto'},
+  {name:'Solana',symbol:'SOL',cat:'crypto'},{name:'BNB',symbol:'BNB',cat:'crypto'},
+  {name:'XRP',symbol:'XRP',cat:'crypto'},{name:'Cardano',symbol:'ADA',cat:'crypto'},
+  {name:'Dogecoin',symbol:'DOGE',cat:'crypto'},{name:'Polkadot',symbol:'DOT',cat:'crypto'},
+  {name:'Avalanche',symbol:'AVAX',cat:'crypto'},{name:'Chainlink',symbol:'LINK',cat:'crypto'},
+  {name:'Nvidia',symbol:'NVDA',cat:'stocks'},{name:'Apple',symbol:'AAPL',cat:'stocks'},
+  {name:'Microsoft',symbol:'MSFT',cat:'stocks'},{name:'Amazon',symbol:'AMZN',cat:'stocks'},
+  {name:'Alphabet',symbol:'GOOG',cat:'stocks'},{name:'Meta',symbol:'META',cat:'stocks'},
+  {name:'Tesla',symbol:'TSLA',cat:'stocks'},{name:'SAP SE',symbol:'SAP',cat:'stocks'},
+  {name:'ASML Holding',symbol:'ASML',cat:'stocks'},{name:'Novo Nordisk',symbol:'NOVO',cat:'stocks'},
+  {name:'iShares MSCI World',symbol:'IWDA',cat:'etf'},{name:'Vanguard FTSE All-World',symbol:'VWRL',cat:'etf'},
+  {name:'iShares MSCI ACWI',symbol:'ACWI',cat:'etf'},{name:'SPDR S&P 500',symbol:'SPY',cat:'etf'},
+  {name:'Invesco QQQ Trust',symbol:'QQQ',cat:'etf'},{name:'Vanguard S&P 500',symbol:'VOO',cat:'etf'},
+  {name:'EURO STOXX 50',symbol:'STOXX',cat:'etf'},{name:'Vanguard FTSE Europe',symbol:'VEUR',cat:'etf'},
+  {name:'iShares Core MSCI Europe',symbol:'EXSA',cat:'etf'},{name:'iShares MSCI Japan',symbol:'EWJ',cat:'etf'},
+  {name:'iShares MSCI China',symbol:'MCHI',cat:'etf'},{name:'iShares Asia ex Japan',symbol:'AAXJ',cat:'etf'},
+];
+function portAC(val){
+  const drop=document.getElementById('port-ac');if(!drop)return;
+  if(!val||val.length<1){drop.style.display='none';return}
+  const q=val.toLowerCase();
+  const hits=PORT_ASSETS.filter(a=>a.name.toLowerCase().includes(q)||a.symbol.toLowerCase().includes(q)).slice(0,6);
+  if(!hits.length){drop.style.display='none';return}
+  drop.innerHTML=hits.map(a=>`<div class="ac-item" onclick="portACSelect('${a.name}','${a.symbol}','${a.cat}')"><span class="ac-sym">${esc(a.symbol)}</span><span style="flex:1">${esc(a.name)}</span><span class="ac-cat">${a.cat}</span></div>`).join('');
+  drop.style.display='block';
+}
+function portACSelect(name,symbol,cat){
+  document.getElementById('port-name').value=name;
+  document.getElementById('port-symbol').value=symbol;
+  const drop=document.getElementById('port-ac');if(drop)drop.style.display='none';
+  const btn=document.querySelector(`#port-cats .pcat-btn[data-cat="${cat}"]`);if(btn)selPCat(btn);
+  setTimeout(()=>document.getElementById('port-amount').focus(),50);
+}
+document.addEventListener('click',e=>{const drop=document.getElementById('port-ac');if(drop&&!drop.contains(e.target)&&e.target.id!=='port-name')drop.style.display='none';});
+
+// ── SWIPE BACK ──────────────────────────────────────────────────────────────
+let _sx=0,_sy=0,_swOk=false;
+document.addEventListener('touchstart',e=>{
+  _sx=e.touches[0].clientX;_sy=e.touches[0].clientY;_swOk=true;
+  let el=e.target;while(el&&el!==document.body){if(el.scrollWidth>el.clientWidth+4){_swOk=false;break}el=el.parentElement;}
+},{passive:true});
+document.addEventListener('touchend',e=>{
+  if(!_swOk)return;
+  const dx=e.changedTouches[0].clientX-_sx,dy=e.changedTouches[0].clientY-_sy;
+  if(dx>60&&Math.abs(dy)<80)swipeBack();
+},{passive:true});
+function swipeBack(){
+  const checks=[
+    ['pdov',()=>closePD()],['opov',()=>closeOP()],['chov',()=>closeChat()],
+    ['cd',()=>closeCD()],['setov',()=>closeSet()],['editov',()=>closeEditProf()],
+    ['nmov',()=>document.getElementById('nmov').classList.remove('on')],
+    ['fl-ov',()=>document.getElementById('fl-ov').classList.remove('on')],
+    ['pov',()=>document.getElementById('pov').classList.remove('on')],
+    ['inst-ov',()=>closeInstPage()],
+  ];
+  for(const[id,fn]of checks){const el=document.getElementById(id);if(el&&el.classList.contains('on')){fn();return;}}
+}
 </script>
 </body>
 </html>
