@@ -292,15 +292,24 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .phold-val{text-align:right;flex-shrink:0}
 .phold-cur{font-size:13px;font-weight:600;color:var(--tx)}
 .phold-pnl{font-size:11px;font-weight:600;margin-top:1px}
-.ptog{position:absolute;bottom:8px;left:86px;display:flex;align-items:center;gap:6px;cursor:pointer;z-index:11;background:rgba(0,0,0,.5);border-radius:20px;padding:3px 8px 3px 5px;backdrop-filter:blur(4px)}
+.ptog{display:flex;align-items:center;gap:6px;cursor:pointer}
 .ptog input{display:none}
 .ptog-sl{width:30px;height:17px;background:#555;border-radius:9px;transition:background .2s;position:relative;flex-shrink:0}
 .ptog-sl::after{content:'';position:absolute;top:2px;left:2px;width:13px;height:13px;background:#fff;border-radius:50%;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)}
 .ptog input:checked~.ptog-sl{background:#4ade80}
 .ptog input:checked~.ptog-sl::after{left:15px}
-.ptog-lbl{font-size:10px;font-weight:600;color:rgba(255,255,255,.9);white-space:nowrap}
+.ptog-lbl{font-size:11px;font-weight:600;color:var(--mu2);white-space:nowrap}
 .op-port-btn{width:100%;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;border:1px solid var(--bd);background:var(--sf2);color:var(--tx);display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer}
 .op-port-btn:disabled{opacity:.45;cursor:default}
+.cfdlg{position:absolute;inset:0;background:rgba(0,0,0,.72);z-index:600;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.cfdlg.on{display:flex}
+.cfdlg-box{background:var(--sf);border:1px solid rgba(247,147,26,.25);border-radius:18px;padding:22px 20px 18px;margin:0 28px;width:100%;max-width:300px}
+.cfdlg-ico{font-size:28px;color:var(--gold);text-align:center;margin-bottom:8px}
+.cfdlg-msg{font-size:14px;font-weight:600;color:var(--tx);text-align:center;margin-bottom:18px;line-height:1.4}
+.cfdlg-btns{display:flex;gap:10px}
+.cfdlg-btns button{flex:1;padding:11px;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid}
+.cfdlg-cancel{background:var(--sf2);border-color:var(--bd)!important;color:var(--mu2)}
+.cfdlg-ok{background:rgba(247,147,26,.12);border-color:rgba(247,147,26,.45)!important;color:var(--gold)}
 .padd{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px 14px;background:var(--gold);color:#000;border:none;padding:12px;border-radius:12px;width:calc(100% - 28px);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--fb)}
 .pform-sel{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap}
 .pcat-btn{padding:5px 13px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--bd);color:var(--mu2);background:transparent}.pcat-btn.ak{background:var(--gold);color:#000;border-color:var(--gold)}
@@ -554,6 +563,14 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
     <div class="stitle">Portfolio<em style="color:var(--gold);font-style:normal">.</em></div>
     <div style="position:absolute;right:16px"><button class="ib2" onclick="refreshPortPrices().then(renderPortfolio);showToast('Refreshing...')" title="Refresh"><i class="ti ti-refresh"></i></button></div>
   </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid var(--bd);flex-shrink:0">
+    <span style="font-size:11px;color:var(--mu2);display:flex;align-items:center;gap:5px"><i class="ti ti-eye" style="font-size:13px"></i> Portfolio öffentlich</span>
+    <label class="ptog" title="Portfolio öffentlich/privat schalten">
+      <span class="ptog-lbl" id="ptog-lbl">Privat</span>
+      <input type="checkbox" id="ptog" onchange="togglePortPublic(this.checked)">
+      <span class="ptog-sl"></span>
+    </label>
+  </div>
   <div class="scroll">
     <div id="port-total-box"></div>
     <div id="port-list"></div>
@@ -575,11 +592,6 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       <div class="pav" id="myav" onclick="document.getElementById('avinp').click()"></div>
       <input type="file" id="avinp" accept="image/*" style="display:none" onchange="upAv(this)">
       <input type="file" id="covinp" accept="image/*" style="display:none" onchange="upCov(this)">
-      <label class="ptog" title="Portfolio öffentlich/privat schalten">
-        <input type="checkbox" id="ptog" onchange="togglePortPublic(this.checked)">
-        <span class="ptog-sl"></span>
-        <span class="ptog-lbl" id="ptog-lbl">Privat</span>
-      </label>
     </div>
     <div class="pinfo">
       <div class="pname" id="myname">-</div>
@@ -741,6 +753,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 <div class="toast" id="toast"></div>
 <div class="bnav">
   <div style="padding:8px 14px 20px;display:none" class="desk-logo"><svg width="72" height="32" viewBox="0 0 72 32" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="0,16 8,16 11,5 14,27 17,11 20,21 23,16 32,16" stroke="#F7931A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="36" y="23" font-family="Syne,sans-serif" font-weight="800" font-size="20" fill="#f0ede6">J<tspan fill="#F7931A">L</tspan></text></svg></div>
+  <div class="cfdlg" id="cfdlg"><div class="cfdlg-box"><div class="cfdlg-ico"><i class="ti ti-trash"></i></div><div class="cfdlg-msg" id="cfdlg-msg">Löschen?</div><div class="cfdlg-btns"><button class="cfdlg-cancel" onclick="_cfCancel()">Abbrechen</button><button class="cfdlg-ok" onclick="_cfOk()">Löschen</button></div></div></div>
   <button class="bn ak" id="bn-feed" onclick="goTo('feed')"><i class="ti ti-home"></i><span data-i18n="nav_feed">Feed</span></button>
   <button class="bn" id="bn-puls" onclick="goTo('puls')"><i class="ti ti-activity"></i><span data-i18n="nav_puls">Puls</span></button>
   <button class="bn" id="bn-search" onclick="goTo('search')"><i class="ti ti-search"></i><span data-i18n="nav_search">Search</span></button>
@@ -1187,7 +1200,6 @@ function pH(p){
           <span class="pan" onclick="openOP('${p.authorId}')">${esc(p.authorName||'Anonymous')}</span>
           <span class="cbadge ${cb}" onclick="goToCh('${p.channel||''}')">${cl}</span>
           <span class="ptm">${t}</span>
-          ${isOwn?`<button class="pa" onclick="delPost('${p.id}')" style="margin-left:auto;color:var(--mu)" title="Delete post"><i class="ti ti-trash" style="font-size:13px"></i></button>`:''}
         </div>
         <div class="ptxt" onclick="openPD('${p.id}')">${linkText(p.text||'')}</div>
         ${img}
@@ -1312,7 +1324,8 @@ async function openPD(pid){
   const img=p.imageUrl?`<img src="${p.imageUrl}" class="pimg">`:'';
   const avH=p.authorAvatar?`<img src="${p.authorAvatar}">`:(p.authorName||'?').substring(0,2).toUpperCase();
   const liked=CU&&(p.likedBy||[]).includes(CU.uid);
-  document.getElementById('pd-content').innerHTML=`<div class="pi" style="cursor:default"><div class="pr"><div class="av" onclick="openOP('${p.authorId}')">${avH}</div><div class="pb"><div class="ptop"><span class="pan" onclick="openOP('${p.authorId}')">${esc(p.authorName||'')}</span><span class="cbadge ${cb}">${cl}</span><span class="ptm">${t}</span></div><div class="ptxt" style="cursor:default">${linkText(p.text||'')}</div>${img}<div class="pacts"><button class="pa${liked?' liked':''}" id="lb-${p.id}" onclick="likeP('${p.id}',this)"><i class="ti ${liked?'ti-heart-filled':'ti-heart'}"></i><span id="lc-${p.id}">${p.likes||0}</span></button></div></div></div></div>`;
+  const isOwnPD=CU&&p.authorId===CU.uid;
+  document.getElementById('pd-content').innerHTML=`<div class="pi" style="cursor:default"><div class="pr"><div class="av" onclick="openOP('${p.authorId}')">${avH}</div><div class="pb"><div class="ptop"><span class="pan" onclick="openOP('${p.authorId}')">${esc(p.authorName||'')}</span><span class="cbadge ${cb}">${cl}</span><span class="ptm">${t}</span>${isOwnPD?`<button class="pa" onclick="delPost('${p.id}')" style="margin-left:auto;color:var(--mu)" title="Delete post"><i class="ti ti-trash" style="font-size:13px"></i></button>`:''}</div><div class="ptxt" style="cursor:default">${linkText(p.text||'')}</div>${img}<div class="pacts"><button class="pa${liked?' liked':''}" id="lb-${p.id}" onclick="likeP('${p.id}',this)"><i class="ti ${liked?'ti-heart-filled':'ti-heart'}"></i><span id="lc-${p.id}">${p.likes||0}</span></button></div></div></div></div>`;
   await loadCmts(pid,'pd-cmts');
   document.getElementById('pdov').classList.add('on');
   document.getElementById('pd-inp').focus();
@@ -1339,9 +1352,14 @@ async function submitCmt(){
   await loadCmts(curPD,'pd-cmts');
 }
 
+let _cfResolve=null;
+function appConfirm(msg){return new Promise(res=>{_cfResolve=res;document.getElementById('cfdlg-msg').textContent=msg;document.getElementById('cfdlg').classList.add('on');});}
+function _cfOk(){document.getElementById('cfdlg').classList.remove('on');if(_cfResolve){_cfResolve(true);_cfResolve=null;}}
+function _cfCancel(){document.getElementById('cfdlg').classList.remove('on');if(_cfResolve){_cfResolve(false);_cfResolve=null;}}
+
 async function delPost(pid){
   if(!CU)return;
-  if(!confirm('Delete this post?'))return;
+  if(!await appConfirm('Post löschen?'))return;
   const{db,doc,deleteDoc,updateDoc,increment}=window._fb;
   await deleteDoc(doc(db,'posts',pid));
   try{await updateDoc(doc(db,'users',CU.uid),{posts:increment(-1)})}catch(e){}
@@ -1351,6 +1369,7 @@ async function delPost(pid){
 }
 async function delCmt(pid,cmtId){
   if(!CU)return;
+  if(!await appConfirm('Kommentar löschen?'))return;
   const{db,doc,deleteDoc,updateDoc,increment}=window._fb;
   await deleteDoc(doc(db,`posts/${pid}/comments`,cmtId));
   try{await updateDoc(doc(db,'posts',pid),{comments:increment(-1)})}catch(e){}
@@ -1909,7 +1928,7 @@ function goTo(s){
   if(s==='profile'&&CU){updateUI();loadMyPosts('all');if(CU.email==='claude250k@gmail.com'&&!sessionStorage.getItem('jl_recounted'))recountFollowers();}
   if(s==='search')loadUsers();
   if(s==='messages'){document.getElementById('chov').classList.remove('on');if(chatUnsub){chatUnsub();chatUnsub=null;}curConv=null;loadConvs();switchMT('msgs');}
-  if(s==='portfolio'){renderPortfolio();refreshPortPrices().then(renderPortfolio)}
+  if(s==='portfolio'){const ptog=document.getElementById('ptog');if(ptog)ptog.checked=UP?.portfolioPublic===true;const ptogLbl=document.getElementById('ptog-lbl');if(ptogLbl)ptogLbl.textContent=UP?.portfolioPublic?'Öffentlich':'Privat';renderPortfolio();refreshPortPrices().then(renderPortfolio)}
 }
 
 
