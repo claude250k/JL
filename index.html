@@ -281,7 +281,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   .shell>.sc{max-width:720px}
 }
 .ptot{background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:16px 18px;margin:12px 14px 8px}
-.ptot-v{font-size:28px;font-weight:800;color:var(--tx);font-family:var(--fd);letter-spacing:-.5px}
+.ptot-v{font-size:28px;font-weight:800;color:var(--tx);letter-spacing:-.5px}
 .ptot-chg{font-size:13px;font-weight:600;margin-top:3px}
 .phold{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bd);cursor:pointer}
 .phold:hover{background:var(--sf)}
@@ -292,6 +292,15 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .phold-val{text-align:right;flex-shrink:0}
 .phold-cur{font-size:13px;font-weight:600;color:var(--tx)}
 .phold-pnl{font-size:11px;font-weight:600;margin-top:1px}
+.ptog{position:absolute;bottom:8px;left:86px;display:flex;align-items:center;gap:6px;cursor:pointer;z-index:11;background:rgba(0,0,0,.5);border-radius:20px;padding:3px 8px 3px 5px;backdrop-filter:blur(4px)}
+.ptog input{display:none}
+.ptog-sl{width:30px;height:17px;background:#555;border-radius:9px;transition:background .2s;position:relative;flex-shrink:0}
+.ptog-sl::after{content:'';position:absolute;top:2px;left:2px;width:13px;height:13px;background:#fff;border-radius:50%;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.ptog input:checked~.ptog-sl{background:#4ade80}
+.ptog input:checked~.ptog-sl::after{left:15px}
+.ptog-lbl{font-size:10px;font-weight:600;color:rgba(255,255,255,.9);white-space:nowrap}
+.op-port-btn{width:100%;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;border:1px solid var(--bd);background:var(--sf2);color:var(--tx);display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer}
+.op-port-btn:disabled{opacity:.45;cursor:default}
 .padd{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px 14px;background:var(--gold);color:#000;border:none;padding:12px;border-radius:12px;width:calc(100% - 28px);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--fb)}
 .pform-sel{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap}
 .pcat-btn{padding:5px 13px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--bd);color:var(--mu2);background:transparent}.pcat-btn.ak{background:var(--gold);color:#000;border-color:var(--gold)}
@@ -566,6 +575,11 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       <div class="pav" id="myav" onclick="document.getElementById('avinp').click()"></div>
       <input type="file" id="avinp" accept="image/*" style="display:none" onchange="upAv(this)">
       <input type="file" id="covinp" accept="image/*" style="display:none" onchange="upCov(this)">
+      <label class="ptog" title="Portfolio öffentlich/privat schalten">
+        <input type="checkbox" id="ptog" onchange="togglePortPublic(this.checked)">
+        <span class="ptog-sl"></span>
+        <span class="ptog-lbl" id="ptog-lbl">Privat</span>
+      </label>
     </div>
     <div class="pinfo">
       <div class="pname" id="myname">-</div>
@@ -594,11 +608,23 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       <div class="pbio" id="op-bio" style="margin-top:3px"></div>
       <div class="pstats" style="margin-top:7px"><div class="pst"><strong id="op-pc">0</strong> Posts</div><div class="pst"><strong id="op-fc">0</strong> Followers</div><div class="pst"><strong id="op-gc">0</strong> Following</div></div>
       <button class="mbtn" style="margin-top:9px" onclick="msgUser()"><i class="ti ti-message-circle"></i> Send Message</button>
+      <div style="margin-top:8px">
+        <button class="op-port-btn" id="op-port-btn" onclick="viewOpPortfolio()"><i class="ti ti-briefcase"></i> Portfolio ansehen</button>
+      </div>
     </div>
     <div style="padding:0 14px 3px;font-size:10px;color:var(--mu);letter-spacing:.7px;text-transform:uppercase;font-weight:700">Channels</div>
     <div class="chgrid" id="opchs"></div>
     <div class="ptabs"><div class="ptab ak" onclick="opFilt(this,'all')">All</div><div class="ptab" onclick="opFilt(this,'reposts')">Reposts</div></div>
     <div id="opposts"></div><div style="height:16px"></div>
+  </div>
+</div>
+
+<div class="ov" id="opportov">
+  <div class="ovh"><button class="ovb" onclick="closeOpPort()"><i class="ti ti-arrow-left"></i></button><div class="ovt" id="opport-title">Portfolio</div></div>
+  <div class="scroll">
+    <div id="opport-total"></div>
+    <div id="opport-list"></div>
+    <div style="height:16px"></div>
   </div>
 </div>
 
@@ -968,6 +994,8 @@ function updateUI(){
   document.getElementById('ps-p').innerHTML=`<strong>${UP.posts||0}</strong> Posts`;
   document.getElementById('ps-f').innerHTML=`<strong>${UP.followers||0}</strong> Followers`;
   document.getElementById('ps-g').innerHTML=`<strong>${UP.following||0}</strong> Following`;
+  const ptog=document.getElementById('ptog');if(ptog)ptog.checked=UP.portfolioPublic===true;
+  const ptogLbl=document.getElementById('ptog-lbl');if(ptogLbl)ptogLbl.textContent=UP.portfolioPublic?'Öffentlich':'Privat';
   const pav=document.getElementById('pd-myav');
   if(pav){pav.className='cmtav';pav.innerHTML=UP.avatarUrl?`<img src="${UP.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(UP.name||'?').substring(0,2).toUpperCase()}
   renderMyChs();renderCCats();
@@ -1391,6 +1419,16 @@ async function openOP(uid){
   document.getElementById('op-fc').textContent=u.followers||0;
   document.getElementById('op-gc').textContent=u.following||0;
   document.getElementById('opav').innerHTML=u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase();
+  const opPortBtn=document.getElementById('op-port-btn');
+  if(opPortBtn){
+    if(u.portfolioPublic){
+      opPortBtn.innerHTML='<i class="ti ti-briefcase"></i> Portfolio ansehen';
+      opPortBtn.disabled=false;
+    } else {
+      opPortBtn.innerHTML='<i class="ti ti-eye-off" style="text-decoration:line-through"></i> Portfolio nicht öffentlich';
+      opPortBtn.disabled=true;
+    }
+  }
   if(u.coverUrl){const oc=document.getElementById('opcov');oc.style.backgroundImage=`url(${u.coverUrl})`;oc.style.backgroundSize='cover'}
   const isF=followingIds.has(uid);
   const fb=document.getElementById('op-fb');fb.classList.toggle('following',isF);fb.textContent=isF?t('unfollow'):t('follow');
@@ -1494,7 +1532,67 @@ async function togFollow(){
   document.getElementById('ps-g').innerHTML=`<strong>${UP.following||0}</strong> Following`;
   startFeed();
 }
-function closeOP(){document.getElementById('opov').classList.remove('on');if(opUnsub){opUnsub();opUnsub=null;}curOP=null}
+function closeOP(){document.getElementById('opov').classList.remove('on');document.getElementById('opportov').classList.remove('on');if(opUnsub){opUnsub();opUnsub=null;}curOP=null}
+async function viewOpPortfolio(){
+  if(!curOP)return;
+  const{db,collection,query,orderBy,getDocs,doc,getDoc}=window._fb;
+  const uSnap=await getDoc(doc(db,'users',curOP));
+  if(!uSnap.exists()||!uSnap.data().portfolioPublic){showToast('Portfolio ist privat');return}
+  const u=uSnap.data();
+  document.getElementById('opport-title').textContent=(u.name||'Portfolio')+' · Portfolio';
+  document.getElementById('opport-total').innerHTML='<div class="spin" style="margin:24px auto"></div>';
+  document.getElementById('opport-list').innerHTML='';
+  document.getElementById('opportov').classList.add('on');
+  const hSnap=await getDocs(query(collection(db,`users/${curOP}/holdings`),orderBy('addedAt','desc')));
+  const holdings=hSnap.docs.map(d=>({id:d.id,...d.data()}));
+  const cgIds=[...new Set(holdings.filter(h=>h.category==='crypto').map(h=>PHCID[h.symbol?.toLowerCase()]).filter(Boolean))];
+  if(cgIds.length){
+    try{
+      const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cgIds.join(',')}&vs_currencies=usd`);
+      if(r.ok){const data=await r.json();holdings.forEach(h=>{if(h.category==='crypto'){const cid=PHCID[h.symbol?.toLowerCase()];if(cid&&data[cid])h.livePrice=data[cid].usd;}})}
+    }catch(e){}
+  }
+  holdings.forEach(h=>{
+    if((h.category==='stocks'||h.category==='etf')&&PHDEMO[h.symbol?.toLowerCase()])h.livePrice=PHDEMO[h.symbol.toLowerCase()];
+    if(!h.livePrice)h.livePrice=h.buyPrice;
+  });
+  const fmt=n=>Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  let totalVal=0,totalCost=0;
+  holdings.forEach(h=>{totalVal+=(h.livePrice||h.buyPrice||0)*h.amount;totalCost+=h.buyPrice*h.amount});
+  const pnl=totalVal-totalCost,pct=totalCost>0?(pnl/totalCost*100):0;
+  const pnlCol=pnl>=0?'#4ade80':'#f87171',sg=pnl>=0?'+':'';
+  document.getElementById('opport-total').innerHTML=`<div class="ptot">
+    <div style="font-size:10px;color:var(--mu2);letter-spacing:.7px;text-transform:uppercase;margin-bottom:5px">Gesamtwert</div>
+    <div class="ptot-v">$${fmt(totalVal)}</div>
+    ${totalCost>0?`<div class="ptot-chg" style="color:${pnlCol}">${sg}$${fmt(Math.abs(pnl))} (${sg}${pct.toFixed(2)}%) all time</div>`:''}
+  </div>`;
+  if(!holdings.length){document.getElementById('opport-list').innerHTML='<div class="empty"><i class="ti ti-briefcase-off"></i><p>Keine Positionen</p></div>';return}
+  const cats=[['crypto','Crypto'],['stocks','Stocks'],['etf','ETF'],['tcg','TCG Cards']];
+  let html='';
+  cats.forEach(([cat,lbl])=>{
+    const items=holdings.filter(h=>h.category===cat);
+    if(!items.length)return;
+    html+=`<div class="sl">${lbl}</div>`;
+    items.forEach(h=>{
+      const lp=h.livePrice||h.buyPrice||0,cv=lp*h.amount,cost=h.buyPrice*h.amount,pl=cv-cost,pp=cost>0?(pl/cost*100):0;
+      const pc=pl>=0?'#4ade80':'#f87171',s2=pl>=0?'+':'';
+      const ini=(h.symbol||h.name||'?').substring(0,3).toUpperCase();
+      html+=`<div class="phold" style="cursor:default">
+        <div class="phold-icon">${ini}</div>
+        <div class="phold-info">
+          <div class="phold-name">${esc(h.name||h.symbol||'')}</div>
+          <div class="phold-amt">${h.amount} ${(h.symbol||'').toUpperCase()} &middot; avg $${fmt(h.buyPrice)}</div>
+        </div>
+        <div class="phold-val">
+          <div class="phold-cur">$${fmt(cv)}</div>
+          <div class="phold-pnl" style="color:${pc}">${s2}$${fmt(Math.abs(pl))} (${s2}${pp.toFixed(1)}%)</div>
+        </div>
+      </div>`;
+    });
+  });
+  document.getElementById('opport-list').innerHTML=html;
+}
+function closeOpPort(){document.getElementById('opportov').classList.remove('on')}
 
 async function loadUsers(){
   const{db,collection,query,limit,getDocs}=window._fb;
@@ -1895,6 +1993,15 @@ async function loadPortfolio(){
     refreshPortPrices().then(renderPortfolio);
   });
 }
+async function togglePortPublic(checked){
+  if(!CU)return;
+  const{db,doc,updateDoc}=window._fb;
+  await updateDoc(doc(db,'users',CU.uid),{portfolioPublic:checked});
+  UP.portfolioPublic=checked;
+  const ptogLbl=document.getElementById('ptog-lbl');
+  if(ptogLbl)ptogLbl.textContent=checked?'Öffentlich':'Privat';
+  showToast(checked?'Portfolio ist jetzt öffentlich':'Portfolio ist jetzt privat');
+}
 
 async function refreshPortPrices(){
   const cgIds=[...new Set(portHoldings.filter(h=>h.category==='crypto').map(h=>PHCID[h.symbol?.toLowerCase()]).filter(Boolean))];
@@ -2263,7 +2370,7 @@ document.addEventListener('touchend',e=>{
 },{passive:true});
 function swipeBack(){
   const checks=[
-    ['pdov',()=>closePD()],['opov',()=>closeOP()],['chov',()=>closeChat()],
+    ['pdov',()=>closePD()],['opportov',()=>closeOpPort()],['opov',()=>closeOP()],['chov',()=>closeChat()],
     ['cd',()=>closeCD()],['setov',()=>closeSet()],['editov',()=>closeEditProf()],
     ['nmov',()=>document.getElementById('nmov').classList.remove('on')],
     ['fl-ov',()=>document.getElementById('fl-ov').classList.remove('on')],
