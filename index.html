@@ -126,6 +126,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .notif-item{display:flex;align-items:flex-start;gap:10px;padding:11px 16px;border-bottom:1px solid var(--bd);cursor:pointer}.notif-item:hover{background:var(--sf)}
 .ni{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px}
 .ni-l{background:rgba(247,147,26,.15);color:var(--gold)}.ni-c{background:rgba(96,165,250,.12);color:#7cb9ff}.ni-f{background:rgba(34,197,94,.12);color:#4ade80}.ni-m{background:rgba(192,132,252,.12);color:#d8b4fe}.ni-a{background:rgba(251,191,36,.15);color:#fbbf24}
+.vbadge{color:#60a5fa;font-size:13px;vertical-align:middle;margin-left:3px;flex-shrink:0}
 .ntx{flex:1}.nmain{font-size:12px;color:var(--tx);line-height:1.5}.nmain strong{color:var(--gold)}.ntm{font-size:10px;color:var(--mu);margin-top:2px}
 .ndot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:4px}
 .sbar2{padding:9px 14px;flex-shrink:0}
@@ -740,6 +741,16 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
         </div>
       </label>
     </div>
+    <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px">Verification</div>
+    <div class="seti" id="verif-row" onclick="requestVerification()">
+      <i class="ti ti-rosette-discount-check" style="color:#60a5fa"></i>
+      <div class="setin"><div class="setit" id="verif-lbl">Request Verification</div><div class="setis" id="verif-sub">Get a verified badge on your profile</div></div>
+      <i class="ti ti-chevron-right" id="verif-ico" style="color:var(--mu);font-size:14px"></i>
+    </div>
+    <div id="admin-section" style="display:none">
+      <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px">Admin</div>
+      <div class="seti" onclick="openAdminVerif()"><i class="ti ti-shield-check" style="color:var(--gold)"></i><div class="setin"><div class="setit">Verification Requests</div><div class="setis" id="admin-pending-lbl">Loading…</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
+    </div>
     <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px" data-i18n="session">Session</div>
     <div class="seti" onclick="confirmOut()"><i class="ti ti-logout" style="color:#f87171"></i><div class="setin"><div class="setit" style="color:#f87171" data-i18n="signOut">Sign Out</div><div class="setis" data-i18n="signOutSub">Log out of your account</div></div></div>
   </div>
@@ -758,6 +769,11 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
     <div class="seti" style="background:var(--sf2);border-radius:10px;margin-bottom:10px;border:1px solid var(--bd)" onclick="document.getElementById('ep-covinp').click()"><i class="ti ti-photo"></i><div class="setin"><div class="setit">Upload Cover Photo</div></div><input type="file" id="ep-covinp" accept="image/*" style="display:none" onchange="upCov(this)"></div>
     <button class="savebtn" onclick="saveProfile()">Save Changes</button>
   </div>
+</div>
+
+<div class="setov" id="adminov" style="z-index:160">
+  <div class="ovh"><button class="ovb" onclick="closeAdminVerif()"><i class="ti ti-arrow-left"></i></button><div class="ovt">Verification Requests</div></div>
+  <div class="scroll" id="admin-verif-list"><div class="spin"></div></div>
 </div>
 
 <div class="mbg" id="pm" onclick="if(event.target===this)closePM()">
@@ -1037,8 +1053,98 @@ async function removeCh(ch){
   renderMyChs();renderCCats();showToast('Channel removed');
   document.querySelector('.ov[style*="200"]')?.remove();openSet();
 }
-function openSet(){document.getElementById('setov').classList.add('on')}
+function openSet(){
+  document.getElementById('setov').classList.add('on');
+  // Show admin section for developer
+  const adminSec=document.getElementById('admin-section');
+  if(adminSec)adminSec.style.display=(CU?.email==='claude250k@gmail.com')?'block':'none';
+  // Sync verification row state
+  const verifLbl=document.getElementById('verif-lbl');
+  const verifSub=document.getElementById('verif-sub');
+  const verifIco=document.getElementById('verif-ico');
+  if(UP?.verified){
+    if(verifLbl)verifLbl.textContent='Verified ✓';
+    if(verifSub)verifSub.textContent='Your account is verified';
+    if(verifIco)verifIco.style.display='none';
+    document.getElementById('verif-row').style.cursor='default';
+    document.getElementById('verif-row').onclick=null;
+  } else if(UP?.verifStatus==='pending'){
+    if(verifLbl)verifLbl.textContent='Request Pending';
+    if(verifSub)verifSub.textContent='Your request is under review';
+    if(verifIco)verifIco.className='ti ti-clock';
+  }
+  // Load pending count for admin
+  if(CU?.email==='claude250k@gmail.com')loadVerifCount();
+}
 function closeSet(){document.getElementById('setov').classList.remove('on')}
+
+// ── VERIFICATION ──────────────────────────────────────────────────────────────
+async function requestVerification(){
+  if(!CU||!UP)return;
+  if(UP.verified){showToast('Your account is already verified');return;}
+  if(UP.verifStatus==='pending'){showToast('Your request is already pending review');return;}
+  if(!await appConfirm('Request account verification? A request will be sent to the developers.'))return;
+  const{db,doc,setDoc,updateDoc,serverTimestamp}=window._fb;
+  try{
+    await setDoc(doc(db,'verificationRequests',CU.uid),{uid:CU.uid,name:UP.name||'',num:UP.num||'',email:CU.email||'',status:'pending',requestedAt:serverTimestamp()});
+    await updateDoc(doc(db,'users',CU.uid),{verifStatus:'pending'});
+    UP.verifStatus='pending';
+    const sub=encodeURIComponent(`Verification Request – ${UP.name} ${UP.num}`);
+    const body=encodeURIComponent(`Name: ${UP.name}\nNumber: ${UP.num}\nUID: ${CU.uid}\nEmail: ${CU.email}\n\nPlease review this verification request in the JL admin panel.`);
+    window.open(`mailto:claude250k@gmail.com?subject=${sub}&body=${body}`);
+    showToast('Request sent! We\'ll review it shortly.');
+    openSet();
+  }catch(e){showToast('Error sending request');}
+}
+async function loadVerifCount(){
+  const{db,collection,query,where,getDocs}=window._fb;
+  try{
+    const snap=await getDocs(query(collection(db,'verificationRequests'),where('status','==','pending')));
+    const lbl=document.getElementById('admin-pending-lbl');
+    if(lbl)lbl.textContent=`${snap.size} pending request${snap.size===1?'':'s'}`;
+  }catch(e){}
+}
+function openAdminVerif(){
+  document.getElementById('adminov').classList.add('on');
+  loadVerifRequests();
+}
+function closeAdminVerif(){document.getElementById('adminov').classList.remove('on');}
+async function loadVerifRequests(){
+  const c=document.getElementById('admin-verif-list');if(!c)return;
+  c.innerHTML='<div class="spin"></div>';
+  const{db,collection,query,where,getDocs}=window._fb;
+  try{
+    const snap=await getDocs(query(collection(db,'verificationRequests'),where('status','==','pending')));
+    if(!snap.docs.length){c.innerHTML='<div class="empty"><i class="ti ti-shield-check"></i><p>No pending requests</p></div>';return;}
+    c.innerHTML=snap.docs.map(d=>{const r=d.data();return`<div class="crow" style="flex-direction:column;align-items:flex-start;gap:6px;padding:14px 16px">
+      <div style="display:flex;align-items:center;gap:10px;width:100%">
+        <div class="av" style="width:38px;height:38px;flex-shrink:0">${(r.name||'?').substring(0,2).toUpperCase()}</div>
+        <div style="flex:1"><div class="crnm">${esc(r.name||'')} <span style="color:var(--mu2)">${esc(r.num||'')}</span></div><div class="crds">${esc(r.email||'')}</div></div>
+      </div>
+      <div style="display:flex;gap:8px;width:100%">
+        <button onclick="rejectVerif('${r.uid}','${d.id}')" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--bd);background:var(--sf2);color:#f87171;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--fb)">Decline</button>
+        <button onclick="approveVerif('${r.uid}','${d.id}')" style="flex:1;padding:8px;border-radius:8px;border:none;background:var(--gold);color:#000;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--fb)">Approve ✓</button>
+      </div>
+    </div>`}).join('');
+  }catch(e){c.innerHTML='<div class="empty"><i class="ti ti-alert-circle"></i><p>Error loading requests</p></div>';}
+}
+async function approveVerif(uid,reqId){
+  const{db,doc,updateDoc,deleteDoc}=window._fb;
+  try{
+    await updateDoc(doc(db,'users',uid),{verified:true,verifStatus:'approved'});
+    await deleteDoc(doc(db,'verificationRequests',uid));
+    await addNotif(uid,'follow','🏅 Your account has been verified!','');
+    showToast('User verified!');loadVerifRequests();loadVerifCount();
+  }catch(e){showToast('Error approving');}
+}
+async function rejectVerif(uid,reqId){
+  const{db,doc,updateDoc,deleteDoc}=window._fb;
+  try{
+    await updateDoc(doc(db,'users',uid),{verifStatus:'rejected'});
+    await deleteDoc(doc(db,'verificationRequests',uid));
+    showToast('Request declined');loadVerifRequests();loadVerifCount();
+  }catch(e){showToast('Error rejecting');}
+}
 function confirmOut(){if(confirm(t('signout_confirm'))){const{auth,signOut}=window._fb;signOut(auth);closeSet();}}
 function openEditProf(){
   document.getElementById('ep-name').value=UP?.name||'';
@@ -1143,7 +1249,7 @@ function updateUI(){
   if(!UP)return;
   const avH=UP.avatarUrl?`<img src="${UP.avatarUrl}">`:(UP.name||'?').substring(0,2).toUpperCase();
   document.getElementById('myav').innerHTML=avH;
-  document.getElementById('myname').textContent=UP.name||'';
+  document.getElementById('myname').innerHTML=esc(UP.name||'')+(UP.verified?'<i class="ti ti-rosette-discount-check vbadge" title="Verified"></i>':'');
   document.getElementById('mynum').textContent=UP.num||'#1';
   document.getElementById('mybio').textContent=UP.bio||'Add bio';
   if(UP.coverUrl){const c=document.getElementById('mycov');c.style.backgroundImage=`url(${UP.coverUrl})`;c.style.backgroundSize='cover';c.style.backgroundPosition='center'}
@@ -1441,7 +1547,7 @@ function loadNotifs(){
     renderNotifs(notifs);
   });
 }
-function updateNavBadge(){const b=document.getElementById('nbadge');const n=_msgUnread;if(n>0){b.textContent=n>9?'9+':n;b.classList.add('show')}else{b.classList.remove('show')}}
+function updateNavBadge(){const b=document.getElementById('nbadge');const n=_msgUnread+_notifUnread;if(n>0){b.textContent=n>9?'9+':n;b.classList.add('show')}else{b.classList.remove('show')}}
 function renderNotifs(notifs){
   const c=document.getElementById('notif-list');if(!c)return;
   if(!notifs.length){c.innerHTML='<div class="empty"><i class="ti ti-bell-off"></i><p>No notifications yet</p></div>';return}
@@ -1637,7 +1743,7 @@ async function openOP(uid){
   const snap=await getDoc(doc(db,'users',uid));if(!snap.exists())return;
   const u=snap.data();
   document.getElementById('op-t').textContent=u.name||'Profile';
-  const opnm=document.getElementById('op-nm');opnm.textContent=u.name||'';opnm.onclick=()=>{navigator.clipboard?.writeText(u.name||'').then(()=>showToast('📋 '+t('copied'))).catch(()=>{})};
+  const opnm=document.getElementById('op-nm');opnm.innerHTML=esc(u.name||'')+(u.verified?'<i class="ti ti-rosette-discount-check vbadge" title="Verified"></i>':'');opnm.onclick=()=>{navigator.clipboard?.writeText(u.name||'').then(()=>showToast('📋 '+t('copied'))).catch(()=>{})};
   document.getElementById('op-num').textContent=u.num||'#-';
   document.getElementById('op-bio').textContent=u.bio||'';
   document.getElementById('op-fc').textContent=u.followers||0;
@@ -1885,7 +1991,7 @@ async function renderHashPosts(tag){
 function renderUsers(users){
   const c=document.getElementById('clist');
   if(!users.length){c.innerHTML='<div class="empty"><i class="ti ti-users"></i><p>No creators found</p></div>';return}
-  c.innerHTML=users.map(u=>{const isF=followingIds.has(u.uid);return`<div class="crow" onclick="openOP('${u.uid}')"><div class="av" style="width:36px;height:36px">${u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase()}</div><div style="flex:1"><div class="crnm">${esc(u.name||'')}</div><div class="crds">${esc(u.num||'')} - ${u.followers||0} followers</div></div><button class="fbtn${isF?' following':''}" onclick="event.stopPropagation();qFol('${u.uid}',this)">${isF?t('following_btn'):t('follow')}</button></div>`}).join('');
+  c.innerHTML=users.map(u=>{const isF=followingIds.has(u.uid);const vb=u.verified?'<i class="ti ti-rosette-discount-check vbadge"></i>':'';return`<div class="crow" onclick="openOP('${u.uid}')"><div class="av" style="width:36px;height:36px">${u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase()}</div><div style="flex:1"><div class="crnm" style="display:flex;align-items:center;gap:3px">${esc(u.name||'')}${vb}</div><div class="crds">${esc(u.num||'')} · ${u.followers||0} followers</div></div><button class="fbtn${isF?' following':''}" onclick="event.stopPropagation();qFol('${u.uid}',this)">${isF?t('following_btn'):t('follow')}</button></div>`}).join('');
 }
 function doSearch(){
   const q=document.getElementById('sinp').value.toLowerCase().trim();
@@ -2249,8 +2355,8 @@ async function fetchPuls(){
       if(p)p.textContent=fmtP(coin.current_price);
       if(c){const up=coin.price_change_percentage_24h>=0;c.textContent=(up?'+':'')+coin.price_change_percentage_24h.toFixed(2)+'%';c.className='ccc '+(up?'up':'dn')}
       const sp=coin.sparkline_in_7d?.price;if(sp?.length)mkC('ch-'+k,sp.slice(-40));
-      // Check price alert
-      if(CU&&UP?.priceAlerts?.[k]&&!UP.priceAlerts[k].triggered){const a=UP.priceAlerts[k];if((a.direction==='above'&&coin.current_price>=a.target)||(a.direction==='below'&&coin.current_price<=a.target))triggerAlert(k,coin.current_price);}
+      // Check price alerts (supports multiple per coin)
+      if(CU&&UP?.priceAlerts?.[k]){const arr=Array.isArray(UP.priceAlerts[k])?UP.priceAlerts[k]:[UP.priceAlerts[k]];for(const a of arr){if(!a.triggered&&((a.direction==='above'&&coin.current_price>=a.target)||(a.direction==='below'&&coin.current_price<=a.target)))triggerAlert(k,coin.current_price,a.id);}}
     });
   }catch(e){const b={btc:94000,eth:3200,sol:190,bnb:400,xrp:.6,ada:.45,doge:.15,dot:8,avax:35,link:18};Object.keys(b).forEach(k=>mkC('ch-'+k,demo(b[k],40)))}
   const dm={nvda:840,aapl:216,msft:415,amzn:186,goog:174,meta:512,tsla:248,sap:182,asml:820,novo:780,iwda:98,vwrl:105,acwi:108,spy:524,qqq:448,voo:481,stoxx:52,veur:68,exsa:77,ewj:68,mchi:48,aaxj:72};
@@ -2265,7 +2371,7 @@ async function openCD(coin){
   document.getElementById('cd').classList.add('on');
   document.querySelectorAll('.rb').forEach(b=>b.classList.toggle('ak',b.textContent==='1D'));
   // Sync bell state with any existing alert
-  const hasActive=!!(UP?.priceAlerts?.[coin]&&!UP.priceAlerts[coin].triggered);
+  const hasActive=_hasActiveAlerts(coin);
   const bellIco=document.getElementById('cd-bell-ico');if(bellIco)bellIco.className=hasActive?'ti ti-bell-ringing':'ti ti-bell';
   const dot=document.getElementById('cd-alert-dot');if(dot)dot.style.display=hasActive?'block':'none';
   await loadCD(coin,'1');
@@ -2311,6 +2417,13 @@ async function setCDR(btn,days){document.querySelectorAll('.rb').forEach(b=>b.cl
 function closeCD(){document.getElementById('cd').classList.remove('on');document.getElementById('cd-alert-panel').style.display='none';}
 
 // ── PRICE ALERTS ─────────────────────────────────────────────────────────────
+function _getAlerts(coin){
+  const raw=UP?.priceAlerts?.[coin];
+  if(!raw)return[];
+  return Array.isArray(raw)?raw:[raw]; // backward-compat with old single-object format
+}
+function _hasActiveAlerts(coin){return _getAlerts(coin).some(a=>!a.triggered);}
+
 function toggleAlertPanel(){
   const p=document.getElementById('cd-alert-panel');if(!p)return;
   const open=p.style.display!=='none';
@@ -2320,12 +2433,12 @@ function toggleAlertPanel(){
 function renderAlertPanel(){
   if(!curCDCoin)return;
   const isLive=!!CID[curCDCoin];
-  const alert=UP?.priceAlerts?.[curCDCoin];
-  const hasActive=alert&&!alert.triggered;
+  const alerts=_getAlerts(curCDCoin);
+  const activeAlerts=alerts.filter(a=>!a.triggered);
+  const hasActive=activeAlerts.length>0;
   const curEl=document.getElementById('cd-alert-cur');
   const formEl=document.getElementById('cd-alert-form');
   const hintEl=document.getElementById('cd-alert-hint');
-  // Bell icon / dot
   const bellIco=document.getElementById('cd-bell-ico');
   const dot=document.getElementById('cd-alert-dot');
   if(bellIco)bellIco.className=hasActive?'ti ti-bell-ringing':'ti ti-bell';
@@ -2335,16 +2448,23 @@ function renderAlertPanel(){
     if(formEl)formEl.innerHTML=`<div style="font-size:12px;color:var(--mu2);padding:6px 0">Price alerts are only available for live crypto assets (BTC, ETH, SOL …)</div>`;
     return;
   }
-  if(hasActive){
-    const dir=alert.direction==='above'?'▲ rises above':'▼ drops below';
-    if(curEl)curEl.innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:9px 11px;background:var(--gdim);border:1px solid rgba(247,147,26,.3);border-radius:9px;margin-bottom:8px"><i class="ti ti-bell-ringing" style="color:var(--gold);font-size:15px;flex-shrink:0"></i><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--tx)">Alert when price ${dir} ${fmtP(alert.target)}</div><div style="font-size:10px;color:var(--mu2);margin-top:2px">Fires once and is removed</div></div><button onclick="removeAlert()" style="background:none;border:none;color:#f87171;cursor:pointer;padding:3px 5px;font-size:14px" title="Remove alert"><i class="ti ti-trash"></i></button></div>`;
-    if(formEl)formEl.style.display='none';
-  } else {
-    if(curEl)curEl.innerHTML='';
-    if(formEl)formEl.style.display='block';
-    const curPrice=parseCDPrice();
-    if(hintEl)hintEl.textContent=curPrice?`Current: ${fmtP(curPrice)} — alert fires once when price crosses your target`:'Enter a target price to get notified';
+  // Render all active alerts with individual delete
+  if(curEl){
+    curEl.innerHTML=activeAlerts.map(a=>{
+      const dir=a.direction==='above'?'▲ rises above':'▼ drops below';
+      return`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--gdim);border:1px solid rgba(247,147,26,.28);border-radius:9px;margin-bottom:6px">
+        <i class="ti ti-bell-ringing" style="color:var(--gold);font-size:14px;flex-shrink:0"></i>
+        <div style="flex:1;font-size:12px;font-weight:600;color:var(--tx)">${dir} ${fmtP(a.target)}</div>
+        <button onclick="removeAlertById('${curCDCoin}','${a.id}')" style="background:none;border:none;color:#f87171;cursor:pointer;padding:3px 5px;font-size:14px" title="Remove"><i class="ti ti-trash"></i></button>
+      </div>`;
+    }).join('');
   }
+  // Always show the form so more alerts can be added
+  if(formEl)formEl.style.display='block';
+  const curPrice=parseCDPrice();
+  if(hintEl)hintEl.textContent=curPrice
+    ?`Current: ${fmtP(curPrice)} — fires once when price crosses target`
+    :'Enter a target price to be notified';
 }
 function parseCDPrice(){
   const el=document.getElementById('cd-p');if(!el)return null;
@@ -2359,24 +2479,30 @@ async function setAlert(){
   const curPrice=parseCDPrice()||0;
   const direction=target>=curPrice?'above':'below';
   if(!UP.priceAlerts)UP.priceAlerts={};
-  UP.priceAlerts[curCDCoin]={target,direction,triggered:false,coin:curCDCoin,setAt:Date.now()};
+  if(!Array.isArray(UP.priceAlerts[curCDCoin]))UP.priceAlerts[curCDCoin]=[];
+  const alertId=Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  UP.priceAlerts[curCDCoin].push({id:alertId,target,direction,triggered:false,coin:curCDCoin,setAt:Date.now()});
   const{db,doc,updateDoc}=window._fb;
   try{await updateDoc(doc(db,'users',CU.uid),{priceAlerts:UP.priceAlerts});}catch(e){}
   if(inp)inp.value='';
   renderAlertPanel();
   const dir=direction==='above'?'rises above':'drops below';
-  showToast(`🔔 Alert set: ${CNM[curCDCoin]||curCDCoin.toUpperCase()} ${dir} ${fmtP(target)}`);
+  showToast(`🔔 Alert: ${CNM[curCDCoin]||curCDCoin.toUpperCase()} ${dir} ${fmtP(target)}`);
 }
-async function removeAlert(){
-  if(!CU||!curCDCoin||!UP?.priceAlerts)return;
-  delete UP.priceAlerts[curCDCoin];
+async function removeAlertById(coin,id){
+  if(!CU||!UP?.priceAlerts?.[coin])return;
+  const arr=Array.isArray(UP.priceAlerts[coin])?UP.priceAlerts[coin]:[UP.priceAlerts[coin]];
+  UP.priceAlerts[coin]=arr.filter(a=>a.id!==id);
+  if(!UP.priceAlerts[coin].length)delete UP.priceAlerts[coin];
   const{db,doc,updateDoc}=window._fb;
   try{await updateDoc(doc(db,'users',CU.uid),{priceAlerts:UP.priceAlerts});}catch(e){}
   renderAlertPanel();showToast('Alert removed');
 }
-async function triggerAlert(coin,price){
-  if(!CU||!UP?.priceAlerts?.[coin]||UP.priceAlerts[coin].triggered)return;
-  const a=UP.priceAlerts[coin];
+async function triggerAlert(coin,price,alertId){
+  if(!CU||!UP?.priceAlerts?.[coin])return;
+  const arr=Array.isArray(UP.priceAlerts[coin])?UP.priceAlerts[coin]:[UP.priceAlerts[coin]];
+  const a=alertId?arr.find(x=>x.id===alertId):arr[0];
+  if(!a||a.triggered)return;
   a.triggered=true;
   const{db,doc,updateDoc}=window._fb;
   try{await updateDoc(doc(db,'users',CU.uid),{priceAlerts:UP.priceAlerts});}catch(e){}
