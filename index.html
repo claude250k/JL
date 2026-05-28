@@ -228,17 +228,6 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   .sc{max-width:600px;border-right:1px solid var(--bd)}
 }
 
-.ch-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:250;display:none;align-items:center;justify-content:center;padding:24px}
-.ch-modal.on{display:flex}
-.ch-modal-box{background:var(--sf);border:1px solid var(--gold);border-radius:16px;padding:24px;width:100%;max-width:320px}
-.ch-modal-title{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:12px}
-.ch-modal-inp{width:100%;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:11px 12px;color:var(--tx);font-size:13px;outline:none;margin-bottom:12px}
-.ch-modal-inp:focus{border-color:var(--gold)}
-.ch-modal-inp::placeholder{color:var(--mu)}
-.ch-modal-foot{display:flex;gap:8px}
-.ch-modal-cancel{flex:1;background:transparent;border:1px solid var(--bd);color:var(--mu2);padding:9px;border-radius:9px;cursor:pointer;font-size:12px}
-.ch-modal-ok{flex:1;background:var(--gold);border:none;color:#000;padding:9px;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700}
-
 .rp-btn.reposted{color:var(--gold)}.rp-btn.reposted i{color:var(--gold)}.rp-btn.reposted span{color:var(--gold)}
 .ch-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:250;display:none;align-items:center;justify-content:center;padding:24px}
 .ch-modal.on{display:flex}
@@ -251,10 +240,6 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .ch-modal-cancel{flex:1;background:transparent;border:1px solid var(--bd);color:var(--mu2);padding:9px;border-radius:9px;cursor:pointer;font-size:12px;font-family:var(--fb)}
 .ch-modal-ok{flex:1;background:var(--gold);border:none;color:#000;padding:9px;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700;font-family:var(--fb)}
 .update-toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--gold);color:#000;padding:10px 18px;border-radius:10px;font-size:12px;font-weight:700;z-index:400;cursor:pointer;box-shadow:0 4px 20px rgba(247,147,26,.4)}
-
-
-  .shell>.sc{max-width:680px}
-}
 @media(min-width:600px){.desk-logo{display:block!important}}
 
 /* ── RESPONSIVE: Mobile = phone shell, Desktop = Twitter layout ── */
@@ -1139,8 +1124,9 @@ function renderPosts(posts,cid,cat){
 }
 function pH(p){
   const t=p.createdAt?tAgo(p.createdAt.toDate()):'-';
-  const cb='cb-'+(p.channel||'custom');
-  const cl=chLbl(p.channel||'');
+  const rawCh=p.channel||'';
+  const cb='cb-'+(rawCh||'all');
+  const cl=rawCh?chLbl(rawCh):'General';
   const img=p.imageUrl?`<img src="${p.imageUrl}" class="pimg" onclick="openPD('${p.id}')">`:'';
   const avH=p.authorAvatar?`<img src="${p.authorAvatar}">`:(p.authorName||'?').substring(0,2).toUpperCase();
   const liked=CU&&(p.likedBy||[]).includes(CU.uid);
@@ -1195,25 +1181,30 @@ function goToCh(ch){if(!ch)return;goTo('feed');document.querySelectorAll('#fk .k
 
 async function likeP(pid,btn){
   if(!CU)return;
-  const{db,doc,getDoc,updateDoc,increment}=window._fb;
-  const ref=doc(db,'posts',pid);const snap=await getDoc(ref);if(!snap.exists())return;
-  const d=snap.data(),lb=d.likedBy||[],liked=lb.includes(CU.uid);
-  const nArr=liked?lb.filter(x=>x!==CU.uid):[...lb,CU.uid];
-  const nCount=(d.likes||0)+(liked?-1:1);
-  await updateDoc(ref,{likes:increment(liked?-1:1),likedBy:nArr});
+  // Optimistic immediate UI update — no waiting for Firestore
+  const wasLiked=btn.classList.contains('liked');
+  const nowLiked=!wasLiked;
+  const cnt=btn.querySelector('span');
+  const curCount=parseInt(cnt?.textContent||'0');
+  const newCount=Math.max(0,curCount+(nowLiked?1:-1));
   document.querySelectorAll('[id="lb-'+pid+'"]').forEach(b=>{
-    const nowLiked=!liked;
     b.classList.toggle('liked',nowLiked);
-    const icon=b.querySelector('i');
-    const cnt=b.querySelector('span');
-    if(icon){
-      icon.className='ti ti-heart'+(nowLiked?'-filled':'');
-      icon.style.color=nowLiked?'var(--gold)':'';
-    }
-    if(cnt)cnt.textContent=nCount;
+    const ic=b.querySelector('i');
+    const ct=b.querySelector('span');
+    if(ic){ic.className='ti ti-heart'+(nowLiked?'-filled':'');ic.style.color=nowLiked?'var(--gold)':'';}
+    if(ct)ct.textContent=newCount;
     b.style.color=nowLiked?'var(--gold)':'';
   });
-  if(!liked&&d.authorId!==CU.uid)await addNotif(d.authorId,'like',`${UP?.name} liked your post`,pid);
+  // Persist to Firestore in background
+  const{db,doc,getDoc,updateDoc,increment}=window._fb;
+  const ref=doc(db,'posts',pid);
+  try{
+    const snap=await getDoc(ref);if(!snap.exists())return;
+    const d=snap.data(),lb=d.likedBy||[],liked=lb.includes(CU.uid);
+    const nArr=liked?lb.filter(x=>x!==CU.uid):[...lb,CU.uid];
+    await updateDoc(ref,{likes:increment(liked?-1:1),likedBy:nArr});
+    if(!liked&&d.authorId!==CU.uid)await addNotif(d.authorId,'like',`${UP?.name} liked your post`,pid);
+  }catch(e){}
 }
 
 async function addNotif(toUid,type,msg,refId=''){
@@ -1275,7 +1266,7 @@ async function openPD(pid){
   const snap=await getDoc(doc(db,'posts',pid));if(!snap.exists())return;
   const p={id:pid,...snap.data()};
   const t=p.createdAt?tAgo(p.createdAt.toDate()):'-';
-  const cb='cb-'+(p.channel||'custom');const cl=chLbl(p.channel||'');
+  const rawChPD=p.channel||'';const cb='cb-'+(rawChPD||'all');const cl=rawChPD?chLbl(rawChPD):'General';
   const img=p.imageUrl?`<img src="${p.imageUrl}" class="pimg">`:'';
   const avH=p.authorAvatar?`<img src="${p.authorAvatar}">`:(p.authorName||'?').substring(0,2).toUpperCase();
   const liked=CU&&(p.likedBy||[]).includes(CU.uid);
@@ -1490,6 +1481,9 @@ async function togFollow(){
     });
   }catch(e){showToast('Error: '+e.message);btn.disabled=false;return}
   btn.disabled=false;
+  // Immediately update the other user's follower count in the overlay
+  const opFcEl=document.getElementById('op-fc');
+  if(opFcEl){const cur=parseInt(opFcEl.textContent)||0;opFcEl.textContent=Math.max(0,cur+(wasFollowing?-1:1));}
   if(wasFollowing){
     followingIds.delete(curOP);
     btn.classList.remove('following');btn.textContent=t('follow');
