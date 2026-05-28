@@ -232,7 +232,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .ch-modal-cancel{flex:1;background:transparent;border:1px solid var(--bd);color:var(--mu2);padding:9px;border-radius:9px;cursor:pointer;font-size:12px}
 .ch-modal-ok{flex:1;background:var(--gold);border:none;color:#000;padding:9px;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700}
 
-.rp-btn.reposted i{color:var(--gn)}.rp-btn.reposted span{color:var(--gn)}
+.rp-btn.reposted{color:var(--gold)}.rp-btn.reposted i{color:var(--gold)}.rp-btn.reposted span{color:var(--gold)}
 .ch-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:250;display:none;align-items:center;justify-content:center;padding:24px}
 .ch-modal.on{display:flex}
 .ch-modal-box{background:var(--sf);border:1px solid var(--gold);border-radius:16px;padding:24px;width:100%;max-width:320px}
@@ -303,10 +303,45 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .padd{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px 14px;background:var(--gold);color:#000;border:none;padding:12px;border-radius:12px;width:calc(100% - 28px);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--fb)}
 .pform-sel{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap}
 .pcat-btn{padding:5px 13px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--bd);color:var(--mu2);background:transparent}.pcat-btn.ak{background:var(--gold);color:#000;border-color:var(--gold)}
+.pin-sc{position:absolute;inset:0;background:var(--bg);z-index:250;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px}
+.pin-logo{font-family:var(--fd);font-size:44px;font-weight:800;color:var(--tx);margin-bottom:4px}.pin-logo em{color:var(--gold);font-style:normal}
+.pin-tag{font-size:12px;color:var(--mu2);margin-bottom:28px;letter-spacing:.5px}
+.pin-dots{display:flex;gap:16px;margin-bottom:28px}
+.pin-dot{width:14px;height:14px;border-radius:50%;background:var(--sf3);border:2px solid var(--bd);transition:all .2s}
+.pin-dot.filled{background:var(--gold);border-color:var(--gold);transform:scale(1.1)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;max-width:240px}
+.pin-key{background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:18px;font-size:20px;font-weight:600;color:var(--tx);cursor:pointer;text-align:center;font-family:var(--fd);transition:background .1s;display:flex;align-items:center;justify-content:center}
+.pin-key:active{background:var(--sf3)}
+.pin-err{color:#f87171;font-size:12px;margin-top:12px;min-height:18px;text-align:center}
 </style>
 </head>
 <body>
 <div class="shell" id="app">
+<div class="pin-sc" id="pin-sc" style="display:none">
+  <div class="pin-logo">J<em>L</em></div>
+  <div class="pin-tag">Enter PIN to continue</div>
+  <div class="pin-dots">
+    <div class="pin-dot" id="pd-0"></div>
+    <div class="pin-dot" id="pd-1"></div>
+    <div class="pin-dot" id="pd-2"></div>
+    <div class="pin-dot" id="pd-3"></div>
+  </div>
+  <div class="pin-pad">
+    <button class="pin-key" onclick="pinKey('1')">1</button>
+    <button class="pin-key" onclick="pinKey('2')">2</button>
+    <button class="pin-key" onclick="pinKey('3')">3</button>
+    <button class="pin-key" onclick="pinKey('4')">4</button>
+    <button class="pin-key" onclick="pinKey('5')">5</button>
+    <button class="pin-key" onclick="pinKey('6')">6</button>
+    <button class="pin-key" onclick="pinKey('7')">7</button>
+    <button class="pin-key" onclick="pinKey('8')">8</button>
+    <button class="pin-key" onclick="pinKey('9')">9</button>
+    <div></div>
+    <button class="pin-key" onclick="pinKey('0')">0</button>
+    <button class="pin-key" onclick="pinDel()"><i class="ti ti-backspace" style="font-size:18px"></i></button>
+  </div>
+  <div class="pin-err" id="pin-err"></div>
+</div>
 <div class="ibanner" id="ibanner">
   <div class="ib-t">Install <em>JL</em> App</div>
   <button class="ib-b" onclick="showInstPage()">Install</button>
@@ -515,7 +550,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
     </div>
     <div style="padding:0 14px 3px;font-size:10px;color:var(--mu);letter-spacing:.7px;text-transform:uppercase;font-weight:700">Channels</div>
     <div class="chgrid" id="opchs"></div>
-    <div class="ptabs"><div class="ptab ak" onclick="opFilt(this,'all')">All</div><div class="ptab" onclick="opFilt(this,'bitcoin')">Bitcoin</div><div class="ptab" onclick="opFilt(this,'stocks')">Stocks</div><div class="ptab" onclick="opFilt(this,'reposts')">Reposts</div></div>
+    <div class="ptabs"><div class="ptab ak" onclick="opFilt(this,'all')">All</div><div class="ptab" onclick="opFilt(this,'reposts')">Reposts</div></div>
     <div id="opposts"></div><div style="height:16px"></div>
   </div>
 </div>
@@ -631,6 +666,20 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 </div>
 
 <script>
+// PIN screen
+(function(){
+  if(sessionStorage.getItem('jl_unlocked')==='1'){const ps=document.getElementById('pin-sc');if(ps)ps.style.display='none';}
+  else{const ps=document.getElementById('pin-sc');if(ps)ps.style.display='flex';}
+})();
+let _pinEntry='';
+function pinKey(d){if(_pinEntry.length>=4)return;_pinEntry+=d;_updPinDots();if(_pinEntry.length===4)setTimeout(_chkPin,120)}
+function pinDel(){_pinEntry=_pinEntry.slice(0,-1);_updPinDots();const e=document.getElementById('pin-err');if(e)e.textContent=''}
+function _updPinDots(){for(let i=0;i<4;i++){const d=document.getElementById('pd-'+i);if(d)d.classList.toggle('filled',i<_pinEntry.length)}}
+function _chkPin(){
+  if(_pinEntry==='0000'){sessionStorage.setItem('jl_unlocked','1');const ps=document.getElementById('pin-sc');if(ps)ps.style.display='none';}
+  else{const e=document.getElementById('pin-err');if(e)e.textContent='Incorrect PIN. Try again.';_pinEntry='';_updPinDots();}
+}
+
 function updateHash(s){try{history.replaceState(null,'','#'+s)}catch(e){}}
 const _validScreens=['feed','puls','search','messages','portfolio','profile'];
 function tick(){const n=new Date();document.getElementById('clk').textContent=n.getHours()+':'+(n.getMinutes()<10?'0':'')+n.getMinutes()}
@@ -642,6 +691,7 @@ let pulsInited=false,chartI={},cdChart=null,curCDCoin=null;
 let allUsers=[],myVote=null,curOP=null,curConv=null;
 let customChs=[],myPFilt='all',curPD=null;
 let followingIds=new Set();
+let repostIds=new Set();
 let deferredPrompt=null;
 
 const DCH=['bitcoin','stocks','ETF','economy','politics','forecasts'];
@@ -711,7 +761,7 @@ function wFB(cb){if(window._fbReady)cb();else document.addEventListener('fb-read
 wFB(()=>{
   const{auth,onAuthStateChanged}=window._fb;
   onAuthStateChanged(auth,async u=>{
-    if(u){CU=u;await loadUP(u.uid);document.getElementById('asc').style.display='none';updateUI();startFeed();loadUsers();loadConvs();loadNotifs();renderParties();loadMyVote();loadFollowing();loadPortfolio();}
+    if(u){CU=u;await loadUP(u.uid);document.getElementById('asc').style.display='none';updateUI();startFeed();loadUsers();loadConvs();loadNotifs();renderParties();loadMyVote();loadFollowing();loadPortfolio();loadReposts();}
     else{CU=null;UP=null;followingIds=new Set();document.getElementById('asc').style.display='flex';}
   });
 });
@@ -832,6 +882,18 @@ async function loadFollowing(){
   const{db,collection,query,where,getDocs}=window._fb;
   const snap=await getDocs(query(collection(db,'follows'),where('followerId','==',CU.uid)));
   followingIds=new Set(snap.docs.map(d=>d.data().followingId));
+}
+async function loadReposts(){
+  if(!CU)return;
+  const{db,collection,query,where,getDocs}=window._fb;
+  try{
+    const snap=await getDocs(query(collection(db,'reposts'),where('uid','==',CU.uid)));
+    repostIds=new Set(snap.docs.map(d=>d.data().postId));
+    repostIds.forEach(pid=>{
+      const btn=document.getElementById('rp-'+pid);
+      if(btn){btn.style.color='var(--gold)';btn.classList.add('reposted');const ic=btn.querySelector('i');if(ic)ic.style.color='var(--gold)';}
+    });
+  }catch(e){}
 }
 
 function updateUI(){
@@ -996,7 +1058,7 @@ function pH(p){
   const img=p.imageUrl?`<img src="${p.imageUrl}" class="pimg" onclick="openPD('${p.id}')">`:'';
   const avH=p.authorAvatar?`<img src="${p.authorAvatar}">`:(p.authorName||'?').substring(0,2).toUpperCase();
   const liked=CU&&(p.likedBy||[]).includes(CU.uid);
-  const rpd=false; // repost state loaded async
+  const rpd=repostIds.has(p.id);
   const myAvH=UP?.avatarUrl?`<img src="${UP.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(UP?.name||'?').substring(0,2).toUpperCase();
   return`<div class="pi" data-id="${p.id}">
     <div class="pr">
@@ -1016,7 +1078,7 @@ function pH(p){
           </button>
           <button class="pa" onclick="toggleQC('${p.id}')"><i class="ti ti-message-circle"></i> <span>${p.comments||0}</span></button>
 
-          <button class="pa rp-btn" id="rp-${p.id}" onclick="repostP('${p.id}',this)"><i class="ti ti-repeat"></i> <span>${p.reposts||0}</span></button>
+          <button class="pa rp-btn${rpd?' reposted':''}" id="rp-${p.id}" onclick="repostP('${p.id}',this)" style="${rpd?'color:var(--gold)':''}"><i class="ti ti-repeat" style="${rpd?'color:var(--gold)':''}"></i> <span>${p.reposts||0}</span></button>
           <button class="pa" onclick="shareP('${p.id}')"><i class="ti ti-share"></i></button>
         </div>
       </div>
@@ -1272,36 +1334,47 @@ async function opChFilt(el,uid,ch){
   document.getElementById('opposts').innerHTML=posts.length?posts.map(p=>pH(p)).join(''):`<div class="empty"><i class="ti ti-pencil-off"></i><p>No posts in #${chLbl(ch)}</p></div>`;
 }
 
-// FOLLOW - uses separate 'follows' collection to prevent duplicate follows
+// FOLLOW - uses runTransaction to set exact counts atomically
 async function togFollow(){
   if(!CU||!curOP)return;
-  const{db,doc,setDoc,deleteDoc,updateDoc,increment,getDoc}=window._fb;
+  const{db,doc,runTransaction}=window._fb;
   const fid=`${CU.uid}_${curOP}`;
   const fRef=doc(db,'follows',fid);
-  const snap=await getDoc(fRef);
+  const meRef=doc(db,'users',CU.uid);
+  const themRef=doc(db,'users',curOP);
   const btn=document.getElementById('op-fb');
-  if(snap.exists()){
-    await deleteDoc(fRef);followingIds.delete(curOP);
-    await updateDoc(doc(db,'users',curOP),{followers:increment(-1)});
-    await updateDoc(doc(db,'users',CU.uid),{following:increment(-1)});
+  btn.disabled=true;
+  let wasFollowing=false;
+  try{
+    await runTransaction(db,async tx=>{
+      const fSnap=await tx.get(fRef);
+      wasFollowing=fSnap.exists();
+      const meSnap=await tx.get(meRef);
+      const themSnap=await tx.get(themRef);
+      const myF=meSnap.exists()?(meSnap.data().following||0):0;
+      const thF=themSnap.exists()?(themSnap.data().followers||0):0;
+      if(wasFollowing){
+        tx.delete(fRef);
+        tx.update(meRef,{following:Math.max(0,myF-1)});
+        tx.update(themRef,{followers:Math.max(0,thF-1)});
+      } else {
+        tx.set(fRef,{followerId:CU.uid,followingId:curOP,createdAt:new Date()});
+        tx.update(meRef,{following:myF+1});
+        tx.update(themRef,{followers:thF+1});
+      }
+    });
+  }catch(e){showToast('Error: '+e.message);btn.disabled=false;return}
+  btn.disabled=false;
+  if(wasFollowing){
+    followingIds.delete(curOP);
     btn.classList.remove('following');btn.textContent=t('follow');
-    UP.following=Math.max(0,(UP.following||1)-1);
   } else {
-    await setDoc(fRef,{followerId:CU.uid,followingId:curOP,createdAt:new Date()});
     followingIds.add(curOP);
-    await updateDoc(doc(db,'users',curOP),{followers:increment(1)});
-    await updateDoc(doc(db,'users',CU.uid),{following:increment(1)});
     btn.classList.add('following');btn.textContent=t('unfollow');
-    // Reload UP to get accurate counts
-    UP.following=(UP.following||0)+1;
     await addNotif(curOP,'follow',`${UP.name} started following you`,'');
   }
-  // Reload accurate counts from Firebase
-  const{db:db2,doc:doc2,getDoc:getDoc2}=window._fb;
-  const mySnap=await getDoc2(doc2(db2,'users',CU.uid));
+  const mySnap=await window._fb.getDoc(window._fb.doc(window._fb.db,'users',CU.uid));
   if(mySnap.exists()){UP.following=mySnap.data().following||0;UP.followers=mySnap.data().followers||0}
-  // reload fresh counts
-  try{const fr=await window._fb.getDoc(window._fb.doc(window._fb.db,'users',CU.uid));if(fr.exists()){UP.following=fr.data().following||0;UP.followers=fr.data().followers||0}}catch(e){}
   document.getElementById('ps-f').innerHTML=`<strong>${UP.followers||0}</strong> Followers`;
   document.getElementById('ps-g').innerHTML=`<strong>${UP.following||0}</strong> Following`;
   startFeed();
@@ -1323,10 +1396,35 @@ function doSearch(){const q=document.getElementById('sinp').value.toLowerCase().
 function tagS(t){document.getElementById('sinp').value=t;goTo('search');doSearch()}
 async function qFol(uid,btn){
   if(!CU)return;
-  const{db,doc,setDoc,deleteDoc,updateDoc,increment,getDoc}=window._fb;
-  const fid=`${CU.uid}_${uid}`;const fRef=doc(db,'follows',fid);const snap=await getDoc(fRef);const isF=snap.exists();
-  if(isF){await deleteDoc(fRef);followingIds.delete(uid);await updateDoc(doc(db,'users',uid),{followers:increment(-1)});await updateDoc(doc(db,'users',CU.uid),{following:increment(-1)});btn.classList.remove('following');btn.textContent=t('follow');}
-  else{await setDoc(fRef,{followerId:CU.uid,followingId:uid,createdAt:new Date()});followingIds.add(uid);await updateDoc(doc(db,'users',uid),{followers:increment(1)});await updateDoc(doc(db,'users',CU.uid),{following:increment(1)});btn.classList.add('following');btn.textContent=t('following_btn');await addNotif(uid,'follow',`${UP?.name} started following you`,'')}
+  const{db,doc,runTransaction}=window._fb;
+  const fid=`${CU.uid}_${uid}`;
+  const fRef=doc(db,'follows',fid);
+  const meRef=doc(db,'users',CU.uid);
+  const themRef=doc(db,'users',uid);
+  btn.disabled=true;
+  let wasFollowing=false;
+  try{
+    await runTransaction(db,async tx=>{
+      const fSnap=await tx.get(fRef);
+      wasFollowing=fSnap.exists();
+      const meSnap=await tx.get(meRef);
+      const themSnap=await tx.get(themRef);
+      const myF=meSnap.exists()?(meSnap.data().following||0):0;
+      const thF=themSnap.exists()?(themSnap.data().followers||0):0;
+      if(wasFollowing){
+        tx.delete(fRef);
+        tx.update(meRef,{following:Math.max(0,myF-1)});
+        tx.update(themRef,{followers:Math.max(0,thF-1)});
+      } else {
+        tx.set(fRef,{followerId:CU.uid,followingId:uid,createdAt:new Date()});
+        tx.update(meRef,{following:myF+1});
+        tx.update(themRef,{followers:thF+1});
+      }
+    });
+  }catch(e){btn.disabled=false;return}
+  btn.disabled=false;
+  if(wasFollowing){followingIds.delete(uid);btn.classList.remove('following');btn.textContent=t('follow');}
+  else{followingIds.add(uid);btn.classList.add('following');btn.textContent=t('following_btn');await addNotif(uid,'follow',`${UP?.name} started following you`,'');}
   startFeed();
 }
 
@@ -1544,7 +1642,7 @@ function goTo(s){
   if(s==='puls')setTimeout(initPuls,80);
   if(s==='profile'&&CU){updateUI();loadMyPosts('all')}
   if(s==='search')loadUsers();
-  if(s==='messages'){loadConvs();switchMT('msgs');}
+  if(s==='messages'){document.getElementById('chov').classList.remove('on');if(chatUnsub){chatUnsub();chatUnsub=null;}curConv=null;loadConvs();switchMT('msgs');}
   if(s==='portfolio'){renderPortfolio();refreshPortPrices().then(renderPortfolio)}
 }
 
@@ -1595,16 +1693,18 @@ async function repostP(pid,btn){
   const cnt=btn?btn.querySelector('span'):null;
   if(rpSnap.exists()){
     await deleteDoc(rpRef);
+    repostIds.delete(pid);
     try{await updateDoc(doc(db,'posts',pid),{reposts:increment(-1)})}catch(e){}
-    if(btn)btn.style.color='';
+    if(btn){btn.style.color='';btn.classList.remove('reposted')}
     if(icon)icon.style.color='';
     if(cnt)cnt.textContent=Math.max(0,(orig.reposts||1)-1);
     showToast('Repost removed');
   } else {
     await setDoc(rpRef,{uid:CU.uid,postId:pid,authorId:orig.authorId,createdAt:serverTimestamp()});
+    repostIds.add(pid);
     try{await updateDoc(doc(db,'posts',pid),{reposts:increment(1)})}catch(e){}
-    if(btn)btn.style.color='var(--gn)';
-    if(icon)icon.style.color='var(--gn)';
+    if(btn){btn.style.color='var(--gold)';btn.classList.add('reposted')}
+    if(icon)icon.style.color='var(--gold)';
     if(cnt)cnt.textContent=(orig.reposts||0)+1;
     showToast('Reposted!');
     if(orig.authorId!==CU.uid)await addNotif(orig.authorId,'repost',UP.name+' reposted your post',pid);
