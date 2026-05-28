@@ -1970,7 +1970,15 @@ async function loadCD(coin,days){
     renderCDChart(prices);
     const hi=Math.max(...prices),lo=Math.min(...prices);
     document.getElementById('cd-st').innerHTML=`<div class="cds"><div class="cdsl">High</div><div class="cdsv">${fmtP(hi)}</div></div><div class="cds"><div class="cdsl">Low</div><div class="cdsv">${fmtP(lo)}</div></div><div class="cds"><div class="cdsl">Change</div><div class="cdsv" style="color:${chg>=0?'#4ade80':'#f87171'}">${(chg>=0?'+':'')+chg}%</div></div><div class="cds"><div class="cdsl">Current</div><div class="cdsv">${fmtP(last)}</div></div>`;
-  }catch(e){if(pEl)pEl.textContent='-';if(cEl)cEl.textContent='Data unavailable'}
+  }catch(e){
+    const cb={btc:94000,eth:3200,sol:190,bnb:400,xrp:.6,ada:.45,doge:.15,dot:8,avax:35,link:18};
+    const base=cb[coin]||100;const pts=days==='max'?365:Math.max(parseInt(days)*8,40);
+    const d=demo(base,pts);const chg=((d[d.length-1]-d[0])/d[0]*100).toFixed(2);
+    if(pEl)pEl.textContent=fmtP(d[d.length-1]);
+    if(cEl){cEl.textContent=(chg>=0?'+':'')+chg+'%';cEl.className='cdchg '+(chg>=0?'up':'dn')}
+    renderCDChart(d);const hi=Math.max(...d),lo=Math.min(...d);
+    document.getElementById('cd-st').innerHTML=`<div class="cds"><div class="cdsl">High</div><div class="cdsv">${fmtP(hi)}</div></div><div class="cds"><div class="cdsl">Low</div><div class="cdsv">${fmtP(lo)}</div></div><div class="cds"><div class="cdsl">Change</div><div class="cdsv" style="color:${chg>=0?'#4ade80':'#f87171'}">${(chg>=0?'+':'')+chg}%</div></div><div class="cds"><div class="cdsl">Current</div><div class="cdsv">${fmtP(d[d.length-1])}</div></div><div class="cds" style="grid-column:span 2"><div class="cdsl">Data source</div><div class="cdsv"><span class="demo-badge" style="font-size:11px;padding:2px 8px">Demo — Live data coming soon</span></div></div>`;
+  }
 }
 function renderCDChart(prices){
   const cv=document.getElementById('cd-cv');if(!cv)return;if(cdChart)cdChart.destroy();
@@ -1988,7 +1996,13 @@ function closePM(){document.getElementById('pm').classList.remove('on');clearQuo
 function sCat(btn){document.querySelectorAll('#pm .pcat').forEach(b=>b.classList.remove('ak'));btn.classList.add('ak');selCat=btn.dataset.cat}
 function prevImg(inp){if(!inp.files[0])return;const p=document.getElementById('uprev');p.src=URL.createObjectURL(inp.files[0]);p.style.display='block'}
 
+function closeAllOverlays(){
+  closePD();closeOP();closeChat();closeCD();closePM();closeInstPage();closeHoldOv();
+  ['fl-ov','nmov','pov'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('on');});
+  document.querySelectorAll('.cfdlg.on,.ch-modal.on').forEach(el=>el.classList.remove('on'));
+}
 function goTo(s){
+  closeAllOverlays();
   updateHash(s);
   document.querySelectorAll('.sc').forEach(e=>e.classList.remove('on'));
   document.querySelectorAll('.bn').forEach(e=>e.classList.remove('ak'));
@@ -1997,7 +2011,7 @@ function goTo(s){
   if(s==='puls')setTimeout(initPuls,80);
   if(s==='profile'&&CU){document.querySelectorAll('#sc-profile .ptabs .ptab').forEach((t,i)=>t.classList.toggle('ak',i===0));myTab='posts';myPFilt='all';updateUI();loadMyPosts('all');if(CU.email==='claude250k@gmail.com'&&!sessionStorage.getItem('jl_recounted'))recountFollowers();}
   if(s==='search')loadUsers();
-  if(s==='messages'){document.getElementById('chov').classList.remove('on');if(chatUnsub){chatUnsub();chatUnsub=null;}curConv=null;loadConvs();switchMT('msgs');}
+  if(s==='messages'){loadConvs();switchMT('msgs');}
   if(s==='portfolio'){const ptog=document.getElementById('ptog');if(ptog)ptog.checked=UP?.portfolioPublic===true;const ptogLbl=document.getElementById('ptog-lbl');if(ptogLbl)ptogLbl.textContent=t(UP?.portfolioPublic?'portfolio_public':'portfolio_private');renderPortfolio();refreshPortPrices().then(renderPortfolio)}
 }
 
