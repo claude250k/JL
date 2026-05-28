@@ -357,6 +357,15 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .ac-drop{display:none;position:absolute;top:calc(100% + 2px);left:0;right:0;background:var(--sf2);border:1px solid var(--gold);border-radius:10px;z-index:300;max-height:180px;overflow-y:auto}
 .ac-item{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--bd);font-size:12px;color:var(--tx)}.ac-item:last-child{border-bottom:none}.ac-item:hover{background:var(--gdim)}
 .ac-sym{font-size:10px;color:var(--gold);font-weight:700;min-width:36px}.ac-cat{font-size:10px;color:var(--mu2)}
+/* ── PULSE ── */
+.pulse-card{background:var(--cbg);border:1px solid var(--bd);border-radius:14px;margin:8px 12px;overflow:hidden;cursor:pointer}.pulse-card:hover{border-color:rgba(247,147,26,.3)}
+.pulse-ch{height:80px;padding:2px 10px 8px}
+.pulse-closed-bdg{display:inline-block;background:rgba(239,68,68,.12);color:#f87171;padding:2px 6px;border-radius:5px;font-size:9px;font-weight:700;letter-spacing:.3px}
+.pulse-vote-btn{background:transparent;border:1px solid var(--bd);color:var(--mu2);padding:3px 9px;border-radius:7px;font-size:11px;cursor:pointer;white-space:nowrap;font-family:var(--fb);flex-shrink:0}.pulse-vote-btn:hover{border-color:var(--gold);color:var(--gold)}.pulse-vote-btn.voted{background:rgba(247,147,26,.12);border-color:var(--gold);color:var(--gold);font-weight:700}
+.cb-pulse{background:rgba(247,147,26,.15);color:var(--gold)}
+.po-inp-row{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.po-inp{flex:1;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;padding:8px 11px;color:var(--tx);font-size:12px;outline:none;font-family:var(--fb)}.po-inp:focus{border-color:var(--gold)}.po-inp::placeholder{color:var(--mu)}
+.po-rm{background:none;border:1px solid var(--bd);color:var(--mu2);width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;flex-shrink:0}.po-rm:hover{border-color:#f87171;color:#f87171}
 </style>
 </head>
 <body>
@@ -463,20 +472,21 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 
 <div class="sc" id="sc-puls">
   <div class="sh" style="justify-content:center;position:relative">
-    <div class="stitle" style="font-size:16px">Puls<em style="color:var(--gold);font-style:normal">.</em></div>
+    <div class="stitle" style="font-size:16px">Pulse<em style="color:var(--gold);font-style:normal">.</em></div>
     <div style="position:absolute;right:16px;display:flex;gap:8px;align-items:center">
       <span style="font-size:10px;color:var(--mu2);display:flex;align-items:center"><span class="ldot"></span>Live</span>
-      <button class="ib2" onclick="rfPuls()"><i class="ti ti-refresh"></i></button>
+      <button class="ib2" onclick="rfPulse()"><i class="ti ti-refresh"></i></button>
     </div>
   </div>
   <div class="krow" id="pk">
-    <button class="kachel ak" onclick="fpuls(this,'all')">All</button>
-    <button class="kachel" onclick="fpuls(this,'crypto')">Crypto</button>
-    <button class="kachel" onclick="fpuls(this,'stocks')">Stocks</button>
-    <button class="kachel" onclick="fpuls(this,'ETF')">ETF</button>
-    <button class="kachel" onclick="fpuls(this,'pol')">Politics</button>
-    <button class="kachel" onclick="fpuls(this,'tcg')">TCG</button>
-    <button class="kachel" onclick="fpuls(this,'watches')">Watches</button>
+    <button class="kachel ak" onclick="fpulse(this,'all')">All</button>
+    <button class="kachel" onclick="fpulse(this,'pulse')">Pulse</button>
+    <button class="kachel" onclick="fpulse(this,'crypto')">Crypto</button>
+    <button class="kachel" onclick="fpulse(this,'stocks')">Stocks</button>
+    <button class="kachel" onclick="fpulse(this,'ETF')">ETF</button>
+    <button class="kachel" onclick="fpulse(this,'pol')">Politics</button>
+    <button class="kachel" onclick="fpulse(this,'tcg')">TCG</button>
+    <button class="kachel" onclick="fpulse(this,'watches')">Watches</button>
   </div>
   <div class="scroll" id="puls-scroll">
     <div data-pc="crypto">
@@ -537,6 +547,16 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       <div class="watch-brand"><div class="watch-brand-top" onclick="togTCGSub('topps')"><div class="watch-bi" style="background:rgba(50,100,200,.18)">To</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">Topps</div><div style="font-size:11px;color:var(--mu2)">Basketball · Baseball · Football</div></div><i class="ti ti-chevron-down" id="tcgsubi-topps" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div><div id="tcgsub-topps" style="display:none;padding:10px 13px;border-top:1px solid var(--bd)"><div class="watch-soon" style="margin:0"><i class="ti ti-clock" style="color:var(--gold);font-size:16px;flex-shrink:0"></i><div><div style="font-size:12px;font-weight:700;color:var(--gold)">Coming Soon</div><div style="font-size:11px;color:var(--mu2);margin-top:1px">Topps sports card data in development</div></div></div></div></div>
       <div class="watch-brand"><div class="watch-brand-top" onclick="togTCGSub('mtg')"><div class="watch-bi" style="background:rgba(140,55,170,.2)">MTG</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">Magic the Gathering</div><div style="font-size:11px;color:var(--mu2)">Wizards of the Coast</div></div><i class="ti ti-chevron-down" id="tcgsubi-mtg" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div><div id="tcgsub-mtg" style="display:none;padding:10px 13px;border-top:1px solid var(--bd)"><div class="watch-soon" style="margin:0"><i class="ti ti-clock" style="color:var(--gold);font-size:16px;flex-shrink:0"></i><div><div style="font-size:12px;font-weight:700;color:var(--gold)">Coming Soon</div><div style="font-size:11px;color:var(--mu2);margin-top:1px">MTG card market data in development</div></div></div></div></div>
       <div class="watch-brand" style="margin-bottom:8px"><div class="watch-brand-top" onclick="togTCGSub('yugioh')"><div class="watch-bi" style="background:rgba(80,80,210,.18)">YGO</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">Yu-Gi-Oh</div><div style="font-size:11px;color:var(--mu2)">Konami</div></div><i class="ti ti-chevron-down" id="tcgsubi-yugioh" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div><div id="tcgsub-yugioh" style="display:none;padding:10px 13px;border-top:1px solid var(--bd)"><div class="watch-soon" style="margin:0"><i class="ti ti-clock" style="color:var(--gold);font-size:16px;flex-shrink:0"></i><div><div style="font-size:12px;font-weight:700;color:var(--gold)">Coming Soon</div><div style="font-size:11px;color:var(--mu2);margin-top:1px">Yu-Gi-Oh card market data in development</div></div></div></div></div>
+    </div>
+    <div data-pc="pulse" style="display:none">
+      <div style="padding:10px 14px 6px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--tx)">Community Pulses</div>
+          <div style="font-size:11px;color:var(--mu2);margin-top:2px">Daily vote · Resets midnight CET</div>
+        </div>
+        <button onclick="openCreatePulse()" style="background:var(--gold);border:none;color:#000;padding:5px 13px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;font-family:var(--fb)"><i class="ti ti-plus" style="font-size:12px"></i>Create</button>
+      </div>
+      <div id="pulse-list"><div class="spin"></div></div>
     </div>
     <div data-pc="watches">
       <div class="watch-soon"><i class="ti ti-clock" style="color:var(--gold);font-size:16px;flex-shrink:0"></i><div><div style="font-size:12px;font-weight:700;color:var(--gold)">Coming Soon</div><div style="font-size:11px;color:var(--mu2);margin-top:1px">Live watch market data in development · Prices are approximate</div></div></div>
@@ -848,12 +868,38 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
     <button onclick="removeHolding()" style="flex:1;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;padding:11px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-trash"></i> Remove Position</button>
   </div>
 </div>
+<div class="ov" id="create-pulse-ov">
+  <div class="ovh">
+    <button class="ovb" onclick="closeCreatePulse()"><i class="ti ti-arrow-left"></i></button>
+    <div class="ovt">Create Pulse</div>
+    <button onclick="submitCreatePulse()" style="background:var(--gold);color:#000;border:none;padding:5px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--fb)">Create</button>
+  </div>
+  <div class="scroll" style="padding:16px">
+    <div class="elabel">Question / Title *</div>
+    <input class="einp" id="pulse-title-inp" type="text" placeholder="e.g. Who will be the next President?" maxlength="120">
+    <div class="elabel">End Date *</div>
+    <input class="einp" id="pulse-enddate-inp" type="date">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div class="elabel" style="margin:0">Answer Options (2–10) *</div>
+      <button onclick="addPulseOption()" style="background:none;border:1px solid var(--gold);color:var(--gold);padding:3px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer">+ Add</button>
+    </div>
+    <div id="pulse-opts-list"></div>
+    <div style="height:16px"></div>
+  </div>
+</div>
+<div class="ov" id="pulse-detail-ov">
+  <div class="ovh">
+    <button class="ovb" onclick="closePulseDetail()"><i class="ti ti-arrow-left"></i></button>
+    <div class="ovt" id="pulse-detail-hdr">Pulse</div>
+  </div>
+  <div class="scroll" id="pulse-detail-body"></div>
+</div>
 <div class="toast" id="toast"></div>
 <div class="bnav">
   <div style="padding:8px 14px 20px;display:none" class="desk-logo"><svg width="72" height="32" viewBox="0 0 72 32" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="0,16 8,16 11,5 14,27 17,11 20,21 23,16 32,16" stroke="#F7931A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="36" y="23" font-family="Syne,sans-serif" font-weight="800" font-size="20" fill="#f0ede6">J<tspan fill="#F7931A">L</tspan></text></svg></div>
   <div class="cfdlg" id="cfdlg"><div class="cfdlg-box"><div class="cfdlg-ico"><i class="ti ti-trash"></i></div><div class="cfdlg-msg" id="cfdlg-msg">Löschen?</div><div class="cfdlg-btns"><button class="cfdlg-cancel" onclick="_cfCancel()" data-i18n="dlg_cancel">Cancel</button><button class="cfdlg-ok" onclick="_cfOk()" data-i18n="dlg_delete">Delete</button></div></div></div>
   <button class="bn ak" id="bn-feed" onclick="goTo('feed')"><i class="ti ti-home"></i><span data-i18n="nav_feed">Feed</span></button>
-  <button class="bn" id="bn-puls" onclick="goTo('puls')"><i class="ti ti-activity"></i><span data-i18n="nav_puls">Puls</span></button>
+  <button class="bn" id="bn-puls" onclick="goTo('puls')"><i class="ti ti-activity"></i><span data-i18n="nav_puls">Pulse</span></button>
   <button class="bn" id="bn-search" onclick="goTo('search')"><i class="ti ti-search"></i><span data-i18n="nav_search">Search</span></button>
   <button class="bn" id="bn-messages" onclick="goTo('messages')"><i class="ti ti-message-circle"></i><span data-i18n="nav_messages">Messages</span><div class="nbadge" id="nbadge"></div></button>
   <button class="bn" id="bn-portfolio" onclick="goTo('portfolio')"><i class="ti ti-briefcase"></i><span data-i18n="nav_portfolio">Portfolio</span></button>
@@ -883,7 +929,8 @@ setInterval(tick,10000);tick();
 
 let CU=null,UP=null,selCat='all';
 let feedUnsub=null,chatUnsub=null,msgUnsub=null,notifUnsub=null,opUnsub=null;
-let pulsInited=false,chartI={},cdChart=null,curCDCoin=null;
+let pulseInited=false,chartI={},cdChart=null,curCDCoin=null;
+let _curPulseId=null;
 let allUsers=[],myVote=null,curOP=null,curConv=null,curChatOid=null;
 let customChs=[],myPFilt='all',myTab='posts',curPD=null;
 let _notifUnread=0,_msgUnread=0,_lastRead={};
@@ -1439,6 +1486,7 @@ function pH(p){
         <div class="ptxt" onclick="openPD('${p.id}')">${linkText(p.text||'')}</div>
         ${qblockH(p.quoteOf)}
         ${img}
+        ${p.pulseId?`<div onclick="event.stopPropagation();openPulseFromPost('${esc(p.pulseId)}')" style="display:inline-flex;align-items:center;gap:5px;background:rgba(247,147,26,.12);border:1px solid rgba(247,147,26,.28);color:var(--gold);padding:3px 11px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;margin-bottom:5px"><i class="ti ti-chart-bar" style="font-size:12px"></i>Open Pulse →</div>`:''}
         <div class="pacts">
           <button class="pa${liked?' liked':''}" id="lb-${p.id}" onclick="likeP('${p.id}',this)">
             <i class="ti ${liked?'ti-heart-filled':'ti-heart'}"></i>
@@ -2343,7 +2391,7 @@ function mkC(id,data){const el=document.getElementById(id);if(!el)return;if(char
 function demo(b,n){let v=b,d=[];for(let i=0;i<n;i++){v+=(Math.random()-.48)*b*.012;d.push(Math.round(v*100)/100)}return d}
 function fmtP(n){if(n>=1000)return'$'+n.toLocaleString('de-DE',{maximumFractionDigits:0});if(n>=1)return'$'+n.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});return'$'+n.toLocaleString('de-DE',{minimumFractionDigits:4,maximumFractionDigits:4})}
 
-async function fetchPuls(){
+async function fetchPulse(){
   try{
     const ids=Object.values(CID).join(',');
     const r=await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&sparkline=true&price_change_percentage=24h`);
@@ -2513,9 +2561,9 @@ async function triggerAlert(coin,price,alertId){
   showToast(msg);
   if(curCDCoin===coin)renderAlertPanel();
 }
-function fpuls(btn,cat){document.querySelectorAll('#pk .kachel').forEach(b=>b.classList.remove('ak'));btn.classList.add('ak');document.querySelectorAll('#puls-scroll [data-pc]').forEach(el=>el.style.display=(cat==='all'||el.dataset.pc===cat)?'':'none');document.getElementById('puls-scroll').scrollTop=0;}
-function rfPuls(){pulsInited=false;initPuls()}
-function initPuls(){if(pulsInited)return;pulsInited=true;fetchPuls();setInterval(fetchPuls,60000)}
+function fpulse(btn,cat){document.querySelectorAll('#pk .kachel').forEach(b=>b.classList.remove('ak'));btn.classList.add('ak');document.querySelectorAll('#puls-scroll [data-pc]').forEach(el=>el.style.display=(cat==='all'||el.dataset.pc===cat)?'':'none');document.getElementById('puls-scroll').scrollTop=0;if(cat==='pulse')loadPulses();}
+function rfPulse(){pulseInited=false;initPulse()}
+function initPulse(){if(pulseInited)return;pulseInited=true;fetchPulse();setInterval(fetchPulse,60000)}
 
 function openPM(){if(!CU){showToast('Please sign in');return}document.getElementById('pm').classList.add('on');renderQuotePreview();}
 function closePM(){document.getElementById('pm').classList.remove('on');clearQuote();}
@@ -2523,7 +2571,7 @@ function sCat(btn){document.querySelectorAll('#pm .pcat').forEach(b=>b.classList
 function prevImg(inp){if(!inp.files[0])return;const p=document.getElementById('uprev');p.src=URL.createObjectURL(inp.files[0]);p.style.display='block'}
 
 function closeAllOverlays(){
-  closePD();closeOP();closeChat();closeCD();closePM();closeInstPage();closeHoldOv();closeGrpCreate();closeGrpInvite();
+  closePD();closeOP();closeChat();closeCD();closePM();closeInstPage();closeHoldOv();closeGrpCreate();closeGrpInvite();closePulseDetail();closeCreatePulse();
   ['fl-ov','nmov','pov'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('on');});
   document.querySelectorAll('.cfdlg.on,.ch-modal.on').forEach(el=>el.classList.remove('on'));
 }
@@ -2535,7 +2583,7 @@ function goTo(s){
   document.querySelectorAll('.bn').forEach(e=>e.classList.remove('ak'));
   document.getElementById('sc-'+s).classList.add('on');
   document.getElementById('bn-'+s).classList.add('ak');
-  if(s==='puls')setTimeout(initPuls,80);
+  if(s==='puls')setTimeout(initPulse,80);
   if(s==='profile'&&CU){document.querySelectorAll('#sc-profile .ptabs .ptab').forEach((t,i)=>t.classList.toggle('ak',i===0));myTab='posts';myPFilt='all';updateUI();loadMyPosts('all');if(CU.email==='claude250k@gmail.com'&&!sessionStorage.getItem('jl_recounted'))recountFollowers();}
   if(s==='search'){loadUsers();_trendIntv=setInterval(()=>loadTrending(true),60000);}
   if(s==='messages'){loadConvs();switchMT('msgs');}
@@ -2828,7 +2876,7 @@ async function removeHolding(){
 // ── i18n ───────────────────────────────────────────────────────────────────
 const I18N={
   en:{
-    nav_feed:'Feed',nav_puls:'Puls',nav_search:'Search',nav_messages:'Messages',nav_portfolio:'Portfolio',nav_profile:'Profile',
+    nav_feed:'Feed',nav_puls:'Pulse',nav_search:'Search',nav_messages:'Messages',nav_portfolio:'Portfolio',nav_profile:'Profile',
     settings:'Settings',account:'Account',editProfile:'Edit Profile',editProfileSub:'Name, bio and photo',
     installApp:'Install App',installAppSub:'Add to home screen',manageChannels:'Manage Channels',manageChannelsSub:'Add or remove your channels',
     privacy:'Privacy',privacySub:'Visibility and data',privacySoon:'Privacy settings coming soon',
@@ -3067,6 +3115,7 @@ document.addEventListener('touchend',e=>{
 function swipeBack(){
   const checks=[
     ['giov',()=>closeGrpInvite()],['grpov',()=>closeGrpCreate()],
+    ['pulse-detail-ov',()=>closePulseDetail()],['create-pulse-ov',()=>closeCreatePulse()],
     ['pdov',()=>closePD()],['opportov',()=>closeOpPort()],['opov',()=>closeOP()],['chov',()=>closeChat()],
     ['cd',()=>closeCD()],['setov',()=>closeSet()],['editov',()=>closeEditProf()],
     ['nmov',()=>document.getElementById('nmov').classList.remove('on')],
@@ -3202,6 +3251,263 @@ document.addEventListener('pointerdown',e=>{
 document.addEventListener('pointerup',()=>{clearTimeout(_lpTimer);_lpTimer=null;},{passive:true});
 document.addEventListener('pointermove',e=>{if(_lpTimer&&e.movementX*e.movementX+e.movementY*e.movementY>16){clearTimeout(_lpTimer);_lpTimer=null;}},{passive:true});
 document.addEventListener('pointercancel',()=>{clearTimeout(_lpTimer);_lpTimer=null;},{passive:true});
+
+// ── PULSE ─────────────────────────────────────────────────────────────────────
+const PULSE_COLORS=['#F7931A','#22c55e','#60a5fa','#f87171','#a78bfa','#fb923c','#34d399','#f472b6','#facc15','#94a3b8'];
+
+function getBerlinDate(){
+  return new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Berlin'}).format(new Date());
+}
+function daysLeft(endDate){
+  const today=getBerlinDate();
+  if(!endDate||endDate<=today)return'Closed';
+  const ms=new Date(endDate).getTime()-new Date(today).getTime();
+  const d=Math.ceil(ms/86400000);
+  return d===1?'1 day left':d+' days left';
+}
+
+function openCreatePulse(){
+  if(!CU){showToast('Please sign in');return}
+  const today=getBerlinDate();
+  if(localStorage.getItem('jl_pulse_created')===today){showToast('You can only create one Pulse per day');return}
+  const tInp=document.getElementById('pulse-title-inp');if(tInp)tInp.value='';
+  const dInp=document.getElementById('pulse-enddate-inp');
+  if(dInp){
+    const def=new Date();def.setDate(def.getDate()+7);
+    dInp.value=def.toISOString().split('T')[0];
+    dInp.min=new Date(Date.now()+86400000).toISOString().split('T')[0];
+  }
+  const ol=document.getElementById('pulse-opts-list');
+  if(ol){ol.innerHTML='';addPulseOption();addPulseOption();}
+  document.getElementById('create-pulse-ov').classList.add('on');
+  setTimeout(()=>document.getElementById('pulse-title-inp')?.focus(),80);
+}
+function closeCreatePulse(){const el=document.getElementById('create-pulse-ov');if(el)el.classList.remove('on');}
+
+function addPulseOption(){
+  const ol=document.getElementById('pulse-opts-list');if(!ol)return;
+  const count=ol.querySelectorAll('.po-inp-row').length;
+  if(count>=10){showToast('Maximum 10 options');return}
+  const row=document.createElement('div');row.className='po-inp-row';
+  row.innerHTML=`<span style="font-size:11px;color:var(--mu2);width:16px;text-align:right;flex-shrink:0">${count+1}</span><input class="po-inp" type="text" placeholder="Option ${count+1}" maxlength="80"><button class="po-rm" onclick="removePulseOption(this)"><i class="ti ti-x"></i></button>`;
+  ol.appendChild(row);
+}
+function removePulseOption(btn){
+  const ol=document.getElementById('pulse-opts-list');if(!ol)return;
+  if(ol.querySelectorAll('.po-inp-row').length<=2){showToast('Minimum 2 options required');return}
+  btn.closest('.po-inp-row').remove();
+  ol.querySelectorAll('.po-inp-row').forEach((row,i)=>{const num=row.querySelector('span');if(num)num.textContent=i+1;const inp=row.querySelector('.po-inp');if(inp)inp.placeholder='Option '+(i+1);});
+}
+
+async function submitCreatePulse(){
+  if(!CU||!UP){showToast('Please sign in');return}
+  const title=(document.getElementById('pulse-title-inp')?.value||'').trim();
+  if(!title){showToast('Please enter a question');return}
+  const endDateStr=document.getElementById('pulse-enddate-inp')?.value;
+  if(!endDateStr){showToast('Please set an end date');return}
+  const opts=Array.from(document.querySelectorAll('#pulse-opts-list .po-inp')).map(inp=>inp.value.trim()).filter(Boolean);
+  if(opts.length<2){showToast('Please add at least 2 options');return}
+  const{db,collection,addDoc,doc,updateDoc,increment,serverTimestamp}=window._fb;
+  try{
+    const options=opts.map((text,i)=>({id:'opt'+i,text,votes:0}));
+    const pRef=await addDoc(collection(db,'pulses'),{
+      title,options,endDate:endDateStr,
+      creatorId:CU.uid,creatorName:UP.name||'',creatorAvatar:UP.avatarUrl||'',
+      createdAt:serverTimestamp(),voteHistory:[]
+    });
+    const postRef=await addDoc(collection(db,'posts'),{
+      text:`🗳️ Created a new Pulse: "${title}" — Vote now!`,
+      channel:'pulse',type:'pulse',pulseId:pRef.id,
+      authorId:CU.uid,authorName:UP.name||'',authorAvatar:UP.avatarUrl||'',
+      likes:0,likedBy:[],comments:0,reposts:0,createdAt:serverTimestamp()
+    });
+    await updateDoc(doc(db,'users',CU.uid),{posts:increment(1)});
+    UP.posts=(UP.posts||0)+1;
+    await updateDoc(doc(db,'pulses',pRef.id),{postId:postRef.id});
+    localStorage.setItem('jl_pulse_created',getBerlinDate());
+    closeCreatePulse();showToast('Pulse created! 🗳️');
+    // Switch to Pulse tab
+    const pulseBtn=Array.from(document.querySelectorAll('#pk .kachel')).find(b=>b.textContent==='Pulse');
+    if(pulseBtn)pulseBtn.click();
+  }catch(e){showToast('Error: '+e.message);}
+}
+
+async function loadPulses(){
+  const c=document.getElementById('pulse-list');if(!c)return;
+  c.innerHTML='<div class="spin"></div>';
+  const{db,collection,query,orderBy,limit,getDocs,doc,getDoc}=window._fb;
+  try{
+    const snap=await getDocs(query(collection(db,'pulses'),orderBy('createdAt','desc'),limit(20)));
+    const pulses=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(!pulses.length){c.innerHTML='<div class="empty"><i class="ti ti-chart-bar"></i><p>No Pulses yet.<br>Be the first to create one!</p></div>';return}
+    const today=getBerlinDate();
+    const myVotes={};
+    if(CU){
+      await Promise.all(pulses.map(async p=>{
+        try{const vs=await getDoc(doc(db,'pulseVotes',CU.uid+'_'+p.id));if(vs.exists())myVotes[p.id]=vs.data();}catch(e){}
+      }));
+    }
+    c.innerHTML=pulses.map(p=>_pulseCardHTML(p,myVotes[p.id],today)).join('');
+    pulses.forEach(p=>_renderPulseMiniChart(p));
+  }catch(e){c.innerHTML='<div class="empty"><i class="ti ti-alert-circle"></i><p>Error loading Pulses</p></div>';}
+}
+
+function _pulseCardHTML(p,myVote,today){
+  const closed=!!(p.endDate&&p.endDate<today);
+  const opts=p.options||[];
+  const totalVotes=opts.reduce((s,o)=>s+(o.votes||0),0);
+  const topOpt=closed&&totalVotes>0?opts.reduce((a,b)=>(b.votes||0)>(a.votes||0)?b:a,opts[0]):null;
+  const votedOptId=myVote?.optionId;
+  const optsHTML=opts.slice(0,4).map((o,i)=>{
+    const pct=totalVotes>0?Math.round((o.votes||0)/totalVotes*100):0;
+    const isWinner=closed&&topOpt&&o.id===topOpt.id;
+    const isVoted=votedOptId===o.id;
+    return`<div style="display:flex;align-items:center;gap:7px;padding:2px 14px">
+      <div style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:${PULSE_COLORS[i%PULSE_COLORS.length]}"></div>
+      <div style="flex:1;font-size:11px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(o.text||'')}</div>
+      ${isWinner?'<span style="font-size:10px">🏆</span>':''}
+      <span style="font-size:10px;font-weight:600;color:${isVoted?'var(--gold)':'var(--mu2)'}">${pct}%</span>
+    </div>`;
+  }).join('')+(opts.length>4?`<div style="font-size:10px;color:var(--mu2);padding:2px 14px 4px">+${opts.length-4} more options</div>`:'');
+  return`<div class="pulse-card" onclick="openPulseDetail('${p.id}')">
+    <div style="padding:10px 14px 5px">
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:2px">
+        <div style="font-size:13px;font-weight:700;color:var(--tx);flex:1;line-height:1.3">${esc(p.title||'')}</div>
+        ${closed?'<span class="pulse-closed-bdg">Closed</span>':p.endDate?`<span style="font-size:9px;color:var(--mu2);white-space:nowrap">${daysLeft(p.endDate)}</span>`:''}
+      </div>
+      <div style="font-size:10px;color:var(--mu2)">by ${esc(p.creatorName||'')} · ${totalVotes} vote${totalVotes!==1?'s':''}</div>
+    </div>
+    <div class="pulse-ch" id="pulse-mc-${p.id}"><canvas id="pulse-cv-${p.id}" style="width:100%;height:100%"></canvas></div>
+    ${optsHTML}
+    <div style="height:8px"></div>
+  </div>`;
+}
+
+function _renderPulseMiniChart(p){
+  const cv=document.getElementById('pulse-cv-'+p.id);if(!cv)return;
+  const opts=p.options||[];
+  const hist=p.voteHistory||[];
+  const cid='pulse-cv-'+p.id;
+  if(chartI[cid])chartI[cid].destroy();
+  if(hist.length>=2){
+    const labels=hist.map(h=>h.date);
+    const datasets=opts.map((o,i)=>({data:hist.map(h=>h.counts?.[i]||0),borderColor:PULSE_COLORS[i%PULSE_COLORS.length],borderWidth:2,pointRadius:0,tension:.4,fill:false}));
+    chartI[cid]=new Chart(cv,{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false,min:0}}}});
+  } else {
+    const totalVotes=opts.reduce((s,o)=>s+(o.votes||0),0)||1;
+    chartI[cid]=new Chart(cv,{type:'bar',data:{labels:opts.map((o,i)=>i+1),datasets:[{data:opts.map(o=>o.votes||0),backgroundColor:opts.map((_,i)=>PULSE_COLORS[i%PULSE_COLORS.length]+'88'),borderColor:opts.map((_,i)=>PULSE_COLORS[i%PULSE_COLORS.length]),borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>opts[c.dataIndex]?.text+': '+c.parsed.y+' votes'}}},scales:{x:{display:false},y:{display:false,min:0}}}});
+  }
+}
+
+async function openPulseDetail(pulseId){
+  _curPulseId=pulseId;
+  const{db,doc,getDoc}=window._fb;
+  const snap=await getDoc(doc(db,'pulses',pulseId));
+  if(!snap.exists()){showToast('Pulse not found');return}
+  const p={id:pulseId,...snap.data()};
+  const today=getBerlinDate();
+  const closed=!!(p.endDate&&p.endDate<today);
+  let myVote=null;
+  if(CU){try{const vs=await getDoc(doc(db,'pulseVotes',CU.uid+'_'+pulseId));if(vs.exists())myVote=vs.data();}catch(e){}}
+  document.getElementById('pulse-detail-hdr').textContent=(p.title||'Pulse').substring(0,30);
+  _renderPulseDetail(p,myVote,today,closed);
+  document.getElementById('pulse-detail-ov').classList.add('on');
+}
+function closePulseDetail(){const el=document.getElementById('pulse-detail-ov');if(el)el.classList.remove('on');_curPulseId=null;}
+
+function _renderPulseDetail(p,myVote,today,closed){
+  const opts=p.options||[];
+  const totalVotes=opts.reduce((s,o)=>s+(o.votes||0),0);
+  const topOpt=closed&&totalVotes>0?opts.reduce((a,b)=>(b.votes||0)>(a.votes||0)?b:a,opts[0]):null;
+  const votedToday=!!(myVote&&myVote.date===today);
+  const votedOptId=myVote?.optionId;
+  const hist=p.voteHistory||[];
+  const hasHistory=hist.length>=2;
+  const optRows=opts.map((o,i)=>{
+    const pct=totalVotes>0?Math.round((o.votes||0)/totalVotes*100):0;
+    const isWinner=!!(closed&&topOpt&&o.id===topOpt.id);
+    const isVoted=votedOptId===o.id;
+    const canVote=!closed&&!votedToday&&CU;
+    return`<div style="padding:9px 16px;border-bottom:1px solid var(--bd)">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:6px">
+        <div style="width:10px;height:10px;border-radius:50%;flex-shrink:0;background:${PULSE_COLORS[i%PULSE_COLORS.length]}"></div>
+        <div style="flex:1;font-size:13px;color:${isWinner?'var(--gold)':isVoted?'var(--tx)':'var(--tx2)'};font-weight:${isWinner||isVoted?700:400}">${esc(o.text||'')}</div>
+        ${isWinner?'<span style="font-size:14px">🏆</span>':''}
+        ${canVote?`<button class="pulse-vote-btn${isVoted?' voted':''}" onclick="voteOnPulse('${p.id}','${o.id}',this)">${isVoted?'Voted ✓':'Vote'}</button>`:''}
+      </div>
+      <div style="height:5px;background:var(--sf3);border-radius:3px;overflow:hidden;margin-bottom:4px">
+        <div style="height:100%;width:${pct}%;background:${PULSE_COLORS[i%PULSE_COLORS.length]};border-radius:3px;transition:width .7s ease"></div>
+      </div>
+      <div style="font-size:10px;color:var(--mu2)">${o.votes||0} vote${(o.votes||0)!==1?'s':''} · ${pct}%</div>
+    </div>`;
+  }).join('');
+  document.getElementById('pulse-detail-body').innerHTML=`
+    <div style="padding:13px 16px 9px;border-bottom:1px solid var(--bd)">
+      <div style="font-size:16px;font-weight:800;color:var(--tx);margin-bottom:6px;line-height:1.3;font-family:var(--fd)">${esc(p.title||'')}</div>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:11px;color:var(--mu2)">
+        <span>by ${esc(p.creatorName||'')}</span><span>·</span>
+        <span>${totalVotes} vote${totalVotes!==1?'s':''}</span><span>·</span>
+        ${closed?'<span class="pulse-closed-bdg">Closed</span>':`<span>${daysLeft(p.endDate)}</span>`}
+        ${votedToday&&!closed?'<span style="color:var(--gold);font-weight:600">· Voted today ✓</span>':''}
+        ${closed&&!votedToday&&!myVote?'':(votedToday?'':'<span style="color:var(--mu2)">· Vote resets midnight CET</span>')}
+      </div>
+    </div>
+    ${hasHistory?`<div style="height:160px;padding:8px 12px 0"><canvas id="pulse-detail-cv"></canvas></div>`:''}
+    ${optRows}
+    <div style="height:20px"></div>`;
+  if(hasHistory){
+    setTimeout(()=>{
+      const cv=document.getElementById('pulse-detail-cv');if(!cv)return;
+      const labels=hist.map(h=>h.date);
+      const datasets=opts.map((o,i)=>({label:o.text,data:hist.map(h=>h.counts?.[i]||0),borderColor:PULSE_COLORS[i%PULSE_COLORS.length],borderWidth:2.5,pointRadius:2,tension:.4,fill:false}));
+      if(chartI['pulse-detail-cv'])chartI['pulse-detail-cv'].destroy();
+      chartI['pulse-detail-cv']=new Chart(cv,{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,animation:{duration:400},plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,backgroundColor:'#1a1a1a',borderColor:'#333',borderWidth:1,callbacks:{title:ts=>'Date: '+ts[0].label,label:c=>c.dataset.label+': '+c.parsed.y+' votes'}}},scales:{x:{display:false},y:{min:0,ticks:{color:'#666',font:{size:9},stepSize:1},grid:{color:'rgba(255,255,255,.05)'}}}}});
+    },50);
+  }
+}
+
+async function voteOnPulse(pulseId,optionId,btn){
+  if(!CU){showToast('Please sign in');return}
+  const today=getBerlinDate();
+  const{db,doc,getDoc,setDoc,runTransaction,serverTimestamp}=window._fb;
+  try{
+    const voteRef=doc(db,'pulseVotes',CU.uid+'_'+pulseId);
+    const voteSnap=await getDoc(voteRef);
+    if(voteSnap.exists()&&voteSnap.data().date===today){showToast('Already voted today · Resets midnight CET');return}
+    const prevVote=voteSnap.exists()?voteSnap.data():null;
+    await runTransaction(db,async tx=>{
+      const pSnap=await tx.get(doc(db,'pulses',pulseId));
+      if(!pSnap.exists())return;
+      const pData=pSnap.data();
+      const opts=[...(pData.options||[])];
+      if(prevVote?.optionId){const pi=opts.findIndex(o=>o.id===prevVote.optionId);if(pi>=0)opts[pi]={...opts[pi],votes:Math.max(0,(opts[pi].votes||0)-1)};}
+      const ni=opts.findIndex(o=>o.id===optionId);
+      if(ni>=0)opts[ni]={...opts[ni],votes:(opts[ni].votes||0)+1};
+      const hist=[...(pData.voteHistory||[])];
+      const counts=opts.map(o=>o.votes||0);
+      const tEntry=hist.find(h=>h.date===today);
+      if(tEntry)tEntry.counts=counts;else hist.push({date:today,counts});
+      if(hist.length>60)hist.splice(0,hist.length-60);
+      tx.update(doc(db,'pulses',pulseId),{options:opts,voteHistory:hist});
+      tx.set(voteRef,{uid:CU.uid,pulseId,optionId,date:today,votedAt:serverTimestamp()});
+    });
+    showToast('Vote cast! ✓');
+    const snap=await getDoc(doc(db,'pulses',pulseId));
+    if(snap.exists()){
+      const p={id:pulseId,...snap.data()};
+      _renderPulseDetail(p,{optionId,date:today},today,!!(p.endDate&&p.endDate<today));
+    }
+  }catch(e){showToast('Error: '+e.message);}
+}
+
+function openPulseFromPost(pulseId){
+  goTo('puls');
+  setTimeout(()=>{
+    const pulseBtn=Array.from(document.querySelectorAll('#pk .kachel')).find(b=>b.textContent==='Pulse');
+    if(pulseBtn)pulseBtn.click();
+    setTimeout(()=>openPulseDetail(pulseId),300);
+  },150);
+}
 </script>
 </body>
 </html>
