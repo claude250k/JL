@@ -1246,8 +1246,9 @@ async function likeP(pid,btn){
   const curCount=parseInt(cnt?.textContent||'0');
   const newCount=Math.max(0,curCount+(nowLiked?1:-1));
   document.querySelectorAll('[id="lb-'+pid+'"]').forEach(b=>{
-    if(nowLiked){b.classList.add('liked');b.innerHTML=`<i class="ti ti-heart-filled" style="color:var(--gold)"></i> <span>${newCount}</span>`;}
-    else{b.classList.remove('liked');b.innerHTML=`<i class="ti ti-heart"></i> <span>${newCount}</span>`;}
+    const ic=b.querySelector('i');const sp=b.querySelector('span');
+    if(nowLiked){b.classList.add('liked');if(ic)ic.className='ti ti-heart-filled';if(sp)sp.textContent=newCount;}
+    else{b.classList.remove('liked');if(ic)ic.className='ti ti-heart';if(sp)sp.textContent=newCount;}
   });
   // Persist to Firestore in background
   const{db,doc,getDoc,updateDoc,increment}=window._fb;
@@ -2151,7 +2152,7 @@ function showHoldDetail(id){
   const row=(l,v)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--bd)"><span style="font-size:12px;color:var(--mu2)">${l}</span><span style="font-size:13px;font-weight:600;color:var(--tx)">${v}</span></div>`;
   document.getElementById('hold-ov-body').innerHTML=`
     <div style="text-align:center;padding:20px 0 24px">
-      <div style="font-family:var(--fd);font-size:32px;font-weight:800;color:var(--tx);letter-spacing:-.5px">$${fmt(cv)}</div>
+      <div style="font-size:32px;font-weight:800;color:var(--tx);letter-spacing:-.5px">$${fmt(cv)}</div>
       <div style="font-size:14px;color:${plCol};font-weight:600;margin-top:4px">${sg}$${fmt(Math.abs(pl))} (${sg}${pp.toFixed(2)}%) all time</div>
     </div>
     <div style="background:var(--sf);border:1px solid var(--bd);border-radius:13px;overflow:hidden;margin-bottom:16px">
@@ -2192,7 +2193,7 @@ async function saveHoldEdit(){
 }
 async function removeHolding(){
   const h=portHoldings.find(x=>x.id===curHoldId);if(!h)return;
-  if(!confirm(`Remove ${h.name||h.symbol||'holding'} from portfolio?`))return;
+  if(!await appConfirm(`${h.name||h.symbol||'Position'} entfernen?`))return;
   const id=curHoldId;closeHoldOv();await delHolding(id);
 }
 
