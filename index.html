@@ -600,8 +600,9 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 
 <div class="sc" id="sc-search">
   <div class="sh" style="justify-content:center;position:relative"><div class="stitle">Search<em style="color:var(--gold);font-style:normal">.</em></div><div style="position:absolute;right:16px"><button class="ib2" onclick="loadUsers();showToast('Refreshing...')" title="Refresh"><i class="ti ti-refresh"></i></button></div></div>
-  <div class="sbar2"><div class="sbox"><i class="ti ti-search"></i><input type="text" id="sinp" placeholder="Name or #number ..." oninput="doSearch()"><button id="sinp-clear" onclick="clearSearch()" style="display:none;background:none;border:none;color:var(--mu2);cursor:pointer;padding:0 4px;line-height:1;font-size:16px" title="Clear"><i class="ti ti-x"></i></button></div></div>
+  <div class="sbar2"><div class="sbox"><i class="ti ti-search"></i><input type="text" id="sinp" placeholder="Name or number …" oninput="doSearch()" onfocus="showSearchHistory()"><button id="sinp-clear" onclick="clearSearch()" style="display:none;background:none;border:none;color:var(--mu2);cursor:pointer;padding:0 4px;line-height:1;font-size:16px" title="Clear"><i class="ti ti-x"></i></button></div></div>
   <div class="scroll">
+    <div id="search-history" style="display:none"></div>
     <div id="trending-section" style="display:none"></div>
     <div class="sl" id="search-section-lbl">Creators</div>
     <div id="clist"><div class="spin"></div></div>
@@ -2042,27 +2043,99 @@ function renderUsers(users){
   c.innerHTML=users.map(u=>{const isF=followingIds.has(u.uid);const vb=u.verified?'<i class="ti ti-rosette-discount-check vbadge"></i>':'';return`<div class="crow" onclick="openOP('${u.uid}')"><div class="av" style="width:36px;height:36px">${u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase()}</div><div style="flex:1"><div class="crnm" style="display:flex;align-items:center;gap:3px">${esc(u.name||'')}${vb}</div><div class="crds">${esc(u.num||'')} · ${u.followers||0} followers</div></div><button class="fbtn${isF?' following':''}" onclick="event.stopPropagation();qFol('${u.uid}',this)">${isF?t('following_btn'):t('follow')}</button></div>`}).join('');
 }
 function doSearch(){
-  const q=document.getElementById('sinp').value.toLowerCase().trim();
-  const clr=document.getElementById('sinp-clear');if(clr)clr.style.display=q?'block':'none';
+  const raw=document.getElementById('sinp').value;
+  const clr=document.getElementById('sinp-clear');if(clr)clr.style.display=raw?'block':'none';
+  const hist=document.getElementById('search-history');
   const clist=document.getElementById('clist'),lbl=document.getElementById('search-section-lbl'),hp=document.getElementById('hash-posts');
+  if(!raw.trim()){
+    if(hist)hist.style.display='none';
+    if(hp)hp.style.display='none';
+    if(clist)clist.style.display='block';if(lbl)lbl.style.display='block';
+    renderUsers(allUsers);showSearchHistory();return;
+  }
+  if(hist)hist.style.display='none';
+  const q=raw.trim().toLowerCase();
+  // @name → strip @ → user search
+  if(q.startsWith('@')){
+    const name=q.slice(1);
+    if(hp)hp.style.display='none';if(clist)clist.style.display='block';if(lbl)lbl.style.display='block';
+    renderUsers(name?allUsers.filter(u=>(u.name||'').toLowerCase().includes(name)):allUsers);
+    clearTimeout(_shSaveTimer);_shSaveTimer=setTimeout(()=>_saveToSearchHist(raw.trim()),900);return;
+  }
+  // #digits → number search (not hashtag)
+  if(q.startsWith('#')&&/^#\d+/.test(q)){
+    const num=q.slice(1);
+    if(hp)hp.style.display='none';if(clist)clist.style.display='block';if(lbl)lbl.style.display='block';
+    renderUsers(allUsers.filter(u=>(u.num||'').replace('#','').includes(num)));
+    clearTimeout(_shSaveTimer);_shSaveTimer=setTimeout(()=>_saveToSearchHist(raw.trim()),900);return;
+  }
+  // #text → hashtag search
   if(q.startsWith('#')){
     const tag=q.slice(1).replace(/\W/g,'');
     if(clist)clist.style.display='none';if(lbl)lbl.style.display='none';
-    if(tag.length>0)renderHashPosts(tag);else if(hp)hp.style.display='none';
-    return;
+    if(tag.length>0){renderHashPosts(tag);clearTimeout(_shSaveTimer);_shSaveTimer=setTimeout(()=>_saveToSearchHist(raw.trim()),900);}
+    else if(hp)hp.style.display='none';return;
+  } else {
+    // Default: name or number (without any prefix)
+    if(hp)hp.style.display='none';if(clist)clist.style.display='block';if(lbl)lbl.style.display='block';
+    renderUsers(allUsers.filter(u=>(u.name||'').toLowerCase().includes(q)||(u.num||'').toLowerCase().replace('#','').includes(q)));
+    clearTimeout(_shSaveTimer);_shSaveTimer=setTimeout(()=>_saveToSearchHist(raw.trim()),900);
   }
-  if(hp)hp.style.display='none';if(clist)clist.style.display='block';if(lbl)lbl.style.display='block';
-  if(!q){renderUsers(allUsers);return;}
-  renderUsers(allUsers.filter(u=>(u.name||'').toLowerCase().includes(q)||(u.num||'').toLowerCase().includes(q)));
 }
 function clearSearch(){
   const el=document.getElementById('sinp');if(el)el.value='';
   const clr=document.getElementById('sinp-clear');if(clr)clr.style.display='none';
   const clist=document.getElementById('clist'),lbl=document.getElementById('search-section-lbl'),hp=document.getElementById('hash-posts');
   if(clist)clist.style.display='block';if(lbl)lbl.style.display='block';if(hp)hp.style.display='none';
-  renderUsers(allUsers);
+  renderUsers(allUsers);renderSearchHistory();
 }
 function tagS(t){document.getElementById('sinp').value=t;goTo('search');doSearch()}
+
+// ── SEARCH HISTORY ────────────────────────────────────────────────────────────
+const _SH_KEY='jl_search_hist',_SH_MAX=8;
+let _shSaveTimer=null;
+function _getSearchHist(){try{return JSON.parse(localStorage.getItem(_SH_KEY)||'[]');}catch{return[];}}
+function _saveToSearchHist(q){
+  if(!q||q.length<2)return;
+  let h=_getSearchHist().filter(x=>x.toLowerCase()!==q.toLowerCase());
+  h.unshift(q);if(h.length>_SH_MAX)h.length=_SH_MAX;
+  localStorage.setItem(_SH_KEY,JSON.stringify(h));
+}
+function _removeFromSearchHist(q){
+  localStorage.setItem(_SH_KEY,JSON.stringify(_getSearchHist().filter(x=>x!==q)));
+  renderSearchHistory();
+}
+async function clearSearchHistory(){
+  if(!await appConfirm('Clear all search history?'))return;
+  localStorage.removeItem(_SH_KEY);renderSearchHistory();
+}
+function renderSearchHistory(){
+  const c=document.getElementById('search-history');if(!c)return;
+  const inp=document.getElementById('sinp');
+  if(inp&&inp.value.trim()){c.style.display='none';return;}
+  const hist=_getSearchHist();
+  if(!hist.length){c.style.display='none';return;}
+  c.style.display='block';
+  c.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 16px 4px">
+    <span style="font-size:10px;font-weight:700;color:var(--mu2);letter-spacing:.7px;text-transform:uppercase">Recent</span>
+    <button onclick="clearSearchHistory()" style="background:none;border:none;color:var(--mu2);font-size:11px;cursor:pointer;padding:2px 0;font-family:var(--fb)">Clear all</button>
+  </div>`+hist.map(q=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--bd);cursor:pointer" data-q="${esc(q)}" onclick="applySearchHist(this.dataset.q)">
+    <i class="ti ti-history" style="font-size:14px;color:var(--mu);flex-shrink:0"></i>
+    <div style="flex:1;font-size:13px;color:var(--tx2)">${esc(q)}</div>
+    <button onclick="event.stopPropagation();_removeFromSearchHist(this.closest('[data-q]').dataset.q)" style="background:none;border:none;color:var(--mu);cursor:pointer;padding:4px 5px;line-height:1;display:flex;align-items:center" title="Remove"><i class="ti ti-x" style="font-size:14px"></i></button>
+  </div>`).join('')+`<div style="height:6px"></div>`;
+}
+function showSearchHistory(){
+  const inp=document.getElementById('sinp');
+  if(inp&&inp.value.trim())return;
+  renderSearchHistory();
+}
+function applySearchHist(q){
+  const inp=document.getElementById('sinp');if(!inp)return;
+  inp.value=q;
+  const clr=document.getElementById('sinp-clear');if(clr)clr.style.display='block';
+  doSearch();
+}
 async function qFol(uid,btn){
   if(!CU)return;
   const{db,doc,runTransaction}=window._fb;
@@ -2585,7 +2658,7 @@ function goTo(s){
   document.getElementById('bn-'+s).classList.add('ak');
   if(s==='puls')setTimeout(initPulse,80);
   if(s==='profile'&&CU){document.querySelectorAll('#sc-profile .ptabs .ptab').forEach((t,i)=>t.classList.toggle('ak',i===0));myTab='posts';myPFilt='all';updateUI();loadMyPosts('all');if(CU.email==='claude250k@gmail.com'&&!sessionStorage.getItem('jl_recounted'))recountFollowers();}
-  if(s==='search'){loadUsers();_trendIntv=setInterval(()=>loadTrending(true),60000);}
+  if(s==='search'){loadUsers();_trendIntv=setInterval(()=>loadTrending(true),60000);setTimeout(renderSearchHistory,80);}
   if(s==='messages'){loadConvs();switchMT('msgs');}
   if(s==='portfolio'){const ptog=document.getElementById('ptog');if(ptog)ptog.checked=UP?.portfolioPublic===true;const ptogLbl=document.getElementById('ptog-lbl');if(ptogLbl)ptogLbl.textContent=t(UP?.portfolioPublic?'portfolio_public':'portfolio_private');renderPortfolio();refreshPortPrices().then(renderPortfolio)}
 }
@@ -3183,7 +3256,8 @@ function toggleSave(pid,btn){
     const was=s.includes(pid);
     localStorage.setItem('jl_saved',JSON.stringify(was?s.filter(x=>x!==pid):[...s,pid]));
     btn.classList.toggle('liked',!was);
-    const ic=btn.querySelector('i');if(ic)ic.className=!was?'ti ti-bookmark-filled':'ti ti-bookmark';
+    const ic=btn.querySelector('i');
+    if(ic){ic.className=!was?'ti ti-bookmark-filled':'ti ti-bookmark';ic.style.color=!was?'var(--gold)':'';}
     showToast(!was?'Saved!':'Removed from saved');
     if(myTab==='saved')loadMySaved();
   }catch(e){}
