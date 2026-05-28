@@ -220,7 +220,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   .shell>.bnav{order:1}
   .shell>.sc{order:2}
   .toast{top:20px}
-  .asc{max-width:400px;margin:0 auto;border-right:1px solid var(--bd)}
+  .asc{max-width:none;margin:0;border-right:none}
 }
 @media(min-width:900px){
   .shell{max-width:1200px;margin:0 auto}
@@ -266,10 +266,11 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   .bn.ak{background:var(--gdim)}
   .bn:hover:not(.ak){background:var(--sf)}
   .nbadge{top:5px;right:5px}
-  .shell>.sc,.shell>.asc{
+  .shell>.sc{
     flex:1;min-width:0;max-width:680px;
     border-right:1px solid var(--bd);order:2
   }
+  .shell>.asc{max-width:none;margin:0;border-right:none}
   .bnav{order:1}
   .sbar{display:none}
   .toast{position:fixed;top:20px}
@@ -1026,7 +1027,7 @@ function updateUI(){
   document.getElementById('ps-f').innerHTML=`<strong>${UP.followers||0}</strong> Followers`;
   document.getElementById('ps-g').innerHTML=`<strong>${UP.following||0}</strong> Following`;
   const ptog=document.getElementById('ptog');if(ptog)ptog.checked=UP.portfolioPublic===true;
-  const ptogLbl=document.getElementById('ptog-lbl');if(ptogLbl)ptogLbl.textContent=UP.portfolioPublic?'Öffentlich':'Privat';
+  const ptogLbl=document.getElementById('ptog-lbl');if(ptogLbl)ptogLbl.textContent=t(UP.portfolioPublic?'portfolio_public':'portfolio_private');
   const pav=document.getElementById('pd-myav');
   if(pav){pav.className='cmtav';pav.innerHTML=UP.avatarUrl?`<img src="${UP.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(UP.name||'?').substring(0,2).toUpperCase()}
   renderMyChs();renderCCats();
@@ -1447,7 +1448,7 @@ async function openOP(uid){
   if(uid===CU?.uid){goTo('profile');return}
   curOP=uid;
   if(opUnsub){opUnsub();opUnsub=null;}
-  const{db,doc,getDoc,collection,query,orderBy,getDocs,onSnapshot}=window._fb;
+  const{db,doc,getDoc,collection,query,orderBy,where,getDocs,onSnapshot}=window._fb;
   const snap=await getDoc(doc(db,'users',uid));if(!snap.exists())return;
   const u=snap.data();
   document.getElementById('op-t').textContent=u.name||'Profile';
@@ -1456,6 +1457,7 @@ async function openOP(uid){
   document.getElementById('op-bio').textContent=u.bio||'';
   document.getElementById('op-fc').textContent=u.followers||0;
   document.getElementById('op-gc').textContent=u.following||0;
+  getDocs(query(collection(db,'follows'),where('followingId','==',uid))).then(s=>{const el=document.getElementById('op-fc');if(el&&curOP===uid)el.textContent=s.size;});
   document.getElementById('opav').innerHTML=u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase();
   const opPortBtn=document.getElementById('op-port-btn');
   if(opPortBtn){
@@ -1928,7 +1930,7 @@ function goTo(s){
   if(s==='profile'&&CU){updateUI();loadMyPosts('all');if(CU.email==='claude250k@gmail.com'&&!sessionStorage.getItem('jl_recounted'))recountFollowers();}
   if(s==='search')loadUsers();
   if(s==='messages'){document.getElementById('chov').classList.remove('on');if(chatUnsub){chatUnsub();chatUnsub=null;}curConv=null;loadConvs();switchMT('msgs');}
-  if(s==='portfolio'){const ptog=document.getElementById('ptog');if(ptog)ptog.checked=UP?.portfolioPublic===true;const ptogLbl=document.getElementById('ptog-lbl');if(ptogLbl)ptogLbl.textContent=UP?.portfolioPublic?'Öffentlich':'Privat';renderPortfolio();refreshPortPrices().then(renderPortfolio)}
+  if(s==='portfolio'){const ptog=document.getElementById('ptog');if(ptog)ptog.checked=UP?.portfolioPublic===true;const ptogLbl=document.getElementById('ptog-lbl');if(ptogLbl)ptogLbl.textContent=t(UP?.portfolioPublic?'portfolio_public':'portfolio_private');renderPortfolio();refreshPortPrices().then(renderPortfolio)}
 }
 
 
@@ -2036,7 +2038,7 @@ async function togglePortPublic(checked){
   await updateDoc(doc(db,'users',CU.uid),{portfolioPublic:checked});
   UP.portfolioPublic=checked;
   const ptogLbl=document.getElementById('ptog-lbl');
-  if(ptogLbl)ptogLbl.textContent=checked?'Öffentlich':'Privat';
+  if(ptogLbl)ptogLbl.textContent=t(checked?'portfolio_public':'portfolio_private');
   showToast(checked?'Portfolio ist jetzt öffentlich':'Portfolio ist jetzt privat');
 }
 
@@ -2211,6 +2213,7 @@ const I18N={
     myProfile:'My Profile',portfolio_title:'Portfolio',search_title:'Search',
     newPost:'New Post',post_btn:'Post',cancel:'Cancel',
     copied:'Username copied!',removed:'Removed',
+    portfolio_public:'Public',portfolio_private:'Private',
   },
   de:{
     nav_feed:'Feed',nav_puls:'Puls',nav_search:'Suche',nav_messages:'Nachrichten',nav_portfolio:'Portfolio',nav_profile:'Profil',
@@ -2224,6 +2227,7 @@ const I18N={
     myProfile:'Mein Profil',portfolio_title:'Portfolio',search_title:'Suche',
     newPost:'Neuer Beitrag',post_btn:'Posten',cancel:'Abbrechen',
     copied:'Benutzername kopiert!',removed:'Entfernt',
+    portfolio_public:'Öffentlich',portfolio_private:'Privat',
   },
   es:{
     nav_feed:'Feed',nav_puls:'Pulso',nav_search:'Buscar',nav_messages:'Mensajes',nav_portfolio:'Cartera',nav_profile:'Perfil',
@@ -2237,6 +2241,7 @@ const I18N={
     myProfile:'Mi Perfil',portfolio_title:'Cartera',search_title:'Buscar',
     newPost:'Nueva publicación',post_btn:'Publicar',cancel:'Cancelar',
     copied:'¡Usuario copiado!',removed:'Eliminado',
+    portfolio_public:'Público',portfolio_private:'Privado',
   }
 };
 let curLang=localStorage.getItem('jl_lang')||'en';
@@ -2264,6 +2269,9 @@ function applyLang(){
     const b=document.getElementById('lang-'+l);
     if(b){b.style.borderColor=curLang===l?'var(--gold)':'var(--bd)';b.style.color=curLang===l?'var(--gold)':'var(--mu2)';b.style.background=curLang===l?'var(--gdim)':'var(--sf2)'}
   });
+  // Portfolio toggle label
+  const ptogLblI18n=document.getElementById('ptog-lbl');
+  if(ptogLblI18n&&UP!=null)ptogLblI18n.textContent=t(UP.portfolioPublic?'portfolio_public':'portfolio_private');
   // Re-render visible dynamic screens
   if(document.getElementById('sc-portfolio')?.classList.contains('on'))renderPortfolio();
   if(document.getElementById('sc-search')?.classList.contains('on'))renderUsers(allUsers);
