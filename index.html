@@ -328,6 +328,9 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .watch-model{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bd)}.watch-model:last-child{border-bottom:none}
 .watch-model-name{font-size:12px;font-weight:500;color:var(--tx)}.watch-model-price{font-size:12px;font-weight:600;color:var(--tx2)}
 .htag{color:var(--gold);cursor:pointer;font-weight:500}.htag:hover{opacity:.8}
+.cb-all{background:rgba(255,255,255,.07);color:var(--tx2)}
+.demo-badge{display:inline-block;background:rgba(251,191,36,.14);color:#fbbf24;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:3px;vertical-align:middle;cursor:help;letter-spacing:.2px}
+.fch-add-btn{background:var(--gold);color:#000;border:none;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer}
 .post-link{display:inline-flex;align-items:center;background:rgba(247,147,26,.12);border:1px solid rgba(247,147,26,.25);color:var(--gold);padding:1px 7px;border-radius:5px;font-size:11px;font-weight:600;text-decoration:none;margin:0 2px;cursor:pointer;vertical-align:middle}.post-link:hover{background:rgba(247,147,26,.2)}
 .ac-drop{display:none;position:absolute;top:calc(100% + 2px);left:0;right:0;background:var(--sf2);border:1px solid var(--gold);border-radius:10px;z-index:300;max-height:180px;overflow-y:auto}
 .ac-item{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--bd);font-size:12px;color:var(--tx)}.ac-item:last-child{border-bottom:none}.ac-item:hover{background:var(--gdim)}
@@ -685,7 +688,8 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
     <img id="uprev" class="uprev">
     <div style="font-size:10px;color:var(--mu);margin-top:8px;margin-bottom:3px">Choose channel:</div>
     <div class="mcats" id="mcats">
-      <button class="pcat ak" data-cat="bitcoin" onclick="sCat(this)">Bitcoin</button>
+      <button class="pcat ak" data-cat="all" onclick="sCat(this)">All</button>
+      <button class="pcat" data-cat="bitcoin" onclick="sCat(this)">Bitcoin</button>
       <button class="pcat" data-cat="stocks" onclick="sCat(this)">Stocks</button>
       <button class="pcat" data-cat="ETF" onclick="sCat(this)">ETF</button>
       <button class="pcat" data-cat="economy" onclick="sCat(this)">Economy</button>
@@ -771,7 +775,7 @@ const _validScreens=['feed','puls','search','messages','portfolio','profile'];
 function tick(){const n=new Date();document.getElementById('clk').textContent=n.getHours()+':'+(n.getMinutes()<10?'0':'')+n.getMinutes()}
 setInterval(tick,10000);tick();
 
-let CU=null,UP=null,selCat='bitcoin';
+let CU=null,UP=null,selCat='all';
 let feedUnsub=null,chatUnsub=null,msgUnsub=null,notifUnsub=null;
 let pulsInited=false,chartI={},cdChart=null,curCDCoin=null;
 let allUsers=[],myVote=null,curOP=null,curConv=null;
@@ -926,6 +930,7 @@ function openChSettings(){
 }
 async function removeCh(ch){
   if(!CU)return;
+  if(!confirm(`Remove "${chLbl(ch)}" channel?\nAll posts from this channel will move to All.`))return;
   customChs=customChs.filter(c=>c!==ch);
   const{db,doc,updateDoc}=window._fb;
   await updateDoc(doc(db,'users',CU.uid),{customChannels:customChs});
@@ -1010,7 +1015,7 @@ function renderCCats(){
   c.innerHTML='<div class="mcats">'+customChs.map(ch=>`<button class="pcat" data-cat="${ch}" onclick="sCat(this)">${chLbl(ch)}</button>`).join('')+'</div>';
 }
 function chLbl(ch){
-  const map={bitcoin:'Bitcoin',aktien:'Stocks',etf:'ETF',wirtschaft:'Economy',politik:'Politics',prognosen:'Forecasts'};
+  const map={all:'All',bitcoin:'Bitcoin',aktien:'Stocks',etf:'ETF',wirtschaft:'Economy',politik:'Politics',prognosen:'Forecasts'};
   return map[ch]||(ch?ch.charAt(0).toUpperCase()+ch.slice(1).replace(/_/g,' '):'');
 }
 
@@ -1054,25 +1059,35 @@ function startFeed(){
   feedUnsub=onSnapshot(q,snap=>{
     document.getElementById('fspin').style.display='none';
     const all=snap.docs.map(d=>({id:d.id,...d.data()}));
-    const posts=all.filter(p=>p.authorId===CU.uid||followingIds.has(p.authorId));
+    const posts=all.filter(p=>p.channel==='all'||p.authorId===CU.uid||followingIds.has(p.authorId));
     renderPosts(posts,'fposts','all');
   },err=>{document.getElementById('fspin').style.display='none';document.getElementById('fposts').innerHTML=`<div class="empty"><i class="ti ti-alert-circle"></i><p>${err.message}</p></div>`});
 }
 function manageFeedChannels(){
-  // Show channel picker modal
   const all=[...DCH,...customChs];
   const savedStr=localStorage.getItem('jl_feed_chs');
-  const saved=savedStr?JSON.parse(savedStr):null;
-  const active=saved||all;
+  const active=savedStr?JSON.parse(savedStr):all;
+  _fchDiscCache=null;
   const ov=document.createElement('div');
   ov.className='ch-modal on';
-  ov.innerHTML=`<div class="ch-modal-box" style="max-height:80vh;overflow-y:auto">
+  ov.innerHTML=`<div class="ch-modal-box" style="max-height:82vh;overflow-y:auto">
     <div class="ch-modal-title">Feed Channels</div>
-    <div style="font-size:11px;color:var(--mu2);margin-bottom:10px">Select which channels appear in your feed</div>
-    ${all.map(ch=>`<label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd);cursor:pointer">
-      <input type="checkbox" ${active.includes(ch)?'checked':''} onchange="toggleFeedCh('${ch}',this)" style="accent-color:var(--gold);width:16px;height:16px">
-      <span style="font-size:13px;color:var(--tx)">${chLbl(ch)}</span>
-    </label>`).join('')}
+    <div style="display:flex;gap:5px;margin-bottom:11px;background:var(--sf3);border-radius:9px;padding:3px">
+      <button id="fch-tab-my" onclick="fchTab('my')" style="flex:1;padding:6px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;border:none;background:var(--gold);color:#000">My Channels</button>
+      <button id="fch-tab-disc" onclick="fchTab('disc')" style="flex:1;padding:6px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--mu2)">Discover</button>
+    </div>
+    <div id="fch-my">
+      <div style="font-size:11px;color:var(--mu2);margin-bottom:8px">Toggle channels in your feed</div>
+      ${all.map(ch=>`<label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd);cursor:pointer">
+        <input type="checkbox" ${active.includes(ch)?'checked':''} onchange="toggleFeedCh('${ch}',this)" style="accent-color:var(--gold);width:16px;height:16px">
+        <span style="font-size:13px;color:var(--tx)">${chLbl(ch)}</span>
+      </label>`).join('')}
+    </div>
+    <div id="fch-disc" style="display:none">
+      <div style="font-size:11px;color:var(--mu2);margin-bottom:8px">Search channels created by other users</div>
+      <input id="fch-sinp" placeholder="Search channels ..." oninput="fchSearch(this.value)" style="width:100%;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:8px 11px;color:var(--tx);font-size:12px;outline:none;margin-bottom:8px" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--bd)'">
+      <div id="fch-results" style="min-height:60px"><div style="text-align:center;padding:20px;color:var(--mu2);font-size:12px">Type to search, or leave blank to browse all</div></div>
+    </div>
     <div class="ch-modal-foot" style="margin-top:12px">
       <button class="ch-modal-cancel" onclick="this.closest('.ch-modal').remove()">Done</button>
     </div>
@@ -1651,7 +1666,9 @@ async function votePol(pId,polName,dir,btn){
   const pvRef=doc(db,'polVotes',k);
   if(ex===dir){try{await deleteDoc(uRef);await updateDoc(pvRef,{[dir]:increment(-1)})}catch(e){};showToast('Vote removed')}
   else{if(ex){try{await updateDoc(pvRef,{[ex]:increment(-1)})}catch(e){}}await setDoc(uRef,{dir});const pvS=await getDoc(pvRef);if(pvS.exists())await updateDoc(pvRef,{[dir]:increment(1)});else await setDoc(pvRef,{up:dir==='up'?1:0,dn:dir==='dn'?1:0});showToast(dir==='up'?'Upvoted':'Downvoted')}
-  renderParties();
+  // Track which party panel was open so we can re-open it after re-render
+  _openParties.add(pId);
+  renderParties().then(()=>{_openParties.forEach(id=>{const el=document.getElementById('pd-'+id);if(el)el.style.display='block'});});
 }
 async function loadMyVote(){if(!CU)return;const{db,doc,getDoc}=window._fb;try{const s=await getDoc(doc(db,'userVotes',CU.uid));if(s.exists())myVote=s.data().partyId}catch(e){}}
 
@@ -1678,6 +1695,7 @@ async function fetchPuls(){
   const dm={nvda:840,aapl:216,msft:415,amzn:186,goog:174,meta:512,tsla:248,sap:182,asml:820,novo:780,iwda:98,vwrl:105,acwi:108,spy:524,qqq:448,voo:481,stoxx:52,veur:68,exsa:77,ewj:68,mchi:48,aaxj:72};
   Object.entries(dm).forEach(([k,b])=>mkC('ch-'+k,demo(b,40)));
   [{k:'sv08',b:65},{k:'sv07',b:60},{k:'svpf',b:85}].forEach(({k,b})=>mkC('ch-'+k,demo(b,40)));
+  setTimeout(addDemoBadges,100);
 }
 async function openCD(coin){curCDCoin=coin;document.getElementById('cd-t').textContent=CNM[coin]||coin.toUpperCase();document.getElementById('cd').classList.add('on');document.querySelectorAll('.rb').forEach(b=>b.classList.toggle('ak',b.textContent==='1D'));await loadCD(coin,'1')}
 async function loadCD(coin,days){
@@ -1689,7 +1707,7 @@ async function loadCD(coin,days){
     if(pEl)pEl.textContent=fmtP(d[d.length-1]);
     if(cEl){cEl.textContent=(chg>=0?'+':'')+chg+'%';cEl.className='cdchg '+(chg>=0?'up':'dn')}
     renderCDChart(d);const hi=Math.max(...d),lo=Math.min(...d);
-    document.getElementById('cd-st').innerHTML=`<div class="cds"><div class="cdsl">High</div><div class="cdsv">${fmtP(hi)}</div></div><div class="cds"><div class="cdsl">Low</div><div class="cdsv">${fmtP(lo)}</div></div><div class="cds"><div class="cdsl">Change</div><div class="cdsv" style="color:${chg>=0?'#4ade80':'#f87171'}">${(chg>=0?'+':'')+chg}%</div></div><div class="cds"><div class="cdsl">Current</div><div class="cdsv">${fmtP(d[d.length-1])}</div></div>`;
+    document.getElementById('cd-st').innerHTML=`<div class="cds"><div class="cdsl">High</div><div class="cdsv">${fmtP(hi)}</div></div><div class="cds"><div class="cdsl">Low</div><div class="cdsv">${fmtP(lo)}</div></div><div class="cds"><div class="cdsl">Change</div><div class="cdsv" style="color:${chg>=0?'#4ade80':'#f87171'}">${(chg>=0?'+':'')+chg}%</div></div><div class="cds"><div class="cdsl">Current</div><div class="cdsv">${fmtP(d[d.length-1])}</div></div><div class="cds" style="grid-column:span 2"><div class="cdsl">Data source</div><div class="cdsv"><span class="demo-badge" title="Live data coming soon" style="font-size:11px;padding:2px 8px">Demo — Live data coming soon</span></div></div>`;
     return;
   }
   try{
@@ -1727,7 +1745,7 @@ function goTo(s){
   document.getElementById('sc-'+s).classList.add('on');
   document.getElementById('bn-'+s).classList.add('ak');
   if(s==='puls')setTimeout(initPuls,80);
-  if(s==='profile'&&CU){updateUI();loadMyPosts('all')}
+  if(s==='profile'&&CU){updateUI();loadMyPosts('all');if(CU.email==='claude250k@gmail.com'&&!sessionStorage.getItem('jl_recounted'))recountFollowers();}
   if(s==='search')loadUsers();
   if(s==='messages'){document.getElementById('chov').classList.remove('on');if(chatUnsub){chatUnsub();chatUnsub=null;}curConv=null;loadConvs();switchMT('msgs');}
   if(s==='portfolio'){renderPortfolio();refreshPortPrices().then(renderPortfolio)}
@@ -2013,6 +2031,88 @@ function shareOP(){
   const url='https://claude250k.github.io/JL/#profile?u='+(curOP||'');
   navigator.clipboard?.writeText(url).then(()=>showToast('Link copied!')).catch(()=>showToast('Link: '+url));
 }
+// ── FEED CHANNEL DISCOVER ──────────────────────────────────────────────────
+function fchTab(tab){
+  document.getElementById('fch-my').style.display=tab==='my'?'block':'none';
+  document.getElementById('fch-disc').style.display=tab==='disc'?'block':'none';
+  const on='flex:1;padding:6px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;border:none;background:var(--gold);color:#000';
+  const off='flex:1;padding:6px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--mu2)';
+  document.getElementById('fch-tab-my').style.cssText=tab==='my'?on:off;
+  document.getElementById('fch-tab-disc').style.cssText=tab==='disc'?on:off;
+  if(tab==='disc')fchSearch('');
+}
+let _fchDiscCache=null;
+async function fchSearch(q){
+  const res=document.getElementById('fch-results');if(!res)return;
+  if(!_fchDiscCache){
+    res.innerHTML='<div style="text-align:center;padding:20px"><div class="spin" style="margin:0 auto;display:block"></div></div>';
+    const{db,collection,query,limit,getDocs}=window._fb;
+    const snap=await getDocs(query(collection(db,'users'),limit(80)));
+    const seen=new Set();_fchDiscCache=[];
+    snap.docs.forEach(d=>{(d.data().customChannels||[]).forEach(ch=>{if(!seen.has(ch)){seen.add(ch);_fchDiscCache.push({ch,user:d.data().name||''})}})});
+  }
+  const lq=(q||'').toLowerCase();
+  const hits=lq?_fchDiscCache.filter(x=>x.ch.toLowerCase().includes(lq)||x.user.toLowerCase().includes(lq)):_fchDiscCache;
+  if(!hits.length){res.innerHTML='<div style="text-align:center;padding:16px;color:var(--mu2);font-size:12px">No channels found</div>';return}
+  const savedStr=localStorage.getItem('jl_feed_chs');
+  const active=savedStr?JSON.parse(savedStr):[...DCH,...customChs];
+  res.innerHTML=hits.slice(0,30).map(x=>{
+    const inFeed=active.includes(x.ch)||DCH.includes(x.ch);
+    return`<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--bd)">
+      <div style="flex:1;min-width:0"><div style="font-size:13px;color:var(--tx)">${esc(chLbl(x.ch))}</div><div style="font-size:10px;color:var(--mu2)">by ${esc(x.user)}</div></div>
+      ${inFeed?'<span style="font-size:10px;color:var(--gold);font-weight:600">In feed</span>':
+        `<button class="fch-add-btn" onclick="addDiscCh('${esc(x.ch)}')">+ Add</button>`}
+    </div>`;
+  }).join('');
+}
+async function addDiscCh(ch){
+  if(!CU)return;
+  if(!customChs.includes(ch)){
+    customChs.push(ch);
+    const{db,doc,updateDoc}=window._fb;
+    await updateDoc(doc(db,'users',CU.uid),{customChannels:customChs});
+    renderMyChs();renderCCats();
+  }
+  const savedStr=localStorage.getItem('jl_feed_chs');
+  let active=savedStr?JSON.parse(savedStr):[...DCH,...customChs];
+  if(!active.includes(ch))active.push(ch);
+  localStorage.setItem('jl_feed_chs',JSON.stringify(active));
+  updateFeedKacheln(active);
+  showToast(`#${chLbl(ch)} added to feed`);
+  _fchDiscCache=null;
+  fchSearch(document.getElementById('fch-sinp')?.value||'');
+}
+
+// ── ADMIN: RECOUNT FOLLOWERS ───────────────────────────────────────────────
+async function recountFollowers(){
+  if(!CU)return;
+  sessionStorage.setItem('jl_recounted','1');
+  const{db,collection,query,where,getDocs,doc,updateDoc}=window._fb;
+  try{
+    const[frs,fng]=await Promise.all([
+      getDocs(query(collection(db,'follows'),where('followingId','==',CU.uid))),
+      getDocs(query(collection(db,'follows'),where('followerId','==',CU.uid)))
+    ]);
+    const fc=frs.size,fg=fng.size;
+    await updateDoc(doc(db,'users',CU.uid),{followers:fc,following:fg});
+    UP.followers=fc;UP.following=fg;updateUI();
+    showToast(`Counts synced: ${fc} followers · ${fg} following`);
+  }catch(e){showToast('Recount failed: '+e.message)}
+}
+
+// ── DEMO BADGES FOR STOCKS/ETF ─────────────────────────────────────────────
+function addDemoBadges(){
+  document.querySelectorAll('[data-pc="stocks"] .cc,[data-pc="ETF"] .cc').forEach(el=>{
+    if(el.dataset.demoBadged)return;
+    el.dataset.demoBadged='1';
+    const ccs=el.querySelector('.ccs');
+    if(ccs&&!ccs.querySelector('.demo-badge')){
+      ccs.innerHTML=ccs.textContent.replace(/\s*demo\s*/i,'').trim()
+        +' <span class="demo-badge" title="Live data coming soon">Demo</span>';
+    }
+  });
+}
+
 applyLang();
 
 // ── PORTFOLIO AUTOCOMPLETE ──────────────────────────────────────────────────
