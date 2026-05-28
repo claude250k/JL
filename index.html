@@ -55,7 +55,14 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .pan{font-size:13px;font-weight:600;color:var(--tx);cursor:pointer}.pan:hover{opacity:.8}
 .ptm{font-size:11px;color:var(--mu);margin-left:auto}
 .cbadge{font-size:10px;padding:2px 7px;border-radius:9px;font-weight:700;cursor:pointer}
-.cb-bitcoin{background:rgba(247,147,26,.15);color:var(--gold)}.cb-aktien{background:rgba(34,197,94,.12);color:#4ade80}.cb-etf{background:rgba(99,179,237,.12);color:#63b3ed}.cb-politik{background:rgba(96,165,250,.12);color:#7cb9ff}.cb-wirtschaft{background:rgba(192,132,252,.12);color:#d8b4fe}.cb-prognosen{background:rgba(251,191,36,.12);color:#fbbf24}.cb-custom{background:rgba(255,255,255,.07);color:var(--tx2)}
+.cb-bitcoin{background:rgba(247,147,26,.15);color:var(--gold)}
+.cb-aktien,.cb-stocks{background:rgba(34,197,94,.12);color:#4ade80}
+.cb-etf,.cb-ETF{background:rgba(99,179,237,.12);color:#63b3ed}
+.cb-politik,.cb-politics{background:rgba(96,165,250,.12);color:#7cb9ff}
+.cb-wirtschaft,.cb-economy{background:rgba(192,132,252,.12);color:#d8b4fe}
+.cb-prognosen,.cb-forecasts{background:rgba(251,191,36,.12);color:#fbbf24}
+.cb-analysis{background:rgba(251,191,36,.12);color:#fbbf24}
+.cb-all,.cb-custom{background:rgba(255,255,255,.07);color:var(--tx2)}
 .ptxt{font-size:13px;line-height:1.6;color:var(--tx2);margin:5px 0 7px;word-break:break-word;cursor:pointer}
 .pimg{width:100%;border-radius:10px;margin-bottom:7px;max-height:200px;object-fit:cover;cursor:pointer}
 .pacts{display:flex;gap:16px;margin-top:2px}
@@ -571,9 +578,12 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       <button id="tab-notif" onclick="switchMT('notif')" style="padding:5px 16px;border-radius:8px;font-size:12px;border:none;cursor:pointer;background:transparent;color:var(--mu2)">Notifications</button>
       <button id="tab-msgs" onclick="switchMT('msgs')" style="padding:5px 16px;border-radius:8px;font-size:12px;border:none;cursor:pointer;background:var(--sf3);color:var(--tx);font-weight:500">Messages</button>
     </div>
-    <div style="position:absolute;right:16px"><button class="ib2" onclick="loadConvs();showToast('Refreshing...')" title="Refresh"><i class="ti ti-refresh"></i></button></div>
+    <div style="position:absolute;right:16px;display:flex;gap:4px">
+      <button class="ib2" onclick="openNM()" title="New message"><i class="ti ti-edit"></i></button>
+      <button class="ib2" onclick="loadConvs();showToast('Refreshing...')" title="Refresh"><i class="ti ti-refresh"></i></button>
+    </div>
   </div>
-  <div id="msgs-panel" class="scroll" style="flex-direction:column"><div id="convlist" style="flex:1"></div></div>
+  <div id="msgs-panel" class="scroll" style="display:flex;flex-direction:column"><div id="convlist" style="flex:1"><div class="spin"></div></div></div>
   <div id="notif-panel" class="scroll" style="display:none"><div id="notif-list"><div class="spin"></div></div></div>
   <div class="chov" id="chov"><div class="chh"><button class="ovb" onclick="closeChat()"><i class="ti ti-arrow-left"></i></button><div class="av" id="ch-av" style="width:32px;height:32px;font-size:10px"></div><div style="flex:1;padding-left:8px"><div style="font-size:13px;font-weight:600;color:var(--tx)" id="ch-nm"></div></div></div><div class="chm" id="chm"></div><div class="chir"><input class="chi" id="chi" placeholder="Message ..." onkeydown="if(event.key==='Enter')sendMsg()"><button class="chs" onclick="sendMsg()"><i class="ti ti-send"></i></button></div></div>
   <div class="ov" id="nmov"><div class="ovh"><button class="ovb" onclick="document.getElementById('nmov').classList.remove('on')"><i class="ti ti-arrow-left"></i></button><div class="ovt">New Message</div></div><div class="sbar2"><div class="sbox"><i class="ti ti-search"></i><input type="text" id="nms" placeholder="Search users ..." oninput="searchNM()"></div></div><div class="scroll" id="nmlist"></div></div>
@@ -1529,13 +1539,16 @@ async function qFol(uid,btn){
   startFeed();
 }
 
-async function loadConvs(){
+function loadConvs(){
   if(!CU)return;
-  const{db,collection,query,where,orderBy,onSnapshot}=window._fb;
-  const q=query(collection(db,'conversations'),where('members','array-contains',CU.uid),orderBy('lastAt','desc'));
+  const{db,collection,query,where,onSnapshot}=window._fb;
+  // No orderBy — avoids composite index requirement; sort client-side instead
+  const q=query(collection(db,'conversations'),where('members','array-contains',CU.uid));
   if(msgUnsub)msgUnsub();
   msgUnsub=onSnapshot(q,snap=>{
-    const convs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    const convs=snap.docs
+      .map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(b.lastAt?.toMillis?.()||0)-(a.lastAt?.toMillis?.()||0));
     const c=document.getElementById('convlist');if(!c)return;
     if(!convs.length){
       c.innerHTML='<div class="empty"><i class="ti ti-message-circle-off"></i><p>No messages yet.</p><button onclick="openNM()" style="margin-top:12px;background:var(--gold);color:#000;border:none;padding:9px 20px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer">Start a Conversation</button></div>';
@@ -1555,6 +1568,9 @@ async function loadConvs(){
         <div class="ctm">${cv.lastAt?tAgo(cv.lastAt.toDate()):''}</div>
       </div>`;
     }).join('');
+  },err=>{
+    const c=document.getElementById('convlist');
+    if(c)c.innerHTML='<div class="empty"><i class="ti ti-alert-circle"></i><p>Could not load messages.<br>'+esc(err.message)+'</p></div>';
   });
 }
 
@@ -1600,7 +1616,13 @@ async function openChat(cid,oid){
   });
 }
 async function sendMsg(){if(!CU||!curConv)return;const inp=document.getElementById('chi');const text=inp.value.trim();if(!text)return;inp.value='';const{db,collection,addDoc,doc,updateDoc,serverTimestamp}=window._fb;await addDoc(collection(db,`conversations/${curConv}/messages`),{text,senderId:CU.uid,createdAt:serverTimestamp()});await updateDoc(doc(db,'conversations',curConv),{lastMsg:text,lastAt:serverTimestamp()})}
-function closeChat(){document.getElementById('chov').classList.remove('on');if(chatUnsub)chatUnsub();chatUnsub=null;curConv=null}
+function closeChat(){
+  document.getElementById('chov').classList.remove('on');
+  if(chatUnsub){chatUnsub();chatUnsub=null;}
+  curConv=null;
+  // Ensure msgs panel is visible after returning from chat
+  switchMT('msgs');
+}
 async function openNM(){
   await loadUsers();
   document.getElementById('nmlist').innerHTML=allUsers.map(u=>`<div class="crow" onclick="startConv('${u.uid}')"><div class="av" style="width:34px;height:34px">${u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase()}</div><div style="flex:1"><div class="crnm">${esc(u.name||'')}</div><div class="crds">${esc(u.num||'')}</div></div></div>`).join('');
