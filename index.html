@@ -37,15 +37,15 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .sbar{height:44px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .sbar-t{font-size:15px;font-weight:600;color:var(--tx)}
 .sbar-i{display:flex;gap:5px;align-items:center;color:var(--tx);font-size:13px}
-.sc{display:none;flex-direction:column;flex:1;overflow:hidden;position:relative;min-height:0}.sc.on{display:flex}
+.sc{display:none;flex-direction:column;flex:1;overflow:hidden;position:relative;min-height:0}.sc.on{display:flex}.sc#sc-profile{overflow:visible}
 .sh{padding:8px 16px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative}
 .logo{font-family:var(--fd);font-size:22px;font-weight:800;letter-spacing:-.5px;color:var(--tx)}.logo em{color:var(--gold);font-style:normal}
 .stitle{font-size:16px;font-weight:700;color:var(--tx)}
-.s-acts{display:flex;gap:8px;align-items:center}
+.s-acts{display:flex;gap:8px;align-items:center;position:relative;z-index:20}
 .ib2{background:none;border:none;cursor:pointer;color:var(--mu2);font-size:19px;padding:4px;line-height:1}
 .krow{display:flex;gap:6px;padding:7px 14px 9px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;border-bottom:1px solid var(--bd)}.krow::-webkit-scrollbar{display:none}
 .kachel{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;border:1px solid var(--bd);color:var(--mu2);background:transparent}.kachel.ak{background:var(--gold);color:#000;border-color:var(--gold);font-weight:700}
-.scroll{flex:1;overflow-y:auto;scrollbar-width:none;min-height:0}.scroll::-webkit-scrollbar{display:none}
+.scroll{flex:1;overflow-y:auto;scrollbar-width:none;min-height:0;position:relative}.scroll::-webkit-scrollbar{display:none}
 .pi{padding:12px 16px;border-bottom:1px solid var(--bd)}
 .pr{display:flex;gap:10px}
 .av{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#000;background:linear-gradient(135deg,var(--gold),#b06010);overflow:hidden;cursor:pointer}
@@ -61,7 +61,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .pacts{display:flex;gap:16px;margin-top:2px}
 .pa{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--mu2);cursor:pointer;background:none;border:none;padding:0}.pa i{font-size:14px}.pa:hover{color:var(--tx)}
 .pa.liked{color:var(--gold)}.pa.liked i{color:var(--gold)}
-.qcbox{display:none;padding:0 16px 9px;border-bottom:1px solid var(--bd);background:var(--sf2)}.qcbox.open{display:flex;gap:8px;align-items:center}
+.qcbox{display:none;padding:6px 16px 9px;border-bottom:1px solid var(--bd);background:var(--sf)}.qcbox.open{display:flex;gap:8px;align-items:center}
 .qcav{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#000;background:linear-gradient(135deg,var(--gold),#b06010);overflow:hidden}
 .qcav img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .qci{flex:1;background:var(--sf2);border:1px solid var(--bd);border-radius:18px;padding:6px 12px;color:var(--tx);font-size:12px;outline:none}.qci:focus{border-color:var(--gold)}.qci::placeholder{color:var(--mu)}
@@ -134,7 +134,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .pav{position:absolute;bottom:-30px;left:16px;width:60px;height:60px;border-radius:50%;border:3px solid var(--bg);background:linear-gradient(135deg,var(--gold),#a06010);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#000;overflow:hidden;cursor:pointer;z-index:10;box-shadow:0 0 0 0 transparent}
 .pav img{width:100%;height:100%;object-fit:cover}
 .ceditbtn{position:absolute;bottom:8px;right:12px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.15);color:var(--tx);padding:4px 11px;border-radius:7px;font-size:11px;cursor:pointer}
-.pinfo{padding:38px 16px 9px;flex-shrink:0}
+.pinfo{padding:40px 16px 9px;flex-shrink:0}
 .pname{font-size:15px;font-weight:700;color:var(--tx)}
 .pnum{font-size:11px;color:var(--mu2);margin-bottom:3px}.pnum em{color:var(--gold);font-style:normal;font-weight:600}
 .pbio{font-size:12px;line-height:1.5;color:var(--tx2);margin-bottom:7px}
@@ -313,7 +313,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 </div>
 
 <div class="inst-ov" id="inst-ov">
-  <div class="ovh"><button class="ovb" onclick="document.getElementById('inst-ov').classList.remove('on')"><i class="ti ti-arrow-left"></i></button><div class="ovt">Install JL App</div></div>
+  <div class="ovh"><button class="ovb" onclick="closeInstPage()"><i class="ti ti-arrow-left"></i></button><div class="ovt">Install JL App</div></div>
   <div class="scroll" style="padding:24px 20px;text-align:center">
     <div style="font-family:var(--fd);font-size:36px;font-weight:800;color:var(--tx);margin-bottom:4px">J<span style="color:var(--gold)">L</span></div>
     <div style="font-size:12px;color:var(--mu2);margin-bottom:24px">Analytics</div>
@@ -330,6 +330,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 <div class="sc on" id="sc-feed">
   <div class="sh" style="justify-content:center;position:relative">
     <button onclick="showInstPage()" style="position:absolute;left:0;background:none;border:none;cursor:pointer;color:var(--mu2);font-size:18px;padding:4px" title="Install App"><i class="ti ti-download"></i></button>
+    <button onclick="goTo('messages');switchMT('notif')" style="position:absolute;right:0;background:none;border:none;cursor:pointer;color:var(--mu2);font-size:18px;padding:4px;position:relative" title="Notifications"><i class="ti ti-bell"></i><div class="nbadge" id="nbadge2"></div></button>
     <div style="display:flex;align-items:center;justify-content:center;gap:6px">
   <svg width="60" height="28" viewBox="0 0 60 28" fill="none" xmlns="http://www.w3.org/2000/svg">
     <polyline points="0,14 8,14 12,4 16,24 20,10 24,18 28,14 36,14" stroke="#F7931A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
@@ -339,7 +340,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   </div>
   <div class="krow" id="fk">
     <button class="kachel ak" onclick="filterFeed(this,'all')">Following</button>
-    <button class="kachel" onclick="filterFeed(this,'discover')">Discover</button>
+    <button class="kachel" onclick="filterFeed(this,'discover')">Discover ✦</button>
     <button class="kachel" onclick="filterFeed(this,'bitcoin')">Bitcoin</button>
     <button class="kachel" onclick="filterFeed(this,'stocks')">Stocks</button>
     <button class="kachel" onclick="filterFeed(this,'ETF')">ETF</button>
@@ -353,7 +354,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 
 <div class="sc" id="sc-puls">
   <div class="sh" style="justify-content:center;position:relative">
-    <div class="stitle">Puls<em style="color:var(--gold);font-style:normal">.</em></div>
+    <div class="stitle" style="font-size:16px">Puls<em style="color:var(--gold);font-style:normal">.</em></div>
     <div style="position:absolute;right:16px;display:flex;gap:8px;align-items:center">
       <span style="font-size:10px;color:var(--mu2);display:flex;align-items:center"><span class="ldot"></span>Live</span>
       <button class="ib2" onclick="rfPuls()"><i class="ti ti-refresh"></i></button>
@@ -422,7 +423,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 <div class="sc" id="sc-search">
   <div class="sh" style="justify-content:center;position:relative"><div class="stitle">Search<em style="color:var(--gold);font-style:normal">.</em></div></div>
   <div class="sbar2"><div class="sbox"><i class="ti ti-search"></i><input type="text" id="sinp" placeholder="Name or #number ..." oninput="doSearch()"></div></div>
-  <div class="tpills"><div class="tp" onclick="tagS('Bitcoin')">#Bitcoin</div><div class="tp" onclick="tagS('Stocks')">#Stocks</div><div class="tp" onclick="tagS('ETF')">#ETF</div><div class="tp" onclick="tagS('DAX')">#DAX</div><div class="tp" onclick="tagS('Nvidia')">#Nvidia</div><div class="tp" onclick="tagS('Politics')">#Politics</div></div>
+  <div class="tpills"><div class="tp" onclick="tagS('Bitcoin')">#Bitcoin</div><div class="tp" onclick="tagS('Stocks')">#Stocks</div><div class="tp" onclick="tagS('ETF')">#ETF</div><div class="tp" onclick="tagS('Economy')">#Economy</div><div class="tp" onclick="tagS('Analysis')">#Analysis</div><div class="tp" onclick="tagS('Politics')">#Politics</div></div>
   <div class="scroll"><div class="sl">Creators</div><div id="clist"><div class="spin"></div></div></div>
 </div>
 
@@ -595,13 +596,46 @@ const CNM={btc:'Bitcoin (BTC)',eth:'Ethereum (ETH)',sol:'Solana (SOL)',bnb:'BNB'
 
 const _openParties=new Set();
 const PARTIES=[
-  {id:'cdu',name:'CDU/CSU',color:'#666',pols:[{i:'FM',n:'Friedrich Merz',r:'Party Leader'},{i:'MS',n:'Markus Soeder',r:'CSU Leader Bavaria'},{i:'CL2',n:'Carsten Linnemann',r:'CDU Secretary General'},{i:'AL',n:'Armin Laschet',r:'Former NRW Minister-President'}]},
-  {id:'spd',name:'SPD',color:'#c0392b',pols:[{i:'OS',n:'Olaf Scholz',r:'Federal Chancellor'},{i:'SK',n:'Saskia Esken',r:'Party Chair'},{i:'LK',n:'Lars Klingbeil',r:'Party Chair'},{i:'RM',n:'Rolf Muetzenich',r:'Caucus Leader'}]},
-  {id:'afd',name:'AfD',color:'#009ee0',pols:[{i:'AW',n:'Alice Weidel',r:'Caucus Leader'},{i:'TC',n:'Tino Chrupalla',r:'Party Chair'},{i:'BH',n:'Bjoern Hoecke',r:'Thuringia State Leader'}]},
-  {id:'gru',name:'Gruene',color:'#1aad62',pols:[{i:'AB',n:'Annalena Baerbock',r:'Foreign Minister'},{i:'RH',n:'Robert Habeck',r:'Economy Minister'},{i:'ON',n:'Omid Nouripour',r:'Party Chair'},{i:'RL',n:'Ricarda Lang',r:'Party Chair'}]},
-  {id:'fdp',name:'FDP',color:'#d4a800',pols:[{i:'CL',n:'Christian Lindner',r:'Party Chair'},{i:'WK',n:'Wolfgang Kubicki',r:'Bundestag VP'}]},
-  {id:'bsw',name:'BSW',color:'#7c3aed',pols:[{i:'SW',n:'Sahra Wagenknecht',r:'Founder & Chair'},{i:'AF',n:'Amira Mohamed Ali',r:'Caucus Leader'}]},
-  {id:'linke',name:'Die Linke',color:'#be1848',pols:[{i:'JV',n:'Jan van Aken',r:'Party Chair'},{i:'HR',n:'Heidi Reichinnek',r:'Party Chair'},{i:'GG',n:'Gregor Gysi',r:'Honorary Chair'}]},
+  {id:'cdu',name:'CDU/CSU',color:'#555',pols:[
+    {i:'FM',n:'Friedrich Merz',r:'Federal Chancellor (CDU)'},
+    {i:'MS',n:'Markus Söder',r:'Minister-President Bavaria (CSU)'},
+    {i:'CL',n:'Carsten Linnemann',r:'CDU Secretary General'},
+    {i:'JW',n:'Julia Klöckner',r:'CDU Deputy Chair'},
+    {i:'AD',n:'Alexander Dobrindt',r:'CSU Group Leader Bundestag'},
+  ]},
+  {id:'spd',name:'SPD',color:'#c0392b',pols:[
+    {i:'OS',n:'Olaf Scholz',r:'Former Federal Chancellor'},
+    {i:'SK',n:'Saskia Esken',r:'SPD Party Co-Chair'},
+    {i:'LK',n:'Lars Klingbeil',r:'SPD Party Co-Chair'},
+    {i:'RM',n:'Rolf Mützenich',r:'SPD Caucus Leader'},
+    {i:'NF',n:'Nancy Faeser',r:'Former Interior Minister'},
+  ]},
+  {id:'afd',name:'AfD',color:'#009ee0',pols:[
+    {i:'AW',n:'Alice Weidel',r:'AfD Lead Candidate / Co-Chair'},
+    {i:'TC',n:'Tino Chrupalla',r:'AfD Co-Chair'},
+    {i:'BH',n:'Björn Höcke',r:'AfD Thuringia State Leader'},
+    {i:'PF',n:'Peter Felser',r:'AfD Deputy Caucus Leader'},
+  ]},
+  {id:'gru',name:'Greens',color:'#1aad62',pols:[
+    {i:'AB',n:'Annalena Baerbock',r:'Former Foreign Minister'},
+    {i:'RH',n:'Robert Habeck',r:'Greens Lead Candidate'},
+    {i:'ON',n:'Omid Nouripour',r:'Former Greens Co-Chair'},
+    {i:'RL',n:'Ricarda Lang',r:'Former Greens Co-Chair'},
+  ]},
+  {id:'fdp',name:'FDP',color:'#d4a800',pols:[
+    {i:'CL',n:'Christian Lindner',r:'FDP Chair / Former Finance Minister'},
+    {i:'WK',n:'Wolfgang Kubicki',r:'FDP Deputy Chair'},
+    {i:'BS',n:'Bettina Stark-Watzinger',r:'Former Education Minister'},
+  ]},
+  {id:'bsw',name:'BSW',color:'#7c3aed',pols:[
+    {i:'SW',n:'Sahra Wagenknecht',r:'BSW Founder & Chair'},
+    {i:'AF',n:'Amira Mohamed Ali',r:'BSW Co-Chair'},
+  ]},
+  {id:'linke',name:'Die Linke',color:'#be1848',pols:[
+    {i:'JV',n:'Jan van Aken',r:'Die Linke Co-Chair'},
+    {i:'HR',n:'Heidi Reichinnek',r:'Die Linke Co-Chair'},
+    {i:'GG',n:'Gregor Gysi',r:'Die Linke Honorary Chair'},
+  ]},
 ];
 
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('ibanner').classList.add('show')});
@@ -745,7 +779,7 @@ function updateUI(){
   const avH=UP.avatarUrl?`<img src="${UP.avatarUrl}">`:(UP.name||'?').substring(0,2).toUpperCase();
   document.getElementById('myav').innerHTML=avH;
   document.getElementById('myname').textContent=UP.name||'';
-  document.getElementById('mynum').textContent=UP.num||'#0001';
+  document.getElementById('mynum').textContent=UP.num||'#1';
   document.getElementById('mybio').textContent=UP.bio||'Add bio';
   if(UP.coverUrl){const c=document.getElementById('mycov');c.style.backgroundImage=`url(${UP.coverUrl})`;c.style.backgroundSize='cover';c.style.backgroundPosition='center'}
   document.getElementById('ps-p').innerHTML=`<strong>${UP.posts||0}</strong> Posts`;
@@ -846,7 +880,7 @@ function filterFeed(btn,cat){
 function renderPosts(posts,cid,cat){
   const c=document.getElementById(cid);if(!c)return;
   if(!posts.length){
-    const msg=followingIds.size===0&&cat==='all'?'Follow people to see their posts!':'No posts in this channel from people you follow.';
+    const msg=followingIds.size===0&&cat==='all'?'Follow people to see their posts here!\nTap Search to find creators.':'No posts in this channel from people you follow yet.';
     c.innerHTML=`<div class="empty"><i class="ti ti-news"></i><p>${msg}</p></div>`;return;
   }
   c.innerHTML=posts.map(p=>pH(p)).join('');
@@ -945,7 +979,7 @@ function loadNotifs(){
     const notifs=snap.docs.map(d=>({id:d.id,...d.data()}));
     const unread=notifs.filter(n=>!n.read).length;
     const badge=document.getElementById('nbadge');
-    if(unread>0){badge.textContent=unread>9?'9+':unread;badge.classList.add('show')}else{badge.classList.remove('show')}
+    if(unread>0){badge.textContent=unread>9?'9+':unread;badge.classList.add('show');const b2=document.getElementById('nbadge2');if(b2){b2.textContent=unread>9?'9+':unread;b2.classList.add('show')}}else{badge.classList.remove('show');const b2=document.getElementById('nbadge2');if(b2)b2.classList.remove('show')}
     renderNotifs(notifs);
   });
 }
@@ -1364,7 +1398,7 @@ function goTo(s){
   if(s==='puls')setTimeout(initPuls,80);
   if(s==='profile'&&CU){updateUI();loadMyPosts('all')}
   if(s==='search')loadUsers();
-  if(s==='messages')loadConvs();
+  if(s==='messages'){loadConvs();switchMT('msgs');}
 }
 
 
