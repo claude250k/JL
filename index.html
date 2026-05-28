@@ -981,7 +981,8 @@ async function saveProfile(){
   const bio=document.getElementById('ep-bio').value.trim();
   if(!nn){showToast('Name cannot be empty');return}
   const{db,doc,updateDoc,getDocs,query,collection,where,setDoc,deleteDoc}=window._fb;
-  if(nn!==UP.name){
+  const nameChanged=nn!==UP.name;
+  if(nameChanged){
     const nc=await getDocs(query(collection(db,'users'),where('name','==',nn)));
     if(!nc.empty){showToast('Name already taken!');return}
     try{await deleteDoc(doc(db,'nameIndex',UP.name.toLowerCase()))}catch(e){}
@@ -989,6 +990,21 @@ async function saveProfile(){
   }
   await updateDoc(doc(db,'users',CU.uid),{name:nn,bio});
   UP.name=nn;UP.bio=bio;updateUI();showToast('Profile saved!');closeEditProf();closeSet();
+  if(nameChanged){
+    // Backfill authorName in all posts by this user
+    try{
+      const ps=await getDocs(query(collection(db,'posts'),where('authorId','==',CU.uid)));
+      await Promise.all(ps.docs.map(d=>updateDoc(doc(db,'posts',d.id),{authorName:nn})));
+    }catch(e){}
+    // Backfill authorName in comments by this user across all posts
+    try{
+      const allPs=await getDocs(collection(db,'posts'));
+      for(const pd of allPs.docs){
+        const cmts=await getDocs(query(collection(db,`posts/${pd.id}/comments`),where('authorId','==',CU.uid)));
+        if(cmts.docs.length)await Promise.all(cmts.docs.map(d=>updateDoc(doc(db,`posts/${pd.id}/comments`,d.id),{authorName:nn})));
+      }
+    }catch(e){}
+  }
 }
 
 async function loadUP(uid){
@@ -1214,7 +1230,7 @@ function pH(p){
   const svd=isSaved(p.id);
   const myAvH=UP?.avatarUrl?`<img src="${UP.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(UP?.name||'?').substring(0,2).toUpperCase();
   const isOwn=CU&&p.authorId===CU.uid;
-  return`<div class="pi" data-id="${p.id}">
+  return`<div class="pi" data-id="${p.id}" data-txt="${esc(p.text||'')}" ontouchend="dtap(this,event)">
     <div class="pr">
       <div class="av" onclick="openOP('${p.authorId}')">${avH}</div>
       <div class="pb">
@@ -1231,7 +1247,7 @@ function pH(p){
             <i class="ti ${liked?'ti-heart-filled':'ti-heart'}"></i>
             <span>${p.likes||0}</span>
           </button>
-          <button class="pa" onclick="toggleQC('${p.id}')"><i class="ti ti-message-circle"></i> <span id="cc-${p.id}">${p.comments||0}</span></button>
+          <button class="pa" onclick="toggleQC('${p.id}',this)"><i class="ti ti-message-circle"></i> <span id="cc-${p.id}">${p.comments||0}</span></button>
           <button class="pa rp-btn${rpd?' reposted':''}" id="rp-${p.id}" onclick="rpMenu('${p.id}',this)" style="${rpd?'color:var(--gold)':''}"><i class="ti ti-repeat" style="${rpd?'color:var(--gold)':''}"></i> <span>${p.reposts||0}</span></button>
           <button class="pa${svd?' liked':''}" id="sv-${p.id}" onclick="toggleSave('${p.id}',this)"><i class="ti ${svd?'ti-bookmark-filled':'ti-bookmark'}"></i></button>
           <button class="pa" onclick="shareP('${p.id}')"><i class="ti ti-share"></i></button>
@@ -1240,23 +1256,26 @@ function pH(p){
     </div>
     <div class="qcbox" id="qc-${p.id}">
       <div class="qcav">${myAvH}</div>
-      <input class="qci" id="qci-${p.id}" placeholder="Quick comment ..." onkeydown="if(event.key==='Enter')submitQC('${p.id}')" oninput="onMentionInput(this)">
-      <button class="qcs" onclick="submitQC('${p.id}')"><i class="ti ti-send"></i></button>
+      <input class="qci" id="qci-${p.id}" placeholder="Quick comment ..." onkeydown="if(event.key==='Enter')submitQC('${p.id}',this)" oninput="onMentionInput(this)">
+      <button class="qcs" onclick="submitQC('${p.id}',this)"><i class="ti ti-send"></i></button>
     </div>
   </div>`;
 }
-function toggleQC(pid){const qc=document.getElementById('qc-'+pid);const o=qc.classList.contains('open');document.querySelectorAll('.qcbox.open').forEach(el=>el.classList.remove('open'));if(!o){qc.classList.add('open');document.getElementById('qci-'+pid)?.focus()}}
-async function submitQC(pid){
+function toggleQC(pid,btn){const post=btn?.closest('.pi');const qc=post?post.querySelector('.qcbox'):document.getElementById('qc-'+pid);if(!qc)return;const o=qc.classList.contains('open');document.querySelectorAll('.qcbox.open').forEach(el=>el.classList.remove('open'));if(!o){qc.classList.add('open');qc.querySelector('.qci')?.focus()}}
+async function submitQC(pid,btn){
   if(!CU||!UP)return;
-  const inp=document.getElementById('qci-'+pid);const text=inp.value.trim();if(!text)return;inp.value='';
+  const post=btn?.closest('.pi');
+  const inp=post?post.querySelector('.qci'):document.getElementById('qci-'+pid);
+  const text=inp?.value.trim();if(!text)return;inp.value='';
   const{db,collection,addDoc,doc,updateDoc,increment,serverTimestamp,getDoc}=window._fb;
   await addDoc(collection(db,`posts/${pid}/comments`),{text,authorId:CU.uid,authorName:UP.name||'',authorAvatar:UP.avatarUrl||'',createdAt:serverTimestamp()});
   await updateDoc(doc(db,'posts',pid),{comments:increment(1)});
   const ps=await getDoc(doc(db,'posts',pid));
   if(ps.exists()&&ps.data().authorId!==CU.uid)await addNotif(ps.data().authorId,'comment',`${UP.name} commented on your post`,pid);
   parseMentions(text,pid);
-  document.getElementById('qc-'+pid)?.classList.remove('open');
-  const ccEl=document.getElementById('cc-'+pid);if(ccEl)ccEl.textContent=parseInt(ccEl.textContent||'0')+1;
+  const qc=post?post.querySelector('.qcbox'):document.getElementById('qc-'+pid);qc?.classList.remove('open');
+  post?.querySelectorAll('[id^="cc-"]').forEach(el=>el.textContent=parseInt(el.textContent||'0')+1);
+  if(!post){const ccEl=document.getElementById('cc-'+pid);if(ccEl)ccEl.textContent=parseInt(ccEl.textContent||'0')+1;}
   showToast('Comment posted');
 }
 function goToCh(ch){if(!ch)return;goTo('feed');document.querySelectorAll('#fk .kachel').forEach(b=>{if(b.onclick&&b.onclick.toString().includes(`'${ch}'`))b.click()})}
@@ -1383,7 +1402,7 @@ async function loadCmts(pid,cid){
   const snap=await getDocs(query(collection(db,`posts/${pid}/comments`),orderBy('createdAt','asc')));
   const cmts=snap.docs.map(d=>({id:d.id,...d.data()}));
   if(!cmts.length){c.innerHTML='<div class="empty" style="padding:18px 20px 10px"><p>No comments yet. Be the first!</p></div>';return}
-  c.innerHTML=cmts.map(cm=>{const cav=cm.authorAvatar?`<img src="${cm.authorAvatar}">`:(cm.authorName||'?').substring(0,2).toUpperCase();const ownCmt=CU&&cm.authorId===CU.uid;const cmLiked=CU&&(cm.likedBy||[]).includes(CU.uid);return`<div class="cmt"><div class="cmtav">${cav}</div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:4px"><div class="cmtnm">${esc(cm.authorName||'')}</div>${ownCmt?`<button onclick="delCmt('${pid}','${cm.id}')" style="background:none;border:none;color:var(--mu);cursor:pointer;margin-left:auto;padding:2px 3px;line-height:1" title="Delete comment"><i class="ti ti-trash" style="font-size:12px"></i></button>`:''}</div><div class="cmttx">${linkText(cm.text||'')}</div><div style="display:flex;align-items:center;gap:10px;margin-top:2px"><div class="cmttm">${cm.createdAt?tAgo(cm.createdAt.toDate()):''}</div><button class="pa${cmLiked?' liked':''}" id="clb-${cm.id}" onclick="likeCmt('${pid}','${cm.id}',this)"><i class="ti ${cmLiked?'ti-heart-filled':'ti-heart'}"></i><span>${cm.likes||0}</span></button></div></div></div>`}).join('');
+  c.innerHTML=cmts.map(cm=>{const cav=cm.authorAvatar?`<img src="${cm.authorAvatar}">`:(cm.authorName||'?').substring(0,2).toUpperCase();const ownCmt=CU&&cm.authorId===CU.uid;const cmLiked=CU&&(cm.likedBy||[]).includes(CU.uid);return`<div class="cmt" data-id="${cm.id}" data-txt="${esc(cm.text||'')}" ontouchend="dtap(this,event)"><div class="cmtav">${cav}</div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:4px"><div class="cmtnm">${esc(cm.authorName||'')}</div>${ownCmt?`<button onclick="delCmt('${pid}','${cm.id}')" style="background:none;border:none;color:var(--mu);cursor:pointer;margin-left:auto;padding:2px 3px;line-height:1" title="Delete comment"><i class="ti ti-trash" style="font-size:12px"></i></button>`:''}</div><div class="cmttx">${linkText(cm.text||'')}</div><div style="display:flex;align-items:center;gap:10px;margin-top:2px"><div class="cmttm">${cm.createdAt?tAgo(cm.createdAt.toDate()):''}</div><button class="pa${cmLiked?' liked':''}" id="clb-${cm.id}" onclick="likeCmt('${pid}','${cm.id}',this)"><i class="ti ${cmLiked?'ti-heart-filled':'ti-heart'}"></i><span>${cm.likes||0}</span></button></div></div></div>`}).join('');
 }
 async function submitCmt(){
   if(!CU||!UP||!curPD)return;
@@ -1453,7 +1472,7 @@ async function loadMyReposts(ch='all'){
     const ps=await getDoc(doc(db,'posts',d.data().postId));
     return ps.exists()?{id:ps.id,...ps.data()}:null;
   }));
-  let valid=posts.filter(p=>p&&p.authorId!==CU.uid);
+  let valid=posts.filter(Boolean);
   if(ch!=='all')valid=valid.filter(p=>p.channel===ch);
   c.innerHTML=valid.length?valid.map(p=>pH(p)).join(''):`<div class="empty"><i class="ti ti-repeat"></i><p>${t('no_reposts_yet')}</p></div>`;
 }
@@ -2049,6 +2068,16 @@ function checkRateLimit(){
 function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800)}
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;')}
+const _dtapLast={};
+function dtap(el,ev){
+  if(ev.target.closest('button,.htag,.cbadge,.pimg,a,.qcbox'))return;
+  const k=el.dataset.id||(el.dataset.id=Math.random().toString(36).slice(2));
+  const now=Date.now();
+  if(_dtapLast[k]&&now-_dtapLast[k]<380){
+    navigator.clipboard?.writeText(el.dataset.txt||'').then(()=>showToast('📋 Copied!')).catch(()=>{});
+    delete _dtapLast[k];ev.preventDefault();
+  }else{_dtapLast[k]=now;}
+}
 function tAgo(d){const s=Math.floor((new Date()-d)/1000);if(s<60)return'now';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';return Math.floor(s/86400)+'d'}
 const HASH_MAP={bitcoin:'btc',btc:'btc',ethereum:'eth',eth:'eth',solana:'sol',sol:'sol',bnb:'bnb',xrp:'xrp',ripple:'xrp',ada:'ada',cardano:'ada',doge:'doge',dogecoin:'doge',dot:'dot',polkadot:'dot',avax:'avax',avalanche:'avax',link:'link',chainlink:'link',nvidia:'nvda',nvda:'nvda',apple:'aapl',aapl:'aapl',microsoft:'msft',msft:'msft',amazon:'amzn',amzn:'amzn',google:'goog',alphabet:'goog',goog:'goog',meta:'meta',tesla:'tsla',tsla:'tsla',sap:'sap',spy:'spy',sp500:'spy',qqq:'qqq',voo:'voo',iwda:'iwda',vwrl:'vwrl'};
 function linkText(s){
@@ -2058,8 +2087,14 @@ function linkText(s){
   parts.push({t:'tx',v:s.slice(li)});
   return parts.map(p=>{
     if(p.t==='url'){try{new URL(p.v);return`<a href="${esc(p.v)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="${esc(p.v)}" style="display:inline-flex;align-items:center;gap:3px;background:rgba(247,147,26,.1);border:1px solid rgba(247,147,26,.28);border-radius:5px;padding:1px 7px;font-size:11px;color:rgba(247,147,26,.75);text-decoration:none;vertical-align:middle"><i class="ti ti-link" style="font-size:11px"></i>Link</a>`}catch(e){return esc(p.v)}}
-    return esc(p.v).replace(/\n/g,'<br>').replace(/#(\w+)/g,(m,tag)=>{const k=tag.toLowerCase();const a=HASH_MAP[k];return a?`<span class="htag" onclick="event.stopPropagation();goToPuls('${a}')">${m}</span>`:`<span class="htag">${m}</span>`;}).replace(/@(\w+)/g,(m,name)=>{const u=(allUsers||[]).find(u=>(u.name||'').toLowerCase()===name.toLowerCase());return u?`<span class="htag" onclick="event.stopPropagation();openOP('${u.uid}')">@${esc(name)}</span>`:`<span style="color:var(--gold)">@${esc(name)}</span>`;});
+    return esc(p.v).replace(/\n/g,'<br>').replace(/#(\w+)/g,(m,tag)=>{const k=tag.toLowerCase();const a=HASH_MAP[k];return a?`<span class="htag" onclick="event.stopPropagation();goToPuls('${a}')">${m}</span>`:`<span class="htag">${m}</span>`;}).replace(/@(\w+)/g,(m,name)=>{const u=(allUsers||[]).find(u=>(u.name||'').toLowerCase()===name.toLowerCase());const act=u?`openOP('${u.uid}')`:`openByName('${name.replace(/'/g,'')}')`;return`<span class="htag" onclick="event.stopPropagation();${act}">@${esc(name)}</span>`;});
   }).join('');
+}
+async function openByName(name){
+  const u=(allUsers||[]).find(u=>(u.name||'').toLowerCase()===name.toLowerCase());
+  if(u){openOP(u.uid);return;}
+  const{db,collection,query,where,getDocs}=window._fb;
+  try{const snap=await getDocs(query(collection(db,'users'),where('name','==',name)));if(!snap.empty)openOP(snap.docs[0].data().uid||snap.docs[0].id);}catch(e){}
 }
 function chBadgeStyle(ch){const known=['bitcoin','aktien','stocks','etf','ETF','politik','politics','wirtschaft','economy','prognosen','forecasts','analysis','all','custom'];if(!ch||known.includes(ch))return'';let h=0;for(let i=0;i<ch.length;i++)h=(h*31+ch.charCodeAt(i))%360;return`background:hsla(${h},60%,62%,.18);color:hsl(${h},70%,70%)`;}
 function goToPuls(asset){goTo('puls');setTimeout(()=>openCD(asset),120);}
