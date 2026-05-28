@@ -15,12 +15,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,GoogleAuthProvider,onAuthStateChanged,signOut,updateProfile}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,GoogleAuthProvider,onAuthStateChanged,signOut,updateProfile,sendPasswordResetEmail}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import{getFirestore,collection,addDoc,getDocs,getDoc,doc,setDoc,updateDoc,deleteDoc,query,orderBy,limit,where,onSnapshot,serverTimestamp,increment,runTransaction}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import{getStorage,ref,uploadBytes,getDownloadURL}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 const cfg={apiKey:"AIzaSyBQ1-aEtgcMV8ZaNnjLAeyTu0t1piRm9Us",authDomain:"k-12b86.firebaseapp.com",projectId:"k-12b86",storageBucket:"k-12b86.firebasestorage.app",messagingSenderId:"375281147692",appId:"1:375281147692:web:5833aee12494854a859689"};
 const app=initializeApp(cfg);
-window._fb={auth:getAuth(app),db:getFirestore(app),storage:getStorage(app),gp:new GoogleAuthProvider(),createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,onAuthStateChanged,signOut,updateProfile,collection,addDoc,getDocs,getDoc,doc,setDoc,updateDoc,deleteDoc,query,orderBy,limit,where,onSnapshot,serverTimestamp,increment,runTransaction,ref,uploadBytes,getDownloadURL};
+window._fb={auth:getAuth(app),db:getFirestore(app),storage:getStorage(app),gp:new GoogleAuthProvider(),createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,onAuthStateChanged,signOut,updateProfile,sendPasswordResetEmail,collection,addDoc,getDocs,getDoc,doc,setDoc,updateDoc,deleteDoc,query,orderBy,limit,where,onSnapshot,serverTimestamp,increment,runTransaction,ref,uploadBytes,getDownloadURL};
 window._fbReady=true;document.dispatchEvent(new Event("fb-ready"));
 </script>
 <style>
@@ -389,13 +389,24 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   <div class="atabs"><div class="atab ak" id="at-li" onclick="atab('li')">Sign In</div><div class="atab" id="at-re" onclick="atab('re')">Sign Up</div></div>
   <div id="fl" style="width:100%">
     <input class="ainp" id="li-e" type="email" placeholder="Email">
-    <input class="ainp" id="li-p" type="password" placeholder="Password">
+    <div style="position:relative;margin-bottom:4px">
+      <input class="ainp" id="li-p" type="password" placeholder="Password" style="margin-bottom:0;padding-right:40px">
+      <button type="button" onclick="togglePw('li-p',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--mu2);cursor:pointer;padding:0;line-height:1;font-size:16px"><i class="ti ti-eye"></i></button>
+    </div>
+    <div style="text-align:right;margin-bottom:8px"><button type="button" onclick="forgotPw()" style="background:none;border:none;color:var(--mu2);font-size:11px;cursor:pointer;padding:0">Forgot password?</button></div>
     <button class="abtn" onclick="doLogin()">Sign In</button>
   </div>
   <div id="fr" style="display:none;width:100%">
     <input class="ainp" id="re-n" type="text" placeholder="Unique name (e.g. MaxMueller)">
     <input class="ainp" id="re-e" type="email" placeholder="Email">
-    <input class="ainp" id="re-p" type="password" placeholder="Password (min. 6 characters)">
+    <div style="position:relative;margin-bottom:8px">
+      <input class="ainp" id="re-p" type="password" placeholder="Password (min. 6 characters)" style="margin-bottom:0;padding-right:40px">
+      <button type="button" onclick="togglePw('re-p',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--mu2);cursor:pointer;padding:0;line-height:1;font-size:16px"><i class="ti ti-eye"></i></button>
+    </div>
+    <div style="position:relative;margin-bottom:8px">
+      <input class="ainp" id="re-p2" type="password" placeholder="Repeat password" style="margin-bottom:0;padding-right:40px">
+      <button type="button" onclick="togglePw('re-p2',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--mu2);cursor:pointer;padding:0;line-height:1;font-size:16px"><i class="ti ti-eye"></i></button>
+    </div>
     <button class="abtn" onclick="doReg()">Create Account</button>
   </div>
   <div class="adiv">or</div>
@@ -646,7 +657,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 <div class="pdov" id="pdov">
   <div class="pdh"><button class="pdb" onclick="closePD()"><i class="ti ti-arrow-left"></i></button><div style="font-size:14px;font-weight:600;color:var(--tx)">Post</div></div>
   <div class="scroll"><div id="pd-content"></div><div style="padding:8px 16px 4px;font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.8px;text-transform:uppercase">Comments</div><div id="pd-cmts"></div></div>
-  <div class="cmtir"><div class="cmtav" id="pd-myav"></div><input class="cmti" id="pd-inp" placeholder="Add a comment ... use @ to mention" onkeydown="if(event.key==='Enter')submitCmt()"><button class="cmts" onclick="submitCmt()"><i class="ti ti-send"></i></button></div>
+  <div class="cmtir"><div class="cmtav" id="pd-myav"></div><input class="cmti" id="pd-inp" placeholder="Add a comment ... use @ to mention" onkeydown="if(event.key==='Enter')submitCmt()" oninput="onMentionInput(this)"><button class="cmts" onclick="submitCmt()"><i class="ti ti-send"></i></button></div>
 </div>
 
 <div class="setov" id="setov">
@@ -686,7 +697,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 <div class="mbg" id="pm" onclick="if(event.target===this)closePM()">
   <div class="msh">
     <div class="mtitle">New Post</div>
-    <textarea class="pta" id="pta" placeholder="What's on your mind? Use @ to mention someone"></textarea>
+    <textarea class="pta" id="pta" placeholder="What's on your mind? Use @ to mention someone" oninput="onMentionInput(this)"></textarea>
     <img id="uprev" class="uprev">
     <div style="font-size:10px;color:var(--mu);margin-top:8px;margin-bottom:3px">Choose channel:</div>
     <div class="mcats" id="mcats">
@@ -887,8 +898,9 @@ async function doLogin(){
 async function doReg(){
   const{auth,db,createUserWithEmailAndPassword,updateProfile,doc,getDoc,setDoc,getDocs,query,where,collection,runTransaction,serverTimestamp}=window._fb;
   const name=document.getElementById('re-n').value.trim().replace(/\s+/g,'');
-  const e=document.getElementById('re-e').value.trim(),p=document.getElementById('re-p').value;
-  if(!name||!e||!p){setAErr('Please fill all fields');return}
+  const e=document.getElementById('re-e').value.trim(),p=document.getElementById('re-p').value,p2=document.getElementById('re-p2').value;
+  if(!name||!e||!p||!p2){setAErr('Please fill all fields');return}
+  if(p!==p2){setAErr('Passwords do not match');return}
   if(name.length<2){setAErr('Name must be at least 2 characters');return}
   const ni=await getDoc(doc(db,'nameIndex',name.toLowerCase()));
   if(ni.exists()){setAErr('This name is already taken. Please choose another.');return}
@@ -920,7 +932,9 @@ async function doGoogle(){
     }
   }catch(err){setAErr(am(err.code))}
 }
-function am(c){const m={'auth/user-not-found':'Email not found','auth/wrong-password':'Wrong password','auth/email-already-in-use':'Email already registered','auth/weak-password':'Password too short (min 6)','auth/invalid-email':'Invalid email','auth/popup-closed-by-user':''};return m[c]||'Error: '+c}
+function togglePw(id,btn){const inp=document.getElementById(id);if(!inp)return;const show=inp.type==='password';inp.type=show?'text':'password';const ic=btn.querySelector('i');if(ic)ic.className=show?'ti ti-eye-off':'ti ti-eye';}
+async function forgotPw(){const e=document.getElementById('li-e').value.trim();if(!e){setAErr('Enter your email address first');return}const{auth,sendPasswordResetEmail}=window._fb;try{await sendPasswordResetEmail(auth,e);setAErr('');showToast('Reset link sent – check your email');}catch(err){setAErr(am(err.code))}}
+function am(c){const m={'auth/user-not-found':'Email not found','auth/wrong-password':'Wrong password','auth/email-already-in-use':'Email already registered','auth/weak-password':'Password too short (min 6)','auth/invalid-email':'Invalid email','auth/popup-closed-by-user':'','auth/missing-email':'Enter your email address first'};return m[c]||'Error: '+c}
 
 function openChSettings(){
   closeSet();
@@ -1202,7 +1216,7 @@ function pH(p){
       <div class="pb">
         <div class="ptop">
           <span class="pan" onclick="openOP('${p.authorId}')">${esc(p.authorName||'Anonymous')}</span>
-          <span class="cbadge ${cb}" onclick="goToCh('${p.channel||''}')">${cl}</span>
+          <span class="cbadge ${cb}" onclick="goToCh('${p.channel||''}')" ${chBadgeStyle(rawCh)?`style="${chBadgeStyle(rawCh)}"`:''}>${cl}</span>
           <span class="ptm">${t}</span>
         </div>
         <div class="ptxt" onclick="openPD('${p.id}')">${linkText(p.text||'')}</div>
@@ -1212,7 +1226,7 @@ function pH(p){
             <i class="ti ${liked?'ti-heart-filled':'ti-heart'}"></i>
             <span>${p.likes||0}</span>
           </button>
-          <button class="pa" onclick="toggleQC('${p.id}')"><i class="ti ti-message-circle"></i> <span>${p.comments||0}</span></button>
+          <button class="pa" onclick="toggleQC('${p.id}')"><i class="ti ti-message-circle"></i> <span id="cc-${p.id}">${p.comments||0}</span></button>
 
           <button class="pa rp-btn${rpd?' reposted':''}" id="rp-${p.id}" onclick="repostP('${p.id}',this)" style="${rpd?'color:var(--gold)':''}"><i class="ti ti-repeat" style="${rpd?'color:var(--gold)':''}"></i> <span>${p.reposts||0}</span></button>
           <button class="pa" onclick="shareP('${p.id}')"><i class="ti ti-share"></i></button>
@@ -1221,7 +1235,7 @@ function pH(p){
     </div>
     <div class="qcbox" id="qc-${p.id}">
       <div class="qcav">${myAvH}</div>
-      <input class="qci" id="qci-${p.id}" placeholder="Quick comment ..." onkeydown="if(event.key==='Enter')submitQC('${p.id}')">
+      <input class="qci" id="qci-${p.id}" placeholder="Quick comment ..." onkeydown="if(event.key==='Enter')submitQC('${p.id}')" oninput="onMentionInput(this)">
       <button class="qcs" onclick="submitQC('${p.id}')"><i class="ti ti-send"></i></button>
     </div>
   </div>`;
@@ -1237,6 +1251,7 @@ async function submitQC(pid){
   if(ps.exists()&&ps.data().authorId!==CU.uid)await addNotif(ps.data().authorId,'comment',`${UP.name} commented on your post`,pid);
   parseMentions(text,pid);
   document.getElementById('qc-'+pid)?.classList.remove('open');
+  const ccEl=document.getElementById('cc-'+pid);if(ccEl)ccEl.textContent=parseInt(ccEl.textContent||'0')+1;
   showToast('Comment posted');
 }
 function goToCh(ch){if(!ch)return;goTo('feed');document.querySelectorAll('#fk .kachel').forEach(b=>{if(b.onclick&&b.onclick.toString().includes(`'${ch}'`))b.click()})}
@@ -1339,6 +1354,7 @@ function switchMT(tab){
 }
 
 async function openPD(pid){
+  if(_lpFired){_lpFired=false;return}
   curPD=pid;
   const{db,doc,getDoc}=window._fb;
   const snap=await getDoc(doc(db,'posts',pid));if(!snap.exists())return;
@@ -1349,7 +1365,7 @@ async function openPD(pid){
   const avH=p.authorAvatar?`<img src="${p.authorAvatar}">`:(p.authorName||'?').substring(0,2).toUpperCase();
   const liked=CU&&(p.likedBy||[]).includes(CU.uid);
   const isOwnPD=CU&&p.authorId===CU.uid;
-  document.getElementById('pd-content').innerHTML=`<div class="pi" style="cursor:default"><div class="pr"><div class="av" onclick="openOP('${p.authorId}')">${avH}</div><div class="pb"><div class="ptop"><span class="pan" onclick="openOP('${p.authorId}')">${esc(p.authorName||'')}</span><span class="cbadge ${cb}">${cl}</span><span class="ptm">${t}</span>${isOwnPD?`<button class="pa" onclick="delPost('${p.id}')" style="margin-left:auto;color:var(--mu)" title="Delete post"><i class="ti ti-trash" style="font-size:13px"></i></button>`:''}</div><div class="ptxt" style="cursor:default">${linkText(p.text||'')}</div>${img}<div class="pacts"><button class="pa${liked?' liked':''}" id="lb-${p.id}" onclick="likeP('${p.id}',this)"><i class="ti ${liked?'ti-heart-filled':'ti-heart'}"></i><span id="lc-${p.id}">${p.likes||0}</span></button></div></div></div></div>`;
+  document.getElementById('pd-content').innerHTML=`<div class="pi" style="cursor:default"><div class="pr"><div class="av" onclick="openOP('${p.authorId}')">${avH}</div><div class="pb"><div class="ptop"><span class="pan" onclick="openOP('${p.authorId}')">${esc(p.authorName||'')}</span><span class="cbadge ${cb}" ${chBadgeStyle(rawChPD)?`style="${chBadgeStyle(rawChPD)}"`:''}>${cl}</span><span class="ptm">${t}</span>${isOwnPD?`<button class="pa" onclick="delPost('${p.id}')" style="margin-left:auto;color:var(--mu)" title="Delete post"><i class="ti ti-trash" style="font-size:13px"></i></button>`:''}</div><div class="ptxt" style="cursor:default">${linkText(p.text||'')}</div>${img}<div class="pacts"><button class="pa${liked?' liked':''}" id="lb-${p.id}" onclick="likeP('${p.id}',this)"><i class="ti ${liked?'ti-heart-filled':'ti-heart'}"></i><span id="lc-${p.id}">${p.likes||0}</span></button></div></div></div></div>`;
   await loadCmts(pid,'pd-cmts');
   document.getElementById('pdov').classList.add('on');
   document.getElementById('pd-inp').focus();
@@ -2019,9 +2035,10 @@ function linkText(s){
   parts.push({t:'tx',v:s.slice(li)});
   return parts.map(p=>{
     if(p.t==='url'){try{new URL(p.v);return`<a href="${esc(p.v)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="${esc(p.v)}" style="display:inline-flex;align-items:center;gap:3px;background:rgba(247,147,26,.1);border:1px solid rgba(247,147,26,.28);border-radius:5px;padding:1px 7px;font-size:11px;color:rgba(247,147,26,.75);text-decoration:none;vertical-align:middle"><i class="ti ti-link" style="font-size:11px"></i>Link</a>`}catch(e){return esc(p.v)}}
-    return esc(p.v).replace(/#(\w+)/g,(m,tag)=>{const k=tag.toLowerCase();const a=HASH_MAP[k];return a?`<span class="htag" onclick="event.stopPropagation();goToPuls('${a}')">${m}</span>`:`<span class="htag">${m}</span>`;});
+    return esc(p.v).replace(/\n/g,'<br>').replace(/#(\w+)/g,(m,tag)=>{const k=tag.toLowerCase();const a=HASH_MAP[k];return a?`<span class="htag" onclick="event.stopPropagation();goToPuls('${a}')">${m}</span>`:`<span class="htag">${m}</span>`;}).replace(/@(\w+)/g,(m,name)=>{const u=(allUsers||[]).find(u=>(u.name||'').toLowerCase()===name.toLowerCase());return u?`<span class="htag" onclick="event.stopPropagation();openOP('${u.uid}')">@${esc(name)}</span>`:`<span style="color:var(--gold)">@${esc(name)}</span>`;});
   }).join('');
 }
+function chBadgeStyle(ch){const known=['bitcoin','aktien','stocks','etf','ETF','politik','politics','wirtschaft','economy','prognosen','forecasts','analysis','all','custom'];if(!ch||known.includes(ch))return'';let h=0;for(let i=0;i<ch.length;i++)h=(h*31+ch.charCodeAt(i))%360;return`background:hsla(${h},60%,62%,.18);color:hsl(${h},70%,70%)`;}
 function goToPuls(asset){goTo('puls');setTimeout(()=>openCD(asset),120);}
 function togTCG(id){const body=document.getElementById('tcg-'+id);const icon=document.getElementById('tcgi-'+id);if(!body)return;const open=body.style.display!=='none';body.style.display=open?'none':'block';if(icon)icon.style.transform=open?'':'rotate(180deg)';}
 function togWatch(id){const body=document.getElementById('watch-'+id);const icon=document.getElementById('watchi-'+id);if(!body)return;const open=body.style.display!=='none';document.querySelectorAll('.watch-models').forEach(el=>{if(el.id!=='watch-'+id){el.style.display='none';const ic=document.getElementById('watchi-'+el.id.slice(6));if(ic)ic.style.transform='';}});body.style.display=open?'none':'block';if(icon)icon.style.transform=open?'':'rotate(180deg)';}
@@ -2493,6 +2510,58 @@ function swipeBack(){
   ];
   for(const[id,fn]of checks){const el=document.getElementById(id);if(el&&el.classList.contains('on')){fn();return;}}
 }
+
+// ── @MENTION DROPDOWN ───────────────────────────────────────────────────────
+let _mDropEl=null,_mInp=null;
+function _getMDrop(){
+  if(!_mDropEl){_mDropEl=document.createElement('div');_mDropEl.style.cssText='position:fixed;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;z-index:900;max-height:160px;overflow-y:auto;min-width:170px;display:none;box-shadow:0 4px 20px rgba(0,0,0,.6)';document.body.appendChild(_mDropEl);}
+  return _mDropEl;
+}
+function closeMentionDrop(){if(_mDropEl)_mDropEl.style.display='none';_mInp=null;}
+function onMentionInput(el){
+  _mInp=el;
+  const val=el.value,pos=el.selectionStart||val.length;
+  const before=val.slice(0,pos);
+  const m=before.match(/@(\w*)$/);
+  if(!m){closeMentionDrop();return}
+  const q=m[1].toLowerCase();
+  const candidates=(allUsers||[]).filter(u=>followingIds.has(u.uid)&&(q===''||(u.name||'').toLowerCase().startsWith(q)));
+  if(!candidates.length){closeMentionDrop();return}
+  const drop=_getMDrop();
+  const rect=el.getBoundingClientRect();
+  drop.style.left=Math.min(rect.left,window.innerWidth-180)+'px';
+  drop.style.top=(rect.bottom+4)+'px';
+  drop.style.display='block';
+  drop.innerHTML=candidates.slice(0,6).map(u=>{const av=u.avatarUrl?`<img src="${u.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:esc((u.name||'?').substring(0,2).toUpperCase());return`<div onclick="insertMention('${esc(u.name||'')}')" style="display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;font-size:12px;color:var(--tx)" onmouseover="this.style.background='var(--sf3)'" onmouseout="this.style.background=''"><div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#b06010);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#000;overflow:hidden;flex-shrink:0">${av}</div>@${esc(u.name||'')}</div>`}).join('');
+}
+function insertMention(name){
+  if(!_mInp)return;
+  const val=_mInp.value,pos=_mInp.selectionStart||val.length;
+  const before=val.slice(0,pos),after=val.slice(pos);
+  const newBefore=before.replace(/@(\w*)$/,'@'+name+' ');
+  _mInp.value=newBefore+after;
+  _mInp.selectionStart=_mInp.selectionEnd=newBefore.length;
+  _mInp.focus();
+  closeMentionDrop();
+}
+document.addEventListener('click',e=>{if(_mDropEl&&_mDropEl.style.display!=='none'&&!_mDropEl.contains(e.target)&&e.target!==_mInp)closeMentionDrop();},{capture:true,passive:true});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMentionDrop();},{passive:true});
+
+// ── LONG-PRESS → COPY TEXT ───────────────────────────────────────────────────
+let _lpTimer=null,_lpFired=false;
+document.addEventListener('pointerdown',e=>{
+  _lpFired=false;
+  const el=e.target.closest('.ptxt,.cmttx');
+  if(!el)return;
+  _lpTimer=setTimeout(()=>{
+    _lpFired=true;
+    const txt=(el.innerText||el.textContent||'').trim();
+    if(txt)navigator.clipboard?.writeText(txt).then(()=>showToast('📋 Copied')).catch(()=>{});
+  },600);
+},{passive:true});
+document.addEventListener('pointerup',()=>{clearTimeout(_lpTimer);_lpTimer=null;},{passive:true});
+document.addEventListener('pointermove',e=>{if(_lpTimer&&e.movementX*e.movementX+e.movementY*e.movementY>16){clearTimeout(_lpTimer);_lpTimer=null;}},{passive:true});
+document.addEventListener('pointercancel',()=>{clearTimeout(_lpTimer);_lpTimer=null;},{passive:true});
 </script>
 </body>
 </html>
