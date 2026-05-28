@@ -843,13 +843,13 @@ async function doLogin(){
 }
 
 async function doReg(){
-  const{auth,db,createUserWithEmailAndPassword,updateProfile,doc,setDoc,getDocs,query,where,collection,runTransaction,serverTimestamp}=window._fb;
+  const{auth,db,createUserWithEmailAndPassword,updateProfile,doc,getDoc,setDoc,getDocs,query,where,collection,runTransaction,serverTimestamp}=window._fb;
   const name=document.getElementById('re-n').value.trim().replace(/\s+/g,'');
   const e=document.getElementById('re-e').value.trim(),p=document.getElementById('re-p').value;
   if(!name||!e||!p){setAErr('Please fill all fields');return}
   if(name.length<2){setAErr('Name must be at least 2 characters');return}
-  const nc=await getDocs(query(collection(db,'users'),where('name','==',name)));
-  if(!nc.empty){setAErr('Name already taken. Choose another.');return}
+  const ni=await getDoc(doc(db,'nameIndex',name.toLowerCase()));
+  if(ni.exists()){setAErr('This name is already taken. Please choose another.');return}
   try{
     const uc=await createUserWithEmailAndPassword(auth,e,p);
     await updateProfile(uc.user,{displayName:name});
@@ -1147,8 +1147,8 @@ function pH(p){
         ${img}
         <div class="pacts">
           <button class="pa${liked?' liked':''}" id="lb-${p.id}" onclick="likeP('${p.id}',this)">
-            <i class="ti ${liked?'ti-heart-filled':'ti-heart'}"></i>
-            <span id="lc-${p.id}">${p.likes||0}</span>
+            <i class="ti ${liked?'ti-heart-filled':'ti-heart'}"${liked?' style="color:var(--gold)"':''}></i>
+            <span>${p.likes||0}</span>
           </button>
           <button class="pa" onclick="toggleQC('${p.id}')"><i class="ti ti-message-circle"></i> <span>${p.comments||0}</span></button>
 
@@ -1188,12 +1188,8 @@ async function likeP(pid,btn){
   const curCount=parseInt(cnt?.textContent||'0');
   const newCount=Math.max(0,curCount+(nowLiked?1:-1));
   document.querySelectorAll('[id="lb-'+pid+'"]').forEach(b=>{
-    b.classList.toggle('liked',nowLiked);
-    const ic=b.querySelector('i');
-    const ct=b.querySelector('span');
-    if(ic){ic.className='ti ti-heart'+(nowLiked?'-filled':'');ic.style.color=nowLiked?'var(--gold)':'';}
-    if(ct)ct.textContent=newCount;
-    b.style.color=nowLiked?'var(--gold)':'';
+    if(nowLiked){b.classList.add('liked');b.innerHTML=`<i class="ti ti-heart-filled" style="color:var(--gold)"></i> <span>${newCount}</span>`;}
+    else{b.classList.remove('liked');b.innerHTML=`<i class="ti ti-heart"></i> <span>${newCount}</span>`;}
   });
   // Persist to Firestore in background
   const{db,doc,getDoc,updateDoc,increment}=window._fb;
@@ -1840,7 +1836,7 @@ function linkText(s){
   while((m=urlRe.exec(s))!==null){parts.push({t:'tx',v:s.slice(li,m.index)});parts.push({t:'url',v:m[1]});li=m.index+m[1].length;}
   parts.push({t:'tx',v:s.slice(li)});
   return parts.map(p=>{
-    if(p.t==='url'){try{const dom=new URL(p.v).hostname.replace(/^www\./,'');return`<a class="post-link" href="${esc(p.v)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">[${esc(dom)}]</a>`}catch(e){return esc(p.v)}}
+    if(p.t==='url'){try{const dom=new URL(p.v).hostname.replace(/^www\./,'');return`<a href="${esc(p.v)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" style="background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:2px 8px;font-size:11px;color:var(--gold);text-decoration:none">[${esc(dom)}]</a>`}catch(e){return esc(p.v)}}
     return esc(p.v).replace(/#(\w+)/g,(m,tag)=>{const k=tag.toLowerCase();const a=HASH_MAP[k];return a?`<span class="htag" onclick="event.stopPropagation();goToPuls('${a}')">${m}</span>`:`<span class="htag">${m}</span>`;});
   }).join('');
 }
