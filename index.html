@@ -201,93 +201,22 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .bn i{font-size:21px;color:var(--mu)}.bn span{font-size:9px;color:var(--mu);font-weight:500}.bn.ak i,.bn.ak span{color:var(--gold)}
 .nbadge{position:absolute;top:2px;right:6px;min-width:16px;height:16px;border-radius:8px;background:var(--gold);color:#000;font-size:9px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--bg)}.nbadge.show{display:flex}
 
-@media(min-width:600px){
-  body{background:var(--bg)}
-  .shell{width:100%;max-width:100%;height:100vh;border-radius:0;border:none;flex-direction:row}
-  .bnav{flex-direction:column;width:220px;height:100vh;border-top:none;border-right:1px solid var(--bd);justify-content:flex-start;padding:20px 12px;gap:4px;flex-shrink:0}
-  .bn{flex-direction:row;justify-content:flex-start;gap:12px;padding:10px 14px;width:100%;border-radius:10px}
-  .bn i{font-size:20px}.bn span{font-size:13px;font-weight:500}
-  .bn.ak{background:var(--gdim)}
-  .shell>div:not(.bnav){flex:1;min-width:0}
-  .sbar{display:none}
-  .shell>.bnav{order:1}
-  .shell>.sc{order:2}
-  .toast{top:20px}
-  .asc{max-width:400px;margin:0 auto;border-right:1px solid var(--bd)}
-}
-@media(min-width:900px){
-  .shell{max-width:1200px;margin:0 auto}
-  .bnav{width:250px}
-  .sc{max-width:600px;border-right:1px solid var(--bd)}
-}
 
-.ch-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:250;display:none;align-items:center;justify-content:center;padding:24px}
-.ch-modal.on{display:flex}
-.ch-modal-box{background:var(--sf);border:1px solid var(--gold);border-radius:16px;padding:24px;width:100%;max-width:320px}
-.ch-modal-title{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:12px}
-.ch-modal-inp{width:100%;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:11px 12px;color:var(--tx);font-size:13px;outline:none;margin-bottom:12px}
-.ch-modal-inp:focus{border-color:var(--gold)}
-.ch-modal-inp::placeholder{color:var(--mu)}
-.ch-modal-foot{display:flex;gap:8px}
-.ch-modal-cancel{flex:1;background:transparent;border:1px solid var(--bd);color:var(--mu2);padding:9px;border-radius:9px;cursor:pointer;font-size:12px}
-.ch-modal-ok{flex:1;background:var(--gold);border:none;color:#000;padding:9px;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700}
-
-.rp-btn.reposted i{color:var(--gn)}.rp-btn.reposted span{color:var(--gn)}
-.ch-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:250;display:none;align-items:center;justify-content:center;padding:24px}
-.ch-modal.on{display:flex}
-.ch-modal-box{background:var(--sf);border:1px solid var(--gold);border-radius:16px;padding:24px;width:100%;max-width:320px}
-.ch-modal-title{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:12px;font-family:var(--fb)}
-.ch-modal-inp{width:100%;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:11px 12px;color:var(--tx);font-size:13px;outline:none;margin-bottom:12px;font-family:var(--fb)}
-.ch-modal-inp:focus{border-color:var(--gold)}
-.ch-modal-inp::placeholder{color:var(--mu)}
-.ch-modal-foot{display:flex;gap:8px}
-.ch-modal-cancel{flex:1;background:transparent;border:1px solid var(--bd);color:var(--mu2);padding:9px;border-radius:9px;cursor:pointer;font-size:12px;font-family:var(--fb)}
-.ch-modal-ok{flex:1;background:var(--gold);border:none;color:#000;padding:9px;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700;font-family:var(--fb)}
-.update-toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--gold);color:#000;padding:10px 18px;border-radius:10px;font-size:12px;font-weight:700;z-index:400;cursor:pointer;box-shadow:0 4px 20px rgba(247,147,26,.4)}
-
-
-  .shell>.sc{max-width:680px}
-}
-@media(min-width:600px){.desk-logo{display:block!important}}
-
-/* ── RESPONSIVE: Mobile = phone shell, Desktop = Twitter layout ── */
+/* RESPONSIVE */
 @media(min-width:640px){
-  html,body{justify-content:flex-start;overflow:auto;background:var(--bg)}
-  .shell{
-    width:100%;max-width:none;height:100vh;min-height:100vh;
-    border-radius:0;border:none;flex-direction:row;
-    box-shadow:none;overflow:hidden
-  }
-  .bnav{
-    flex-direction:column;width:220px;min-width:220px;height:100vh;
-    border-top:none;border-right:1px solid var(--bd);
-    justify-content:flex-start;align-items:flex-start;
-    padding:12px 8px;gap:2px;flex-shrink:0;overflow-y:auto
-  }
-  .bn{
-    flex-direction:row;justify-content:flex-start;
-    gap:14px;padding:11px 14px;width:100%;
-    border-radius:12px;min-width:0
-  }
-  .bn i{font-size:20px}
-  .bn span{font-size:14px;font-weight:500;display:block}
-  .bn.ak{background:var(--gdim)}
-  .bn:hover:not(.ak){background:var(--sf)}
-  .nbadge{top:5px;right:5px}
-  .shell>.sc,.shell>.asc{
-    flex:1;min-width:0;max-width:680px;
-    border-right:1px solid var(--bd);order:2
-  }
-  .bnav{order:1}
+  html,body{justify-content:flex-start;background:var(--bg)}
+  .shell{width:100%;max-width:none;height:100vh;border-radius:0;border:none;flex-direction:row;box-shadow:none}
+  .bnav{flex-direction:column;width:220px;min-width:220px;height:100vh;border-top:none;border-right:1px solid var(--bd);justify-content:flex-start;align-items:flex-start;padding:12px 8px;gap:2px;flex-shrink:0;order:1}
+  .bn{flex-direction:row;justify-content:flex-start;gap:14px;padding:11px 14px;width:100%;border-radius:12px}
+  .bn i{font-size:20px}.bn span{font-size:14px;font-weight:500;display:block}
+  .bn.ak{background:var(--gdim)}.bn:hover:not(.ak){background:var(--sf)}
+  .shell>.sc,.shell>.asc{flex:1;min-width:0;max-width:680px;border-right:1px solid var(--bd);order:2}
   .sbar{display:none}
   .toast{position:fixed;top:20px}
-  .ibanner{max-width:680px}
   .desk-logo{display:block!important}
 }
-@media(min-width:900px){
-  .bnav{width:240px;min-width:240px}
-  .shell>.sc{max-width:720px}
-}
+@media(min-width:900px){.bnav{width:240px;min-width:240px}}
+.desk-logo{display:none}
 </style>
 </head>
 <body>
@@ -338,7 +267,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 
 <div class="sc on" id="sc-feed">
   <div class="sh" style="justify-content:center">
-    <div style="display:flex;align-items:center;justify-content:center"><svg width="72" height="32" viewBox="0 0 72 32" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="0,16 8,16 11,5 14,27 17,11 20,21 23,16 32,16" stroke="#F7931A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="36" y="23" font-family="Syne,sans-serif" font-weight="800" font-size="20" fill="#f0ede6">J<tspan fill="#F7931A">L</tspan></text></svg></div>
+    <svg width="72" height="32" viewBox="0 0 72 32" fill="none"><polyline points="0,16 8,16 11,5 14,27 17,11 20,21 23,16 32,16" stroke="#F7931A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="36" y="23" font-family="Syne,sans-serif" font-weight="800" font-size="20" fill="#f0ede6">J<tspan fill="#F7931A">L</tspan></text></svg>
   </div>
   <div class="krow"<div class="krow" id="fk">
     <button class="kachel ak" onclick="filterFeed(this,'all')">Following</button>
@@ -570,7 +499,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 </div>
 <div class="toast" id="toast"></div>
 <div class="bnav">
-  <div style="padding:8px 14px 20px;display:none" class="desk-logo"><svg width="72" height="32" viewBox="0 0 72 32" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="0,16 8,16 11,5 14,27 17,11 20,21 23,16 32,16" stroke="#F7931A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="36" y="23" font-family="Syne,sans-serif" font-weight="800" font-size="20" fill="#f0ede6">J<tspan fill="#F7931A">L</tspan></text></svg></div>
+  <div class="desk-logo" style="padding:10px 14px 18px"><svg width="72" height="32" viewBox="0 0 72 32" fill="none"><polyline points="0,16 8,16 11,5 14,27 17,11 20,21 23,16 32,16" stroke="#F7931A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="36" y="23" font-family="Syne,sans-serif" font-weight="800" font-size="20" fill="#f0ede6">J<tspan fill="#F7931A">L</tspan></text></svg></div>
   <button class="bn ak" id="bn-feed" onclick="goTo('feed')"><i class="ti ti-home"></i><span>Feed</span></button>
   <button class="bn" id="bn-puls" onclick="goTo('puls')"><i class="ti ti-activity"></i><span>Puls</span></button>
   <button class="bn" id="bn-search" onclick="goTo('search')"><i class="ti ti-search"></i><span>Search</span></button>
@@ -579,71 +508,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 </div>
 </div>
 
-// Hash routing - restore page on reload
-function updateHash(s){try{history.replaceState(null,'','#'+s)}catch(e){}}
-const _validScreens=['feed','puls','search','messages','profile'];
 
-<script>
-function tick(){const n=new Date();document.getElementById('clk').textContent=n.getHours()+':'+(n.getMinutes()<10?'0':'')+n.getMinutes()}
-setInterval(tick,10000);tick();
-
-let CU=null,UP=null,selCat='bitcoin';
-let feedUnsub=null,chatUnsub=null,msgUnsub=null,notifUnsub=null;
-let pulsInited=false,chartI={},cdChart=null,curCDCoin=null;
-let allUsers=[],myVote=null,curOP=null,curConv=null;
-let customChs=[],myPFilt='all',curPD=null;
-let followingIds=new Set();
-let deferredPrompt=null;
-
-const DCH=['bitcoin','stocks','ETF','economy','politics','forecasts'];
-const CID={btc:'bitcoin',eth:'ethereum',sol:'solana',bnb:'binancecoin',xrp:'ripple',ada:'cardano',doge:'dogecoin',dot:'polkadot',avax:'avalanche-2',link:'chainlink'};
-const CNM={btc:'Bitcoin (BTC)',eth:'Ethereum (ETH)',sol:'Solana (SOL)',bnb:'BNB',xrp:'XRP',ada:'Cardano (ADA)',doge:'Dogecoin (DOGE)',dot:'Polkadot (DOT)',avax:'Avalanche (AVAX)',link:'Chainlink (LINK)'};
-
-const _openParties=new Set();
-const PARTIES=[
-  {id:'cdu',name:'CDU/CSU',color:'#555',pols:[
-    {i:'FM',n:'Friedrich Merz',r:'Federal Chancellor (CDU)'},
-    {i:'MS',n:'Markus Söder',r:'Minister-President Bavaria (CSU)'},
-    {i:'CL',n:'Carsten Linnemann',r:'CDU Secretary General'},
-    {i:'JW',n:'Julia Klöckner',r:'CDU Deputy Chair'},
-    {i:'AD',n:'Alexander Dobrindt',r:'CSU Group Leader Bundestag'},
-  ]},
-  {id:'spd',name:'SPD',color:'#c0392b',pols:[
-    {i:'OS',n:'Olaf Scholz',r:'Former Federal Chancellor'},
-    {i:'SK',n:'Saskia Esken',r:'SPD Party Co-Chair'},
-    {i:'LK',n:'Lars Klingbeil',r:'SPD Party Co-Chair'},
-    {i:'RM',n:'Rolf Mützenich',r:'SPD Caucus Leader'},
-    {i:'NF',n:'Nancy Faeser',r:'Former Interior Minister'},
-  ]},
-  {id:'afd',name:'AfD',color:'#009ee0',pols:[
-    {i:'AW',n:'Alice Weidel',r:'AfD Lead Candidate / Co-Chair'},
-    {i:'TC',n:'Tino Chrupalla',r:'AfD Co-Chair'},
-    {i:'BH',n:'Björn Höcke',r:'AfD Thuringia State Leader'},
-    {i:'PF',n:'Peter Felser',r:'AfD Deputy Caucus Leader'},
-  ]},
-  {id:'gru',name:'Greens',color:'#1aad62',pols:[
-    {i:'AB',n:'Annalena Baerbock',r:'Former Foreign Minister'},
-    {i:'RH',n:'Robert Habeck',r:'Greens Lead Candidate'},
-    {i:'ON',n:'Omid Nouripour',r:'Former Greens Co-Chair'},
-    {i:'RL',n:'Ricarda Lang',r:'Former Greens Co-Chair'},
-  ]},
-  {id:'fdp',name:'FDP',color:'#d4a800',pols:[
-    {i:'CL',n:'Christian Lindner',r:'FDP Chair / Former Finance Minister'},
-    {i:'WK',n:'Wolfgang Kubicki',r:'FDP Deputy Chair'},
-    {i:'BS',n:'Bettina Stark-Watzinger',r:'Former Education Minister'},
-  ]},
-  {id:'bsw',name:'BSW',color:'#7c3aed',pols:[
-    {i:'SW',n:'Sahra Wagenknecht',r:'BSW Founder & Chair'},
-    {i:'AF',n:'Amira Mohamed Ali',r:'BSW Co-Chair'},
-  ]},
-  {id:'linke',name:'Die Linke',color:'#be1848',pols:[
-    {i:'JV',n:'Jan van Aken',r:'Die Linke Co-Chair'},
-    {i:'HR',n:'Heidi Reichinnek',r:'Die Linke Co-Chair'},
-    {i:'GG',n:'Gregor Gysi',r:'Die Linke Honorary Chair'},
-  ]},
-];
-
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('ibanner').classList.add('show')});
 function showInstPage(){document.getElementById('inst-ov').classList.add('on')}
 function closeInstPage(){document.getElementById('inst-ov').classList.remove('on')}
 function instAndroid(){
@@ -662,7 +527,7 @@ function wFB(cb){if(window._fbReady)cb();else document.addEventListener('fb-read
 wFB(()=>{
   const{auth,onAuthStateChanged}=window._fb;
   onAuthStateChanged(auth,async u=>{
-    if(u){CU=u;await loadUP(u.uid);document.getElementById('asc').style.display='none';updateUI();startFeed();loadUsers();loadConvs();loadNotifs();renderParties();loadMyVote();loadFollowing();}
+    if(u){CU=u;await loadUP(u.uid);document.getElementById('asc').style.display='none';updateUI();startFeed();loadUsers();loadConvs();loadNotifs();renderParties();loadMyVote();loadFollowing();setTimeout(restoreHash,500);}
     else{CU=null;UP=null;followingIds=new Set();document.getElementById('asc').style.display='flex';}
   });
 });
@@ -1281,31 +1146,34 @@ async function qFol(uid,btn){
   startFeed();
 }
 
+
+
 async function loadConvs(){
   if(!CU)return;
   const{db,collection,query,where,orderBy,onSnapshot}=window._fb;
   const q=query(collection(db,'conversations'),where('members','array-contains',CU.uid),orderBy('lastAt','desc'));
   if(msgUnsub)msgUnsub();
-  msgUnsub=onSnapshot(q,snap=>{
-    const convs=snap.docs.map(d=>({id:d.id,...d.data()}));
-    const c=document.getElementById('convlist');if(!c)return;
+  msgUnsub=onSnapshot(q,function(snap){
+    var convs=snap.docs.map(function(d){return Object.assign({id:d.id},d.data())});
+    var c=document.getElementById('convlist');
+    if(!c)return;
     if(!convs.length){
       c.innerHTML='<div class="empty"><i class="ti ti-message-circle-off"></i><p>No messages yet.</p><button onclick="openNM()" style="margin-top:12px;background:var(--gold);color:#000;border:none;padding:9px 20px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer">Start a Conversation</button></div>';
       return;
     }
-    c.innerHTML=convs.map(cv=>{
-      const oid=cv.members.find(m=>m!==CU.uid);
-      const nm=esc(cv.memberNames?.[oid]||'Unknown');
-      const av=cv.memberAvatars?.[oid]||'';
-      const avH=av?`<img src="${av}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(nm[0]||'?').toUpperCase()+(nm[1]||'');
-      return`<div class="citem" onclick="openChat('${cv.id}','${oid}')">
-        <div class="av" style="width:42px;height:42px;font-size:11px;flex-shrink:0">${avH}</div>
-        <div style="flex:1;min-width:0;padding-left:2px">
-          <div class="cnm">${nm}</div>
-          <div class="cprev">${esc(cv.lastMsg||'Tap to chat')}</div>
-        </div>
-        <div class="ctm">${cv.lastAt?tAgo(cv.lastAt.toDate()):''}</div>
-      </div>`;
+    c.innerHTML=convs.map(function(cv){
+      var oid=cv.members.find(function(m){return m!==CU.uid});
+      var nm=esc(cv.memberNames&&cv.memberNames[oid]||'Unknown');
+      var av=cv.memberAvatars&&cv.memberAvatars[oid]||'';
+      var avH=av?('<img src="'+av+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'):nm.substring(0,2);
+      return '<div class="citem" onclick="openChat(''+cv.id+'',''+oid+'')">'+
+        '<div class="av" style="width:42px;height:42px;font-size:11px;flex-shrink:0">'+avH+'</div>'+
+        '<div style="flex:1;min-width:0;padding-left:4px">'+
+          '<div class="cnm">'+nm+'</div>'+
+          '<div class="cprev">'+esc(cv.lastMsg||'Tap to chat')+'</div>'+
+        '</div>'+
+        '<div class="ctm">'+(cv.lastAt?tAgo(cv.lastAt.toDate()):'')+'</div>'+
+      '</div>';
     }).join('');
   });
 }
@@ -1369,14 +1237,11 @@ async function startConv(oid){
 }
 async function msgUser(){
   if(!CU||!curOP)return;
-  const uid=curOP;
+  var uid=curOP;
   closeOP();
   goTo('messages');
   switchMT('msgs');
-  // Small delay to let UI settle, then open/create conversation
-  setTimeout(async()=>{
-    await startConv(uid);
-  },300);
+  setTimeout(async function(){await startConv(uid);},400);
 }
 
 async function renderParties(){
@@ -1499,70 +1364,22 @@ function goTo(s){
 }
 
 
-// Version check for PWA update notification
-const APP_VERSION = '2.0';
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('/JL/sw.js').catch(()=>{});
-}
-// Check for updates every 5 min
-function checkForUpdate(){
-  fetch(location.href+'?v='+Date.now(),{cache:'no-store'})
-    .then(r=>r.text()).then(html=>{
-      const m=html.match(/APP_VERSION = '([^']+)'/);
-      if(m&&m[1]!==APP_VERSION){
-        const bar=document.createElement('div');
-        bar.style.cssText='position:fixed;top:0;left:0;right:0;background:var(--gold);color:#000;padding:10px 16px;text-align:center;z-index:9999;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--fb)';
-        bar.innerHTML='Update available! Tap to refresh. <span style="text-decoration:underline">Refresh</span>';
-        bar.onclick=()=>location.reload(true);
-        document.body.appendChild(bar);
-      }
-    }).catch(()=>{});
-}
-setTimeout(()=>setInterval(checkForUpdate,300000),10000);
 
-let toastT;
-// Simple rate limit for posts
-const _postTimes=[];
+// Simple hash routing
+function updateHash(s){try{history.replaceState(null,'','#'+s)}catch(e){}}
+
+// Rate limiting
+const _rateTS=[];
 function checkRateLimit(){
-  const now=Date.now();
-  const recent=_postTimes.filter(t=>now-t<60000);// last 60s
-  _postTimes.length=0;_postTimes.push(...recent,now);
-  return recent.length<5;// max 5 posts/min
+  const n=Date.now();
+  const r=_rateTS.filter(t=>n-t<60000);
+  _rateTS.length=0;_rateTS.push(...r,n);
+  return r.length<5;
 }
-function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800)}
 
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;')}
-function tAgo(d){const s=Math.floor((new Date()-d)/1000);if(s<60)return'now';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';return Math.floor(s/86400)+'d'}
-async function repostP(pid,btn){
-  if(!CU||!UP){showToast('Please sign in');return}
-  const{db,doc,getDoc,setDoc,deleteDoc,updateDoc,increment,serverTimestamp}=window._fb;
-  const pSnap=await getDoc(doc(db,'posts',pid));if(!pSnap.exists())return;
-  const orig=pSnap.data();
-  const rpId=CU.uid+'_rp_'+pid;
-  const rpRef=doc(db,'reposts',rpId);
-  const rpSnap=await getDoc(rpRef);
-  const icon=btn?btn.querySelector('i'):null;
-  const cnt=btn?btn.querySelector('span'):null;
-  if(rpSnap.exists()){
-    await deleteDoc(rpRef);
-    try{await updateDoc(doc(db,'posts',pid),{reposts:increment(-1)})}catch(e){}
-    if(btn)btn.style.color='';
-    if(icon)icon.style.color='';
-    if(cnt)cnt.textContent=Math.max(0,(orig.reposts||1)-1);
-    showToast('Repost removed');
-  } else {
-    await setDoc(rpRef,{uid:CU.uid,postId:pid,authorId:orig.authorId,createdAt:serverTimestamp()});
-    try{await updateDoc(doc(db,'posts',pid),{reposts:increment(1)})}catch(e){}
-    if(btn)btn.style.color='var(--gn)';
-    if(icon)icon.style.color='var(--gn)';
-    if(cnt)cnt.textContent=(orig.reposts||0)+1;
-    showToast('Reposted!');
-    if(orig.authorId!==CU.uid)await addNotif(orig.authorId,'repost',UP.name+' reposted your post',pid);
-  }
+// Restore screen from hash after login
+function restoreHash(){
+  const h=(location.hash||'').replace('#','');
+  const ok=['feed','puls','search','messages','profile'];
+  if(h&&ok.includes(h)&&CU)goTo(h);
 }
-// placeholder to avoid duplicate
-
-function shareP(id){if(navigator.share)navigator.share({title:'JL',url:location.href+'#'+id});else showToast('Link copied!')}
-</script>
-</body>
-</html>
