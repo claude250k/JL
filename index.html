@@ -16,11 +16,11 @@
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,GoogleAuthProvider,onAuthStateChanged,signOut,updateProfile,sendPasswordResetEmail}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import{getFirestore,collection,addDoc,getDocs,getDoc,doc,setDoc,updateDoc,deleteDoc,query,orderBy,limit,where,onSnapshot,serverTimestamp,increment,runTransaction}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import{getFirestore,collection,addDoc,getDocs,getDoc,doc,setDoc,updateDoc,deleteDoc,query,orderBy,limit,where,onSnapshot,serverTimestamp,increment,runTransaction,arrayUnion,arrayRemove}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import{getStorage,ref,uploadBytes,getDownloadURL}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 const cfg={apiKey:"AIzaSyBQ1-aEtgcMV8ZaNnjLAeyTu0t1piRm9Us",authDomain:"k-12b86.firebaseapp.com",projectId:"k-12b86",storageBucket:"k-12b86.firebasestorage.app",messagingSenderId:"375281147692",appId:"1:375281147692:web:5833aee12494854a859689"};
 const app=initializeApp(cfg);
-window._fb={auth:getAuth(app),db:getFirestore(app),storage:getStorage(app),gp:new GoogleAuthProvider(),createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,onAuthStateChanged,signOut,updateProfile,sendPasswordResetEmail,collection,addDoc,getDocs,getDoc,doc,setDoc,updateDoc,deleteDoc,query,orderBy,limit,where,onSnapshot,serverTimestamp,increment,runTransaction,ref,uploadBytes,getDownloadURL};
+window._fb={auth:getAuth(app),db:getFirestore(app),storage:getStorage(app),gp:new GoogleAuthProvider(),createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,onAuthStateChanged,signOut,updateProfile,sendPasswordResetEmail,collection,addDoc,getDocs,getDoc,doc,setDoc,updateDoc,deleteDoc,query,orderBy,limit,where,onSnapshot,serverTimestamp,increment,runTransaction,arrayUnion,arrayRemove,ref,uploadBytes,getDownloadURL};
 window._fbReady=true;document.dispatchEvent(new Event("fb-ready"));
 </script>
 <style>
@@ -161,6 +161,9 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .citem{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--bd);cursor:pointer;width:100%}.citem:hover{background:var(--sf)}
 .cnm{font-size:13px;font-weight:500;color:var(--tx)}.cprev{font-size:11px;color:var(--mu2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:185px}.ctm{font-size:10px;color:var(--mu)}
 .chov{position:absolute;inset:0;background:var(--bg);z-index:90;display:none;flex-direction:column}.chov.on{display:flex}
+.grp-av{background:linear-gradient(135deg,#7c3aed,#4f46e5)!important;color:#fff!important}
+.grp-chk{width:22px;height:22px;border-radius:6px;border:2px solid var(--bd);background:var(--sf2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}.grp-chk.sel{background:var(--gold);border-color:var(--gold)}
+.bub-snm{font-size:10px;font-weight:600;color:var(--gold);margin-bottom:2px;padding-left:1px}
 .chh{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--bd);flex-shrink:0}
 .chm{flex:1;overflow-y:auto;padding:10px 13px;scrollbar-width:none;display:flex;flex-direction:column;gap:6px}.chm::-webkit-scrollbar{display:none}
 .bub{max-width:76%;padding:8px 12px;border-radius:15px;font-size:12px;line-height:1.5;word-break:break-word}
@@ -593,13 +596,35 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
     </div>
     <div style="position:absolute;right:16px;display:flex;gap:4px">
       <button class="ib2" onclick="openNM()" title="New message"><i class="ti ti-edit"></i></button>
+      <button class="ib2" onclick="openGrpCreate()" title="New group"><i class="ti ti-users-plus"></i></button>
       <button class="ib2" onclick="loadConvs();showToast('Refreshing...')" title="Refresh"><i class="ti ti-refresh"></i></button>
     </div>
   </div>
   <div id="msgs-panel" class="scroll" style="display:flex;flex-direction:column"><div id="convlist" style="flex:1"><div class="spin"></div></div></div>
   <div id="notif-panel" class="scroll" style="display:none"><div id="notif-list"><div class="spin"></div></div></div>
-  <div class="chov" id="chov"><div class="chh"><button class="ovb" onclick="closeChat()"><i class="ti ti-arrow-left"></i></button><div class="av" id="ch-av" style="width:32px;height:32px;font-size:10px;cursor:pointer" onclick="curChatOid&&openOP(curChatOid)"></div><div style="flex:1;padding-left:8px;cursor:pointer" onclick="curChatOid&&openOP(curChatOid)"><div style="font-size:13px;font-weight:600;color:var(--tx)" id="ch-nm"></div><div style="font-size:10px;color:var(--mu2)">Tap to view profile</div></div></div><div class="chm" id="chm"></div><div class="chir"><input class="chi" id="chi" placeholder="Message ..." onkeydown="if(event.key==='Enter')sendMsg()"><button class="chs" onclick="sendMsg()"><i class="ti ti-send"></i></button></div></div>
+  <div class="chov" id="chov"><div class="chh"><button class="ovb" onclick="closeChat()"><i class="ti ti-arrow-left"></i></button><div class="av" id="ch-av" style="width:32px;height:32px;font-size:10px;cursor:pointer" onclick="curChatOid&&openOP(curChatOid)"></div><div style="flex:1;padding-left:8px;cursor:pointer" onclick="curChatOid&&openOP(curChatOid)"><div style="font-size:13px;font-weight:600;color:var(--tx)" id="ch-nm"></div><div style="font-size:10px;color:var(--mu2)" id="ch-sub">Tap to view profile</div></div></div><div class="chm" id="chm"></div><div class="chir"><input class="chi" id="chi" placeholder="Message ..." onkeydown="if(event.key==='Enter')sendMsg()"><button class="chs" onclick="sendMsg()"><i class="ti ti-send"></i></button></div></div>
   <div class="ov" id="nmov"><div class="ovh"><button class="ovb" onclick="document.getElementById('nmov').classList.remove('on')"><i class="ti ti-arrow-left"></i></button><div class="ovt">New Message</div></div><div class="sbar2"><div class="sbox"><i class="ti ti-search"></i><input type="text" id="nms" placeholder="Search users ..." oninput="searchNM()"></div></div><div class="scroll" id="nmlist"></div></div>
+  <div class="ov" id="grpov">
+    <div class="ovh"><button class="ovb" onclick="closeGrpCreate()"><i class="ti ti-arrow-left"></i></button><div class="ovt">New Group</div><button id="grp-ok" onclick="createGroup()" disabled style="background:var(--gold);color:#000;border:none;padding:5px 15px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;opacity:.35;font-family:var(--fb)">Create</button></div>
+    <div style="padding:12px 16px 10px;border-bottom:1px solid var(--bd)">
+      <input id="grp-name" type="text" placeholder="Group name …" maxlength="40" style="width:100%;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:9px 12px;color:var(--tx);font-size:13px;outline:none;font-family:var(--fb)" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--bd)'" oninput="updateGrpBtn()">
+      <div id="grp-sel-lbl" style="font-size:11px;color:var(--mu2);margin-top:6px">Select at least 1 member</div>
+    </div>
+    <div class="sbar2"><div class="sbox"><i class="ti ti-search"></i><input id="grp-sinp" type="text" placeholder="Search users …" oninput="searchGrp(this.value)"></div></div>
+    <div class="scroll" id="grp-list"></div>
+  </div>
+  <div class="ov" id="giov">
+    <div class="ovh"><button class="ovb" onclick="closeGrpInvite()"><i class="ti ti-arrow-left"></i></button><div class="ovt">Group Invite</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;padding:36px 24px 24px;text-align:center;flex:1">
+      <div class="av grp-av" id="gi-av" style="width:72px;height:72px;font-size:22px;font-weight:800;margin-bottom:16px;flex-shrink:0">GR</div>
+      <div style="font-size:20px;font-weight:800;color:var(--tx);margin-bottom:5px;font-family:var(--fd)" id="gi-name">Group</div>
+      <div style="font-size:13px;color:var(--mu2);margin-bottom:36px" id="gi-from">You've been invited</div>
+      <div style="display:flex;gap:10px;width:100%">
+        <button onclick="declineGroupInvite()" style="flex:1;padding:12px;border-radius:11px;border:1px solid var(--bd);background:var(--sf2);color:var(--mu2);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--fb)">Decline</button>
+        <button onclick="acceptGroupInvite()" style="flex:1;padding:12px;border-radius:11px;border:none;background:var(--gold);color:#000;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--fb)">Join Group</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="sc" id="sc-portfolio">
@@ -1420,13 +1445,18 @@ function updateNavBadge(){const b=document.getElementById('nbadge');const n=_msg
 function renderNotifs(notifs){
   const c=document.getElementById('notif-list');if(!c)return;
   if(!notifs.length){c.innerHTML='<div class="empty"><i class="ti ti-bell-off"></i><p>No notifications yet</p></div>';return}
-  const ic={like:'ti-heart-filled ni-l',comment:'ti-message-circle ni-c',follow:'ti-user-plus ni-f',mention:'ti-at ni-m',repost:'ti-repeat ni-f',alert:'ti-bell-ringing ni-a'};
+  const ic={like:'ti-heart-filled ni-l',comment:'ti-message-circle ni-c',follow:'ti-user-plus ni-f',mention:'ti-at ni-m',repost:'ti-repeat ni-f',alert:'ti-bell-ringing ni-a',groupinvite:'ti-users-plus ni-f'};
   c.innerHTML=notifs.map(n=>{const parts=(ic[n.type]||'ti-bell ni-c').split(' ');return`<div class="notif-item" onclick="openNotif('${n.id}','${n.refId||''}','${n.type}')"><div class="ni ${parts[1]}"><i class="ti ${parts[0]}"></i></div><div class="ntx"><div class="nmain">${esc(n.msg||'')}</div><div class="ntm">${n.createdAt?tAgo(n.createdAt.toDate()):''}</div></div>${!n.read?'<div class="ndot"></div>':''}</div>`}).join('');
 }
 async function openNotif(nid,refId,type){
   const{db,doc,updateDoc}=window._fb;
   try{await updateDoc(doc(db,`users/${CU.uid}/notifications`,nid),{read:true})}catch(e){}
   if(type==='alert'&&refId){goToPuls(refId);return;}
+  if(type==='groupinvite'&&refId){
+    const{db,doc,getDoc}=window._fb;
+    try{const cvSnap=await getDoc(doc(db,'conversations',refId));if(cvSnap.exists()){const cv=cvSnap.data();const fromNm=cv.memberNames?.[cv.createdBy]||'Someone';openGrpInvite(refId,fromNm,cv.groupName||'Group');}}catch(e){}
+    return;
+  }
   if(refId&&['like','comment','mention','repost'].includes(type))openPD(refId);
 }
 function switchMT(tab){
@@ -1938,17 +1968,27 @@ function loadConvs(){
       return;
     }
     c.innerHTML=convs.map(cv=>{
-      const oid=cv.members.find(m=>m!==CU.uid);
-      const nm=esc(cv.memberNames?.[oid]||'Unknown');
-      const av=cv.memberAvatars?.[oid]||'';
-      const avH=av?`<img src="${av}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(nm[0]||'?').toUpperCase()+(nm[1]||'');
+      const isGrp=!!cv.isGroup;
+      let nm,avH;
+      if(isGrp){
+        nm=esc(cv.groupName||'Group');
+        const initials=(cv.groupName||'GR').substring(0,2).toUpperCase();
+        avH=`<span class="grp-av" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff">${initials}</span>`;
+      } else {
+        const oid=cv.members.find(m=>m!==CU.uid);
+        nm=esc(cv.memberNames?.[oid]||'Unknown');
+        const av=cv.memberAvatars?.[oid]||'';
+        avH=av?`<img src="${av}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(nm[0]||'?').toUpperCase()+(nm[1]||'');
+      }
+      const oidForChat=isGrp?'':(cv.members.find(m=>m!==CU.uid)||'');
       const lastAt=cv.lastAt?.toMillis?.()||0;
       const lastRead=_lastRead[cv.id]||(parseInt(localStorage.getItem('jl_lastRead_'+cv.id)||'0'));
       const hasUnread=lastAt>0&&cv.lastSenderId&&cv.lastSenderId!==CU.uid&&(lastRead===0||lastAt>lastRead);
-      return`<div class="citem" onclick="openChat('${cv.id}','${oid}')">
-        <div class="av" style="width:42px;height:42px;font-size:11px;flex-shrink:0">${avH}</div>
+      const badge=isGrp?'<span style="font-size:9px;background:rgba(124,58,237,.18);color:#a78bfa;padding:1px 5px;border-radius:4px;font-weight:700;margin-left:4px">Group</span>':'';
+      return`<div class="citem" onclick="openChat('${cv.id}','${oidForChat}')">
+        <div class="av" style="width:42px;height:42px;font-size:11px;flex-shrink:0;overflow:hidden">${avH}</div>
         <div style="flex:1;min-width:0;padding-left:2px">
-          <div class="cnm" style="${hasUnread?'font-weight:700;color:var(--tx)':''}">${nm}</div>
+          <div class="cnm" style="${hasUnread?'font-weight:700;color:var(--tx)':''}">${nm}${badge}</div>
           <div class="cprev" style="${hasUnread?'color:var(--tx2);font-weight:500':''}">${esc(cv.lastMsg||'Tap to chat')}</div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
@@ -1964,54 +2004,159 @@ function loadConvs(){
 }
 
 async function openChat(cid,oid){
-  curConv=cid;curChatOid=oid;
+  curConv=cid;curChatOid=oid||null;
   _lastRead[cid]=Date.now();try{localStorage.setItem('jl_lastRead_'+cid,Date.now())}catch(e){}
   _msgUnread=Math.max(0,_msgUnread-1);updateNavBadge();
   const{db,doc,getDoc,collection,query,orderBy,onSnapshot}=window._fb;
-  // Load other user info
-  const us=await getDoc(doc(db,'users',oid));
-  const u=us.exists()?us.data():{name:'Unknown',avatarUrl:''};
-  const nm=u.name||'Unknown';
-  const av=u.avatarUrl||'';
-  // Set chat header
   const chNm=document.getElementById('ch-nm');
   const chAv=document.getElementById('ch-av');
-  if(chNm)chNm.textContent=nm;
-  if(chAv)chAv.innerHTML=av
-    ?`<img src="${av}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`
-    :nm.substring(0,2).toUpperCase();
-  // Show chat overlay
+  const chSub=document.getElementById('ch-sub');
+  // Detect group vs DM
+  const cvSnap=await getDoc(doc(db,'conversations',cid));
+  curConvData=cvSnap.exists()?cvSnap.data():null;
+  curConvIsGroup=!!(curConvData?.isGroup);
+  if(curConvIsGroup){
+    const grpNm=curConvData.groupName||'Group';
+    const initials=grpNm.substring(0,2).toUpperCase();
+    const memberCount=(curConvData.members||[]).length;
+    if(chNm)chNm.textContent=grpNm;
+    if(chAv){chAv.className='av grp-av';chAv.style.cssText='width:32px;height:32px;font-size:11px;font-weight:800;cursor:default';chAv.innerHTML=initials;chAv.onclick=null;}
+    if(chSub)chSub.textContent=`${memberCount} member${memberCount===1?'':'s'}`;
+  } else {
+    const us=await getDoc(doc(db,'users',oid));
+    const u=us.exists()?us.data():{name:'Unknown',avatarUrl:''};
+    const nm=u.name||'Unknown';const av=u.avatarUrl||'';
+    if(chNm)chNm.textContent=nm;
+    if(chAv){chAv.className='av';chAv.style.cssText='width:32px;height:32px;font-size:10px;cursor:pointer';chAv.innerHTML=av?`<img src="${av}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`:nm.substring(0,2).toUpperCase();chAv.onclick=()=>openOP(oid);}
+    if(chSub)chSub.textContent='Tap to view profile';
+  }
   document.getElementById('chov').classList.add('on');
-  // Scroll to bottom helper
   const scrollBottom=()=>{const c=document.getElementById('chm');if(c)c.scrollTop=c.scrollHeight};
-  // Real-time messages
   const q=query(collection(db,`conversations/${cid}/messages`),orderBy('createdAt','asc'));
   if(chatUnsub)chatUnsub();
+  const isGrp=curConvIsGroup;
+  const memberNames=curConvData?.memberNames||{};
   chatUnsub=onSnapshot(q,snap=>{
     const msgs=snap.docs.map(d=>({id:d.id,...d.data()}));
-    const c=document.getElementById('chm');
-    if(!c)return;
-    if(!msgs.length){
-      c.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--mu2);font-size:13px">Say hello! 👋</div>';
-      return;
-    }
+    const c=document.getElementById('chm');if(!c)return;
+    if(!msgs.length){c.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--mu2);font-size:13px">Say hello! 👋</div>';return;}
     c.innerHTML=msgs.map(m=>{
       const mine=m.senderId===CU.uid;
       const t=m.createdAt?tAgo(m.createdAt.toDate()):'';
+      const senderLbl=isGrp&&!mine?`<div class="bub-snm">${esc(m.senderName||memberNames[m.senderId]||'')}</div>`:'';
       return`<div style="display:flex;flex-direction:column;align-items:${mine?'flex-end':'flex-start'};margin-bottom:2px">
-        <div class="bub ${mine?'bub-me':'bub-th'}">${esc(m.text||'')}</div>
+        ${senderLbl}<div class="bub ${mine?'bub-me':'bub-th'}">${esc(m.text||'')}</div>
         <div class="btm" style="text-align:${mine?'right':'left'};margin-top:2px">${t}</div>
       </div>`;
     }).join('');
     setTimeout(scrollBottom,50);
   });
 }
-async function sendMsg(){if(!CU||!curConv)return;const inp=document.getElementById('chi');const text=inp.value.trim();if(!text)return;inp.value='';const{db,collection,addDoc,doc,updateDoc,serverTimestamp}=window._fb;await addDoc(collection(db,`conversations/${curConv}/messages`),{text,senderId:CU.uid,createdAt:serverTimestamp()});await updateDoc(doc(db,'conversations',curConv),{lastMsg:text,lastAt:serverTimestamp(),lastSenderId:CU.uid})}
+async function sendMsg(){
+  if(!CU||!curConv)return;
+  const inp=document.getElementById('chi');const text=inp.value.trim();if(!text)return;inp.value='';
+  const{db,collection,addDoc,doc,updateDoc,serverTimestamp}=window._fb;
+  const msgData={text,senderId:CU.uid,createdAt:serverTimestamp()};
+  if(curConvIsGroup)msgData.senderName=UP?.name||'';
+  await addDoc(collection(db,`conversations/${curConv}/messages`),msgData);
+  await updateDoc(doc(db,'conversations',curConv),{lastMsg:text,lastAt:serverTimestamp(),lastSenderId:CU.uid});
+}
 function closeChat(){
   document.getElementById('chov').classList.remove('on');
   if(chatUnsub){chatUnsub();chatUnsub=null;}
-  curConv=null;curChatOid=null;
+  curConv=null;curChatOid=null;curConvIsGroup=false;curConvData=null;
   switchMT('msgs');
+}
+
+// ── GROUP CHAT ───────────────────────────────────────────────────────────────
+let grpSelected=new Set(),curConvIsGroup=false,curConvData=null,_curGrpInviteId=null;
+
+function openGrpCreate(){
+  if(!CU){showToast('Please sign in');return;}
+  grpSelected.clear();
+  const ni=document.getElementById('grp-name');if(ni)ni.value='';
+  const si=document.getElementById('grp-sinp');if(si)si.value='';
+  document.getElementById('grp-sel-lbl').textContent='Select at least 1 member';
+  const ok=document.getElementById('grp-ok');if(ok){ok.disabled=true;ok.style.opacity='.35';}
+  renderGrpList(allUsers);
+  document.getElementById('grpov').classList.add('on');
+  setTimeout(()=>document.getElementById('grp-name')?.focus(),80);
+}
+function closeGrpCreate(){document.getElementById('grpov').classList.remove('on');}
+
+function renderGrpList(users){
+  const c=document.getElementById('grp-list');if(!c)return;
+  c.innerHTML=users.map(u=>{
+    const sel=grpSelected.has(u.uid);
+    return`<div class="crow" onclick="toggleGrpUser('${u.uid}')">
+      <div class="grp-chk${sel?' sel':''}" id="gc-${u.uid}">${sel?'<i class="ti ti-check" style="font-size:13px;color:#000"></i>':''}</div>
+      <div class="av" style="width:36px;height:36px;flex-shrink:0">${u.avatarUrl?`<img src="${u.avatarUrl}">`:esc((u.name||'?').substring(0,2).toUpperCase())}</div>
+      <div style="flex:1"><div class="crnm">${esc(u.name||'')}</div><div class="crds">${esc(u.num||'')}</div></div>
+    </div>`;
+  }).join('');
+}
+function searchGrp(q){renderGrpList(q?allUsers.filter(u=>(u.name||'').toLowerCase().includes(q.toLowerCase())):allUsers);}
+function toggleGrpUser(uid){
+  if(grpSelected.has(uid))grpSelected.delete(uid);else grpSelected.add(uid);
+  const chk=document.getElementById('gc-'+uid);
+  if(chk){const s=grpSelected.has(uid);chk.className='grp-chk'+(s?' sel':'');chk.innerHTML=s?'<i class="ti ti-check" style="font-size:13px;color:#000"></i>':'';}
+  updateGrpBtn();
+}
+function updateGrpBtn(){
+  const name=(document.getElementById('grp-name')?.value||'').trim();
+  const ok=document.getElementById('grp-ok');
+  const lbl=document.getElementById('grp-sel-lbl');
+  const ready=name.length>=1&&grpSelected.size>=1;
+  if(ok){ok.disabled=!ready;ok.style.opacity=ready?'1':'.35';}
+  if(lbl)lbl.textContent=grpSelected.size===0?'Select at least 1 member':`${grpSelected.size} member${grpSelected.size===1?'':'s'} selected`;
+}
+async function createGroup(){
+  if(!CU||!UP)return;
+  const name=(document.getElementById('grp-name')?.value||'').trim();
+  if(!name||grpSelected.size<1)return;
+  const ok=document.getElementById('grp-ok');if(ok){ok.disabled=true;ok.textContent='Creating …';}
+  const{db,collection,addDoc,serverTimestamp}=window._fb;
+  const invitedUids=[...grpSelected];
+  const nc=await addDoc(collection(db,'conversations'),{
+    isGroup:true,groupName:name,createdBy:CU.uid,
+    members:[CU.uid],pendingMembers:invitedUids,
+    memberNames:{[CU.uid]:UP.name||''},memberAvatars:{[CU.uid]:UP.avatarUrl||''},
+    lastMsg:'',lastAt:serverTimestamp(),lastSenderId:null
+  });
+  for(const uid of invitedUids){
+    await addNotif(uid,'groupinvite',`${UP.name||'Someone'} invited you to join "${name}"`,nc.id);
+  }
+  closeGrpCreate();
+  if(ok){ok.disabled=false;ok.textContent='Create';}
+  showToast(`Group "${name}" created · invites sent`);
+}
+
+function openGrpInvite(convId,fromName,groupName){
+  _curGrpInviteId=convId;
+  const nm=document.getElementById('gi-name');if(nm)nm.textContent=groupName||'Group';
+  const fr=document.getElementById('gi-from');if(fr)fr.textContent=`Invited by ${esc(fromName||'someone')}`;
+  const av=document.getElementById('gi-av');if(av)av.textContent=(groupName||'GR').substring(0,2).toUpperCase();
+  document.getElementById('giov').classList.add('on');
+}
+function closeGrpInvite(){document.getElementById('giov').classList.remove('on');_curGrpInviteId=null;}
+async function acceptGroupInvite(){
+  if(!CU||!_curGrpInviteId)return;
+  const{db,doc,updateDoc,getDoc,arrayUnion,arrayRemove}=window._fb;
+  const convRef=doc(db,'conversations',_curGrpInviteId);
+  const cvSnap=await getDoc(convRef);
+  if(!cvSnap.exists()){showToast('Group no longer exists');closeGrpInvite();return;}
+  await updateDoc(convRef,{
+    members:arrayUnion(CU.uid),pendingMembers:arrayRemove(CU.uid),
+    [`memberNames.${CU.uid}`]:UP?.name||'',
+    [`memberAvatars.${CU.uid}`]:UP?.avatarUrl||''
+  });
+  closeGrpInvite();showToast('Joined group!');goTo('messages');
+}
+async function declineGroupInvite(){
+  if(!CU||!_curGrpInviteId)return;
+  const{db,doc,updateDoc,arrayRemove}=window._fb;
+  await updateDoc(doc(db,'conversations',_curGrpInviteId),{pendingMembers:arrayRemove(CU.uid)});
+  closeGrpInvite();showToast('Invitation declined');
 }
 async function openNM(){
   await loadUsers();
@@ -2252,7 +2397,7 @@ function sCat(btn){document.querySelectorAll('#pm .pcat').forEach(b=>b.classList
 function prevImg(inp){if(!inp.files[0])return;const p=document.getElementById('uprev');p.src=URL.createObjectURL(inp.files[0]);p.style.display='block'}
 
 function closeAllOverlays(){
-  closePD();closeOP();closeChat();closeCD();closePM();closeInstPage();closeHoldOv();
+  closePD();closeOP();closeChat();closeCD();closePM();closeInstPage();closeHoldOv();closeGrpCreate();closeGrpInvite();
   ['fl-ov','nmov','pov'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('on');});
   document.querySelectorAll('.cfdlg.on,.ch-modal.on').forEach(el=>el.classList.remove('on'));
 }
@@ -2795,6 +2940,7 @@ document.addEventListener('touchend',e=>{
 },{passive:true});
 function swipeBack(){
   const checks=[
+    ['giov',()=>closeGrpInvite()],['grpov',()=>closeGrpCreate()],
     ['pdov',()=>closePD()],['opportov',()=>closeOpPort()],['opov',()=>closeOP()],['chov',()=>closeChat()],
     ['cd',()=>closeCD()],['setov',()=>closeSet()],['editov',()=>closeEditProf()],
     ['nmov',()=>document.getElementById('nmov').classList.remove('on')],
