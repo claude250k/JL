@@ -28,6 +28,7 @@ window._fbReady=true;document.dispatchEvent(new Event("fb-ready"));
 :root{--bg:#0c0c0c;--sf:#161616;--sf2:#1f1f1f;--sf3:#282828;--cbg:#181818;--bd:#272727;--mu:#4a4a4a;--mu2:#7a7a7a;--tx:#f0ede6;--tx2:#b0ada6;--gold:#F7931A;--gdim:rgba(247,147,26,.13);--gn:#22c55e;--fb:"DM Sans",sans-serif;--fd:"Syne",sans-serif}
 html,body{height:100%;width:100%;background:#000;display:flex;align-items:center;justify-content:center;font-family:var(--fb);overflow:hidden}
 .shell{width:390px;height:844px;background:var(--bg);border-radius:48px;overflow:hidden;position:relative;display:flex;flex-direction:column;border:1.5px solid #1a1a1a;box-shadow:0 60px 160px rgba(0,0,0,.95);flex-shrink:0}
+.shell.light{--bg:#f6f4f1;--sf:#ffffff;--sf2:#eeebe6;--sf3:#e4e1dc;--cbg:#fafaf8;--bd:#dedad4;--mu:#c4c0b8;--mu2:#8a8680;--tx:#1a1614;--tx2:#56524e;--gdim:rgba(247,147,26,.1);--gn:#16a34a;border-color:#dedad4;box-shadow:0 60px 160px rgba(0,0,0,.25)}
 @media(max-width:430px){.shell{width:100vw;height:100vh;border-radius:0;border:none}}
 .ibanner{background:linear-gradient(90deg,#1a1000,#2d1800);border-bottom:1px solid rgba(247,147,26,.3);padding:7px 16px;display:none;align-items:center;justify-content:space-between;flex-shrink:0}
 .ibanner.show{display:flex}
@@ -124,7 +125,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .ovt{font-size:15px;font-weight:700;color:var(--tx);flex:1}
 .notif-item{display:flex;align-items:flex-start;gap:10px;padding:11px 16px;border-bottom:1px solid var(--bd);cursor:pointer}.notif-item:hover{background:var(--sf)}
 .ni{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px}
-.ni-l{background:rgba(247,147,26,.15);color:var(--gold)}.ni-c{background:rgba(96,165,250,.12);color:#7cb9ff}.ni-f{background:rgba(34,197,94,.12);color:#4ade80}.ni-m{background:rgba(192,132,252,.12);color:#d8b4fe}
+.ni-l{background:rgba(247,147,26,.15);color:var(--gold)}.ni-c{background:rgba(96,165,250,.12);color:#7cb9ff}.ni-f{background:rgba(34,197,94,.12);color:#4ade80}.ni-m{background:rgba(192,132,252,.12);color:#d8b4fe}.ni-a{background:rgba(251,191,36,.15);color:#fbbf24}
 .ntx{flex:1}.nmain{font-size:12px;color:var(--tx);line-height:1.5}.nmain strong{color:var(--gold)}.ntm{font-size:10px;color:var(--mu);margin-top:2px}
 .ndot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:4px}
 .sbar2{padding:9px 14px;flex-shrink:0}
@@ -342,6 +343,9 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .watch-model{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bd)}.watch-model:last-child{border-bottom:none}
 .watch-model-name{font-size:12px;font-weight:500;color:var(--tx)}.watch-model-price{font-size:12px;font-weight:600;color:var(--tx2)}
 .htag{color:var(--gold);cursor:pointer;font-weight:500}.htag:hover{opacity:.8}
+.trend-pill{display:inline-flex;align-items:center;gap:5px;background:var(--sf2);border:1px solid var(--bd);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:500;color:var(--tx2);cursor:pointer;white-space:nowrap;transition:border-color .15s,color .15s}.trend-pill:hover,.trend-pill:active{border-color:var(--gold);color:var(--gold)}.trend-pill .tc{font-size:10px;font-weight:600;color:var(--mu2);background:var(--sf3);border-radius:8px;padding:1px 5px}
+.trend-hd{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;color:var(--mu2);letter-spacing:.7px;text-transform:uppercase;padding:12px 16px 8px}
+#trending-section{border-bottom:1px solid var(--bd);padding-bottom:10px}
 .cb-all{background:rgba(255,255,255,.07);color:var(--tx2)}
 .demo-badge{display:inline-block;background:rgba(251,191,36,.14);color:#fbbf24;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:3px;vertical-align:middle;cursor:help;letter-spacing:.2px}
 .fch-add-btn{background:var(--gold);color:#000;border:none;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer}
@@ -545,14 +549,40 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       <div class="watch-brand" style="margin-bottom:8px"><div class="watch-brand-top" onclick="togWatch('cartier')"><div class="watch-bi" style="background:rgba(210,40,80,.18)">Ca</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">Cartier</div><div style="font-size:11px;color:var(--mu2)">Paris · Santos, Tank, Ballon Bleu</div></div><i class="ti ti-chevron-down" id="watchi-cartier" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div><div class="watch-models" id="watch-cartier" style="display:none"><div class="watch-soon" style="margin:8px 0"><i class="ti ti-clock" style="color:var(--gold);font-size:16px;flex-shrink:0"></i><div><div style="font-size:12px;font-weight:700;color:var(--gold)">Coming Soon</div><div style="font-size:11px;color:var(--mu2);margin-top:1px">Cartier market data in development</div></div></div></div></div>
     </div>
   </div>
-  <div class="cd" id="cd"><div class="cdh"><button class="cdb2" onclick="closeCD()"><i class="ti ti-arrow-left"></i></button><div class="cdt" id="cd-t">Chart</div></div><div class="scroll"><div class="cdp" id="cd-p">-</div><div class="cdchg" id="cd-c">-</div><div class="cdcw"><canvas id="cd-cv"></canvas></div><div class="rbs"><button class="rb ak" onclick="setCDR(this,'1')">1D</button><button class="rb" onclick="setCDR(this,'7')">7D</button><button class="rb" onclick="setCDR(this,'30')">1M</button><button class="rb" onclick="setCDR(this,'180')">6M</button><button class="rb" onclick="setCDR(this,'365')">1Y</button><button class="rb" onclick="setCDR(this,'1825')">5Y</button><button class="rb" onclick="setCDR(this,'max')">Max</button></div><div class="cdst" id="cd-st"></div></div></div>
+  <div class="cd" id="cd">
+    <div class="cdh">
+      <button class="cdb2" onclick="closeCD()"><i class="ti ti-arrow-left"></i></button>
+      <div class="cdt" id="cd-t">Chart</div>
+      <button class="cdb2" id="cd-alert-btn" onclick="toggleAlertPanel()" title="Set price alert" style="position:relative">
+        <i class="ti ti-bell" id="cd-bell-ico"></i>
+        <span id="cd-alert-dot" style="display:none;position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--gold);border:1.5px solid var(--bg)"></span>
+      </button>
+    </div>
+    <div id="cd-alert-panel" style="display:none;padding:12px 16px 14px;border-bottom:1px solid var(--bd);background:var(--sf)">
+      <div style="font-size:10px;font-weight:700;color:var(--mu2);letter-spacing:.7px;text-transform:uppercase;margin-bottom:9px"><i class="ti ti-bell" style="font-size:11px;margin-right:3px"></i>Price Alert</div>
+      <div id="cd-alert-cur"></div>
+      <div id="cd-alert-form">
+        <div style="display:flex;gap:7px;align-items:center">
+          <input type="number" id="cd-alert-inp" placeholder="Target price in USD …" step="any" min="0" style="flex:1;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;padding:8px 11px;color:var(--tx);font-size:13px;outline:none;font-family:var(--fb)" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--bd)'" onkeydown="if(event.key==='Enter')setAlert()">
+          <button onclick="setAlert()" style="background:var(--gold);color:#000;border:none;padding:8px 14px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--fb)">Set</button>
+        </div>
+        <div id="cd-alert-hint" style="font-size:10px;color:var(--mu2);margin-top:5px;line-height:1.4"></div>
+      </div>
+    </div>
+    <div class="scroll"><div class="cdp" id="cd-p">-</div><div class="cdchg" id="cd-c">-</div><div class="cdcw"><canvas id="cd-cv"></canvas></div><div class="rbs"><button class="rb ak" onclick="setCDR(this,'1')">1D</button><button class="rb" onclick="setCDR(this,'7')">7D</button><button class="rb" onclick="setCDR(this,'30')">1M</button><button class="rb" onclick="setCDR(this,'180')">6M</button><button class="rb" onclick="setCDR(this,'365')">1Y</button><button class="rb" onclick="setCDR(this,'1825')">5Y</button><button class="rb" onclick="setCDR(this,'max')">Max</button></div><div class="cdst" id="cd-st"></div></div>
+  </div>
   <div class="ov" id="pov"><div class="ovh"><button class="ovb" onclick="document.getElementById('pov').classList.remove('on')"><i class="ti ti-arrow-left"></i></button><div class="ovt" id="pov-t"></div></div><div class="scroll" id="pov-b"></div></div>
 </div>
 
 <div class="sc" id="sc-search">
   <div class="sh" style="justify-content:center;position:relative"><div class="stitle">Search<em style="color:var(--gold);font-style:normal">.</em></div><div style="position:absolute;right:16px"><button class="ib2" onclick="loadUsers();showToast('Refreshing...')" title="Refresh"><i class="ti ti-refresh"></i></button></div></div>
   <div class="sbar2"><div class="sbox"><i class="ti ti-search"></i><input type="text" id="sinp" placeholder="Name or #number ..." oninput="doSearch()"><button id="sinp-clear" onclick="clearSearch()" style="display:none;background:none;border:none;color:var(--mu2);cursor:pointer;padding:0 4px;line-height:1;font-size:16px" title="Clear"><i class="ti ti-x"></i></button></div></div>
-  <div class="scroll"><div class="sl">Creators</div><div id="clist"><div class="spin"></div></div></div>
+  <div class="scroll">
+    <div id="trending-section" style="display:none"></div>
+    <div class="sl" id="search-section-lbl">Creators</div>
+    <div id="clist"><div class="spin"></div></div>
+    <div id="hash-posts" style="display:none"></div>
+  </div>
 </div>
 
 <div class="sc" id="sc-messages">
@@ -673,6 +703,17 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       <button id="lang-en" onclick="setLang('en')" style="flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:var(--sf2);color:var(--mu2)">🇬🇧 EN</button>
       <button id="lang-de" onclick="setLang('de')" style="flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:var(--sf2);color:var(--mu2)">🇩🇪 DE</button>
       <button id="lang-es" onclick="setLang('es')" style="flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:var(--sf2);color:var(--mu2)">🇪🇸 ES</button>
+    </div>
+    <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px">Appearance</div>
+    <div class="seti" style="cursor:default">
+      <i class="ti ti-sun-moon" id="theme-ico"></i>
+      <div class="setin"><div class="setit" id="theme-lbl">Dark Mode</div><div class="setis" id="theme-sub">Standard — tap to switch</div></div>
+      <label style="cursor:pointer;flex-shrink:0">
+        <input type="checkbox" id="theme-tog" style="display:none" onchange="toggleTheme(this.checked)">
+        <div id="theme-rail" style="width:44px;height:26px;background:var(--sf3);border:1px solid var(--bd);border-radius:13px;position:relative;transition:background .2s">
+          <div id="theme-knob" style="width:20px;height:20px;border-radius:50%;background:var(--mu2);position:absolute;top:2px;left:2px;transition:left .2s,background .2s"></div>
+        </div>
+      </label>
     </div>
     <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px" data-i18n="session">Session</div>
     <div class="seti" onclick="confirmOut()"><i class="ti ti-logout" style="color:#f87171"></i><div class="setin"><div class="setit" style="color:#f87171" data-i18n="signOut">Sign Out</div><div class="setis" data-i18n="signOutSub">Log out of your account</div></div></div>
@@ -890,11 +931,16 @@ function atab(t){
 }
 function setAErr(m){document.getElementById('aerr').textContent=m}
 
+const _loginFails=[];
 async function doLogin(){
+  const now=Date.now();
+  const recent=_loginFails.filter(t=>now-t<300000);
+  if(recent.length>=5){setAErr('Too many failed attempts. Please wait 5 minutes.');return;}
   const{auth,signInWithEmailAndPassword}=window._fb;
   const e=document.getElementById('li-e').value.trim(),p=document.getElementById('li-p').value;
   if(!e||!p){setAErr('Please fill all fields');return}
-  try{await signInWithEmailAndPassword(auth,e,p)}catch(err){setAErr(am(err.code))}
+  try{await signInWithEmailAndPassword(auth,e,p)}
+  catch(err){_loginFails.push(Date.now());setAErr(am(err.code))}
 }
 
 async function doReg(){
@@ -903,7 +949,8 @@ async function doReg(){
   const e=document.getElementById('re-e').value.trim(),p=document.getElementById('re-p').value,p2=document.getElementById('re-p2').value;
   if(!name||!e||!p||!p2){setAErr('Please fill all fields');return}
   if(p!==p2){setAErr('Passwords do not match');return}
-  if(name.length<2){setAErr('Name must be at least 2 characters');return}
+  if(name.length<2||name.length>30){setAErr('Name must be 2–30 characters');return}
+  if(!/^[a-zA-Z0-9_\-]+$/.test(name)){setAErr('Name may only contain letters, numbers, _ and -');return}
   const ni=await getDoc(doc(db,'nameIndex',name.toLowerCase()));
   if(ni.exists()){setAErr('This name is already taken. Please choose another.');return}
   try{
@@ -1007,10 +1054,28 @@ async function saveProfile(){
   }
 }
 
+function applyTheme(light){
+  const shell=document.querySelector('.shell');
+  if(!shell)return;
+  if(light){shell.classList.add('light');document.body.style.background='#ccc9c4';}
+  else{shell.classList.remove('light');document.body.style.background='#000';}
+  const ico=document.getElementById('theme-ico');if(ico)ico.className=light?'ti ti-moon':'ti ti-sun-moon';
+  const lbl=document.getElementById('theme-lbl');if(lbl)lbl.textContent=light?'Light Mode':'Dark Mode';
+  const sub=document.getElementById('theme-sub');if(sub)sub.textContent=light?'Active — tap to switch':'Standard — tap to switch';
+  const tog=document.getElementById('theme-tog');if(tog)tog.checked=light;
+  const rail=document.getElementById('theme-rail');if(rail)rail.style.background=light?'var(--gold)':'var(--sf3)';
+  const knob=document.getElementById('theme-knob');if(knob){knob.style.left=light?'22px':'2px';knob.style.background=light?'#000':'var(--mu2)';}
+}
+async function toggleTheme(light){
+  applyTheme(light);
+  if(!CU)return;
+  const{db,doc,updateDoc}=window._fb;
+  try{await updateDoc(doc(db,'users',CU.uid),{theme:light?'light':'dark'});}catch(e){}
+}
 async function loadUP(uid){
   const{db,doc,getDoc}=window._fb;
   const s=await getDoc(doc(db,'users',uid));
-  if(s.exists()){UP=s.data();customChs=UP.customChannels||[];if(!UP.userNumber)await assignUserNumber(uid);}
+  if(s.exists()){UP=s.data();customChs=UP.customChannels||[];if(!UP.userNumber)await assignUserNumber(uid);applyTheme(UP.theme==='light');}
 }
 async function assignUserNumber(uid){
   const{db,doc,updateDoc,getDocs,collection,query,orderBy,runTransaction}=window._fb;
@@ -1094,7 +1159,8 @@ async function chModalOk(){
   const n=document.getElementById('ch-modal-inp').value;
   chModalClose();
   if(!n||!n.trim())return;
-  const id=n.trim().toLowerCase().replace(/\s+/g,'_');
+  const id=n.trim().toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_\-]/g,'');
+  if(!id||id.length<2){showToast('Channel name too short or contains invalid characters');return}
   if(customChs.includes(id)){showToast('Channel already exists');return}
   customChs.push(id);
   const{db,doc,updateDoc}=window._fb;
@@ -1127,7 +1193,7 @@ function startFeed(){
     const all=snap.docs.map(d=>({id:d.id,...d.data()}));
     const posts=all.filter(p=>p.channel==='all'||p.authorId===CU.uid||followingIds.has(p.authorId));
     renderPosts(posts,'fposts','all');
-  },err=>{document.getElementById('fspin').style.display='none';document.getElementById('fposts').innerHTML=`<div class="empty"><i class="ti ti-alert-circle"></i><p>${err.message}</p></div>`});
+  },err=>{document.getElementById('fspin').style.display='none';document.getElementById('fposts').innerHTML=`<div class="empty"><i class="ti ti-alert-circle"></i><p>${esc(err.message)}</p></div>`});
 }
 function manageFeedChannels(){
   const all=[...DCH,...customChs];
@@ -1354,12 +1420,13 @@ function updateNavBadge(){const b=document.getElementById('nbadge');const n=_msg
 function renderNotifs(notifs){
   const c=document.getElementById('notif-list');if(!c)return;
   if(!notifs.length){c.innerHTML='<div class="empty"><i class="ti ti-bell-off"></i><p>No notifications yet</p></div>';return}
-  const ic={like:'ti-heart-filled ni-l',comment:'ti-message-circle ni-c',follow:'ti-user-plus ni-f',mention:'ti-at ni-m',repost:'ti-repeat ni-f'};
+  const ic={like:'ti-heart-filled ni-l',comment:'ti-message-circle ni-c',follow:'ti-user-plus ni-f',mention:'ti-at ni-m',repost:'ti-repeat ni-f',alert:'ti-bell-ringing ni-a'};
   c.innerHTML=notifs.map(n=>{const parts=(ic[n.type]||'ti-bell ni-c').split(' ');return`<div class="notif-item" onclick="openNotif('${n.id}','${n.refId||''}','${n.type}')"><div class="ni ${parts[1]}"><i class="ti ${parts[0]}"></i></div><div class="ntx"><div class="nmain">${esc(n.msg||'')}</div><div class="ntm">${n.createdAt?tAgo(n.createdAt.toDate()):''}</div></div>${!n.read?'<div class="ndot"></div>':''}</div>`}).join('');
 }
 async function openNotif(nid,refId,type){
   const{db,doc,updateDoc}=window._fb;
   try{await updateDoc(doc(db,`users/${CU.uid}/notifications`,nid),{read:true})}catch(e){}
+  if(type==='alert'&&refId){goToPuls(refId);return;}
   if(refId&&['like','comment','mention','repost'].includes(type))openPD(refId);
 }
 function switchMT(tab){
@@ -1725,14 +1792,92 @@ async function loadUsers(){
   const snap=await getDocs(query(collection(db,'users'),limit(50)));
   allUsers=snap.docs.map(d=>d.data()).filter(u=>u.uid!==CU?.uid);
   renderUsers(allUsers);
+  loadTrending();
+}
+
+// ── TRENDING HASHTAGS ────────────────────────────────────────────────────────
+const TREND_EXCLUDE=new Set(['bitcoin','btc','ethereum','eth','solana','sol','bnb','xrp','ripple','ada','cardano','doge','dogecoin','dot','polkadot','avax','avalanche','link','chainlink','nvidia','nvda','apple','aapl','microsoft','msft','amazon','amzn','google','alphabet','goog','meta','tesla','tsla','sap','spy','sp500','qqq','voo','iwda','vwrl','stocks','etf','economy','politics','forecasts','analysis','aktien','wirtschaft','politik','prognosen','crypto','bitcoin','all','general']);
+let _trendCache=null,_trendTs=0,_trendIntv=null;
+
+async function loadTrending(force=false){
+  const sec=document.getElementById('trending-section');if(!sec)return;
+  const now=Date.now();
+  if(!force&&_trendCache&&now-_trendTs<60000){renderTrending(_trendCache);return;}
+  const{db,collection,query,orderBy,limit,getDocs}=window._fb;
+  try{
+    const snap=await getDocs(query(collection(db,'posts'),orderBy('createdAt','desc'),limit(200)));
+    const counts={};
+    snap.docs.forEach(d=>{
+      const text=d.data().text||'';
+      (text.match(/#(\w+)/g)||[]).forEach(raw=>{
+        const tag=raw.slice(1).toLowerCase();
+        if(tag.length>1&&!TREND_EXCLUDE.has(tag))counts[tag]=(counts[tag]||0)+1;
+      });
+    });
+    const sorted=Object.entries(counts).filter(([,n])=>n>=2).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    _trendCache=sorted;_trendTs=now;
+    renderTrending(sorted);
+  }catch(e){}
+}
+
+function renderTrending(tags){
+  const sec=document.getElementById('trending-section');if(!sec)return;
+  if(!tags||!tags.length){sec.style.display='none';return;}
+  sec.style.display='block';
+  sec.innerHTML=
+    `<div class="trend-hd"><i class="ti ti-flame" style="color:var(--gold);font-size:13px"></i>Trending</div>`+
+    `<div style="display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 12px">`+
+    tags.map(([tag,n])=>`<button class="trend-pill" onclick="searchByTag('${esc(tag)}')">#${esc(tag)}<span class="tc">${n}</span></button>`).join('')+
+    `</div>`;
+}
+
+function searchByTag(tag){
+  const inp=document.getElementById('sinp');if(inp)inp.value='#'+tag;
+  const clr=document.getElementById('sinp-clear');if(clr)clr.style.display='block';
+  const clist=document.getElementById('clist'),lbl=document.getElementById('search-section-lbl');
+  if(clist)clist.style.display='none';if(lbl)lbl.style.display='none';
+  renderHashPosts(tag);
+}
+
+async function renderHashPosts(tag){
+  const c=document.getElementById('hash-posts');if(!c)return;
+  c.style.display='block';
+  c.innerHTML=`<div class="sl">#${esc(tag)}</div><div class="spin"></div>`;
+  const{db,collection,query,orderBy,limit,getDocs}=window._fb;
+  try{
+    const snap=await getDocs(query(collection(db,'posts'),orderBy('createdAt','desc'),limit(150)));
+    const re=new RegExp('#'+tag+'(?:\\W|$)','i');
+    const posts=snap.docs.map(d=>({id:d.id,...d.data()})).filter(p=>re.test(p.text||''));
+    if(!posts.length){c.innerHTML=`<div class="sl">#${esc(tag)}</div><div class="empty"><i class="ti ti-hash"></i><p>No posts with #${esc(tag)} yet</p></div>`;return;}
+    c.innerHTML=`<div class="sl">${posts.length} post${posts.length===1?'':'s'} with #${esc(tag)}</div>`+posts.map(p=>pH(p)).join('');
+  }catch(e){c.style.display='none';}
 }
 function renderUsers(users){
   const c=document.getElementById('clist');
   if(!users.length){c.innerHTML='<div class="empty"><i class="ti ti-users"></i><p>No creators found</p></div>';return}
   c.innerHTML=users.map(u=>{const isF=followingIds.has(u.uid);return`<div class="crow" onclick="openOP('${u.uid}')"><div class="av" style="width:36px;height:36px">${u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase()}</div><div style="flex:1"><div class="crnm">${esc(u.name||'')}</div><div class="crds">${esc(u.num||'')} - ${u.followers||0} followers</div></div><button class="fbtn${isF?' following':''}" onclick="event.stopPropagation();qFol('${u.uid}',this)">${isF?t('following_btn'):t('follow')}</button></div>`}).join('');
 }
-function doSearch(){const q=document.getElementById('sinp').value.toLowerCase().trim();const clr=document.getElementById('sinp-clear');if(clr)clr.style.display=q?'block':'none';if(!q){renderUsers(allUsers);return}renderUsers(allUsers.filter(u=>(u.name||'').toLowerCase().includes(q)||(u.num||'').toLowerCase().includes(q)))}
-function clearSearch(){const el=document.getElementById('sinp');if(el)el.value='';const clr=document.getElementById('sinp-clear');if(clr)clr.style.display='none';renderUsers(allUsers);}
+function doSearch(){
+  const q=document.getElementById('sinp').value.toLowerCase().trim();
+  const clr=document.getElementById('sinp-clear');if(clr)clr.style.display=q?'block':'none';
+  const clist=document.getElementById('clist'),lbl=document.getElementById('search-section-lbl'),hp=document.getElementById('hash-posts');
+  if(q.startsWith('#')){
+    const tag=q.slice(1).replace(/\W/g,'');
+    if(clist)clist.style.display='none';if(lbl)lbl.style.display='none';
+    if(tag.length>0)renderHashPosts(tag);else if(hp)hp.style.display='none';
+    return;
+  }
+  if(hp)hp.style.display='none';if(clist)clist.style.display='block';if(lbl)lbl.style.display='block';
+  if(!q){renderUsers(allUsers);return;}
+  renderUsers(allUsers.filter(u=>(u.name||'').toLowerCase().includes(q)||(u.num||'').toLowerCase().includes(q)));
+}
+function clearSearch(){
+  const el=document.getElementById('sinp');if(el)el.value='';
+  const clr=document.getElementById('sinp-clear');if(clr)clr.style.display='none';
+  const clist=document.getElementById('clist'),lbl=document.getElementById('search-section-lbl'),hp=document.getElementById('hash-posts');
+  if(clist)clist.style.display='block';if(lbl)lbl.style.display='block';if(hp)hp.style.display='none';
+  renderUsers(allUsers);
+}
 function tagS(t){document.getElementById('sinp').value=t;goTo('search');doSearch()}
 async function qFol(uid,btn){
   if(!CU)return;
@@ -1959,6 +2104,8 @@ async function fetchPuls(){
       if(p)p.textContent=fmtP(coin.current_price);
       if(c){const up=coin.price_change_percentage_24h>=0;c.textContent=(up?'+':'')+coin.price_change_percentage_24h.toFixed(2)+'%';c.className='ccc '+(up?'up':'dn')}
       const sp=coin.sparkline_in_7d?.price;if(sp?.length)mkC('ch-'+k,sp.slice(-40));
+      // Check price alert
+      if(CU&&UP?.priceAlerts?.[k]&&!UP.priceAlerts[k].triggered){const a=UP.priceAlerts[k];if((a.direction==='above'&&coin.current_price>=a.target)||(a.direction==='below'&&coin.current_price<=a.target))triggerAlert(k,coin.current_price);}
     });
   }catch(e){const b={btc:94000,eth:3200,sol:190,bnb:400,xrp:.6,ada:.45,doge:.15,dot:8,avax:35,link:18};Object.keys(b).forEach(k=>mkC('ch-'+k,demo(b[k],40)))}
   const dm={nvda:840,aapl:216,msft:415,amzn:186,goog:174,meta:512,tsla:248,sap:182,asml:820,novo:780,iwda:98,vwrl:105,acwi:108,spy:524,qqq:448,voo:481,stoxx:52,veur:68,exsa:77,ewj:68,mchi:48,aaxj:72};
@@ -1966,7 +2113,18 @@ async function fetchPuls(){
   [{k:'sv08',b:65},{k:'sv07',b:60},{k:'svpf',b:85}].forEach(({k,b})=>mkC('ch-'+k,demo(b,40)));
   setTimeout(addDemoBadges,100);
 }
-async function openCD(coin){curCDCoin=coin;document.getElementById('cd-t').textContent=CNM[coin]||coin.toUpperCase();document.getElementById('cd').classList.add('on');document.querySelectorAll('.rb').forEach(b=>b.classList.toggle('ak',b.textContent==='1D'));await loadCD(coin,'1')}
+async function openCD(coin){
+  curCDCoin=coin;
+  document.getElementById('cd-t').textContent=CNM[coin]||coin.toUpperCase();
+  document.getElementById('cd-alert-panel').style.display='none';
+  document.getElementById('cd').classList.add('on');
+  document.querySelectorAll('.rb').forEach(b=>b.classList.toggle('ak',b.textContent==='1D'));
+  // Sync bell state with any existing alert
+  const hasActive=!!(UP?.priceAlerts?.[coin]&&!UP.priceAlerts[coin].triggered);
+  const bellIco=document.getElementById('cd-bell-ico');if(bellIco)bellIco.className=hasActive?'ti ti-bell-ringing':'ti ti-bell';
+  const dot=document.getElementById('cd-alert-dot');if(dot)dot.style.display=hasActive?'block':'none';
+  await loadCD(coin,'1');
+}
 async function loadCD(coin,days){
   const cgId=CID[coin];const pEl=document.getElementById('cd-p'),cEl=document.getElementById('cd-c');
   const dm2={nvda:840,aapl:216,msft:415,amzn:186,goog:174,meta:512,tsla:248,sap:182,asml:820,novo:780,iwda:98,vwrl:105,acwi:108,spy:524,qqq:448,voo:481,stoxx:52,veur:68,exsa:77,ewj:68,mchi:48,aaxj:72};
@@ -2005,7 +2163,85 @@ function renderCDChart(prices){
   cdChart=new Chart(cv,{type:'line',data:{labels:prices.map((_,i)=>i),datasets:[{data:prices,borderColor:GC,borderWidth:2,fill:true,backgroundColor:g,pointRadius:0,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:500},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.parsed.y.toLocaleString('de-DE',{maximumFractionDigits:4})},backgroundColor:'#1a1a1a',borderColor:'#333',borderWidth:1}},scales:{x:{display:false},y:{position:'right',ticks:{color:'#666',font:{size:9}},grid:{color:'#222'}}}}});
 }
 async function setCDR(btn,days){document.querySelectorAll('.rb').forEach(b=>b.classList.remove('ak'));btn.classList.add('ak');await loadCD(curCDCoin,days)}
-function closeCD(){document.getElementById('cd').classList.remove('on')}
+function closeCD(){document.getElementById('cd').classList.remove('on');document.getElementById('cd-alert-panel').style.display='none';}
+
+// ── PRICE ALERTS ─────────────────────────────────────────────────────────────
+function toggleAlertPanel(){
+  const p=document.getElementById('cd-alert-panel');if(!p)return;
+  const open=p.style.display!=='none';
+  p.style.display=open?'none':'block';
+  if(!open){renderAlertPanel();if(CID[curCDCoin])setTimeout(()=>document.getElementById('cd-alert-inp')?.focus(),80);}
+}
+function renderAlertPanel(){
+  if(!curCDCoin)return;
+  const isLive=!!CID[curCDCoin];
+  const alert=UP?.priceAlerts?.[curCDCoin];
+  const hasActive=alert&&!alert.triggered;
+  const curEl=document.getElementById('cd-alert-cur');
+  const formEl=document.getElementById('cd-alert-form');
+  const hintEl=document.getElementById('cd-alert-hint');
+  // Bell icon / dot
+  const bellIco=document.getElementById('cd-bell-ico');
+  const dot=document.getElementById('cd-alert-dot');
+  if(bellIco)bellIco.className=hasActive?'ti ti-bell-ringing':'ti ti-bell';
+  if(dot)dot.style.display=hasActive?'block':'none';
+  if(!isLive){
+    if(curEl)curEl.innerHTML='';
+    if(formEl)formEl.innerHTML=`<div style="font-size:12px;color:var(--mu2);padding:6px 0">Price alerts are only available for live crypto assets (BTC, ETH, SOL …)</div>`;
+    return;
+  }
+  if(hasActive){
+    const dir=alert.direction==='above'?'▲ rises above':'▼ drops below';
+    if(curEl)curEl.innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:9px 11px;background:var(--gdim);border:1px solid rgba(247,147,26,.3);border-radius:9px;margin-bottom:8px"><i class="ti ti-bell-ringing" style="color:var(--gold);font-size:15px;flex-shrink:0"></i><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--tx)">Alert when price ${dir} ${fmtP(alert.target)}</div><div style="font-size:10px;color:var(--mu2);margin-top:2px">Fires once and is removed</div></div><button onclick="removeAlert()" style="background:none;border:none;color:#f87171;cursor:pointer;padding:3px 5px;font-size:14px" title="Remove alert"><i class="ti ti-trash"></i></button></div>`;
+    if(formEl)formEl.style.display='none';
+  } else {
+    if(curEl)curEl.innerHTML='';
+    if(formEl)formEl.style.display='block';
+    const curPrice=parseCDPrice();
+    if(hintEl)hintEl.textContent=curPrice?`Current: ${fmtP(curPrice)} — alert fires once when price crosses your target`:'Enter a target price to get notified';
+  }
+}
+function parseCDPrice(){
+  const el=document.getElementById('cd-p');if(!el)return null;
+  return parseFloat(el.textContent.replace(/[^0-9.]/g,''))||null;
+}
+async function setAlert(){
+  if(!CU||!curCDCoin)return;
+  if(!CID[curCDCoin]){showToast('Alerts only available for live crypto');return;}
+  const inp=document.getElementById('cd-alert-inp');
+  const target=parseFloat(inp?.value);
+  if(!target||target<=0){showToast('Enter a valid target price');return;}
+  const curPrice=parseCDPrice()||0;
+  const direction=target>=curPrice?'above':'below';
+  if(!UP.priceAlerts)UP.priceAlerts={};
+  UP.priceAlerts[curCDCoin]={target,direction,triggered:false,coin:curCDCoin,setAt:Date.now()};
+  const{db,doc,updateDoc}=window._fb;
+  try{await updateDoc(doc(db,'users',CU.uid),{priceAlerts:UP.priceAlerts});}catch(e){}
+  if(inp)inp.value='';
+  renderAlertPanel();
+  const dir=direction==='above'?'rises above':'drops below';
+  showToast(`🔔 Alert set: ${CNM[curCDCoin]||curCDCoin.toUpperCase()} ${dir} ${fmtP(target)}`);
+}
+async function removeAlert(){
+  if(!CU||!curCDCoin||!UP?.priceAlerts)return;
+  delete UP.priceAlerts[curCDCoin];
+  const{db,doc,updateDoc}=window._fb;
+  try{await updateDoc(doc(db,'users',CU.uid),{priceAlerts:UP.priceAlerts});}catch(e){}
+  renderAlertPanel();showToast('Alert removed');
+}
+async function triggerAlert(coin,price){
+  if(!CU||!UP?.priceAlerts?.[coin]||UP.priceAlerts[coin].triggered)return;
+  const a=UP.priceAlerts[coin];
+  a.triggered=true;
+  const{db,doc,updateDoc}=window._fb;
+  try{await updateDoc(doc(db,'users',CU.uid),{priceAlerts:UP.priceAlerts});}catch(e){}
+  const name=CNM[coin]||coin.toUpperCase();
+  const dir=a.direction==='above'?'reached':'dropped to';
+  const msg=`🔔 ${name} ${dir} ${fmtP(price)}`;
+  await addNotif(CU.uid,'alert',msg,coin);
+  showToast(msg);
+  if(curCDCoin===coin)renderAlertPanel();
+}
 function fpuls(btn,cat){document.querySelectorAll('#pk .kachel').forEach(b=>b.classList.remove('ak'));btn.classList.add('ak');document.querySelectorAll('#puls-scroll [data-pc]').forEach(el=>el.style.display=(cat==='all'||el.dataset.pc===cat)?'':'none');document.getElementById('puls-scroll').scrollTop=0;}
 function rfPuls(){pulsInited=false;initPuls()}
 function initPuls(){if(pulsInited)return;pulsInited=true;fetchPuls();setInterval(fetchPuls,60000)}
@@ -2022,6 +2258,7 @@ function closeAllOverlays(){
 }
 function goTo(s){
   closeAllOverlays();
+  if(_trendIntv){clearInterval(_trendIntv);_trendIntv=null;}
   updateHash(s);
   document.querySelectorAll('.sc').forEach(e=>e.classList.remove('on'));
   document.querySelectorAll('.bn').forEach(e=>e.classList.remove('ak'));
@@ -2029,7 +2266,7 @@ function goTo(s){
   document.getElementById('bn-'+s).classList.add('ak');
   if(s==='puls')setTimeout(initPuls,80);
   if(s==='profile'&&CU){document.querySelectorAll('#sc-profile .ptabs .ptab').forEach((t,i)=>t.classList.toggle('ak',i===0));myTab='posts';myPFilt='all';updateUI();loadMyPosts('all');if(CU.email==='claude250k@gmail.com'&&!sessionStorage.getItem('jl_recounted'))recountFollowers();}
-  if(s==='search')loadUsers();
+  if(s==='search'){loadUsers();_trendIntv=setInterval(()=>loadTrending(true),60000);}
   if(s==='messages'){loadConvs();switchMT('msgs');}
   if(s==='portfolio'){const ptog=document.getElementById('ptog');if(ptog)ptog.checked=UP?.portfolioPublic===true;const ptogLbl=document.getElementById('ptog-lbl');if(ptogLbl)ptogLbl.textContent=t(UP?.portfolioPublic?'portfolio_public':'portfolio_private');renderPortfolio();refreshPortPrices().then(renderPortfolio)}
 }
