@@ -32,7 +32,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .sbar-t{font-size:15px;font-weight:600;color:var(--tx)}
 .sbar-i{display:flex;gap:5px;align-items:center;color:var(--tx);font-size:13px}
 .sc{display:none;flex-direction:column;flex:1;overflow:hidden;position:relative;min-height:0}.sc.on{display:flex}
-.sh{padding:8px 16px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;overflow:visible}
+.sh{padding:8px 16px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative}
 .logo{font-family:var(--fd);font-size:22px;font-weight:800;letter-spacing:-.5px;color:var(--tx)}.logo em{color:var(--gold);font-style:normal}
 .stitle{font-size:16px;font-weight:700;color:var(--tx)}
 .s-acts{display:flex;gap:8px;align-items:center}
@@ -55,13 +55,13 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .pacts{display:flex;gap:16px;margin-top:2px}
 .pa{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--mu2);cursor:pointer;background:none;border:none;padding:0}.pa i{font-size:14px}.pa:hover{color:var(--tx)}
 .pa.liked{color:var(--gold)}.pa.liked i{color:var(--gold)}
-.qcbox{display:none;padding:0 16px 9px;border-bottom:1px solid var(--bd);background:var(--sf)}.qcbox.open{display:flex;gap:8px;align-items:center}
+.qcbox{display:none;padding:0 16px 9px;border-bottom:1px solid var(--bd);background:var(--sf2)}.qcbox.open{display:flex;gap:8px;align-items:center}
 .qcav{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#000;background:linear-gradient(135deg,var(--gold),#b06010);overflow:hidden}
 .qcav img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .qci{flex:1;background:var(--sf2);border:1px solid var(--bd);border-radius:18px;padding:6px 12px;color:var(--tx);font-size:12px;outline:none}.qci:focus{border-color:var(--gold)}.qci::placeholder{color:var(--mu)}
 .qcs{background:var(--gold);border:none;color:#000;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
-.pdov{position:absolute;inset:0;background:var(--bg);z-index:85;display:none;flex-direction:column}.pdov.on{display:flex}
-.pdh{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.pdov{position:absolute;inset:0;background:var(--bg);z-index:85;display:none;flex-direction:column;overflow:hidden}.pdov.on{display:flex}
+.pdh{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--bd);flex-shrink:0;z-index:1}
 .pdb{background:none;border:none;cursor:pointer;color:var(--mu2);font-size:22px;line-height:1}
 .cmt{display:flex;gap:8px;padding:9px 14px;border-bottom:1px solid var(--bd)}
 .cmtav{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#000;background:linear-gradient(135deg,var(--gold),#b06010);overflow:hidden}
@@ -124,11 +124,11 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .crnm{font-size:13px;font-weight:500;color:var(--tx)}.crds{font-size:11px;color:var(--mu2);margin-top:1px}
 .fbtn{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:5px 12px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}.fbtn.following{background:var(--gold);color:#000}
 .mbtn{background:transparent;border:1px solid var(--bd);color:var(--mu2);padding:5px 11px;border-radius:7px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:3px}.mbtn:hover{border-color:var(--gold);color:var(--gold)}
-.pcov{height:88px;background:linear-gradient(135deg,#110800,#3d2200);position:relative;flex-shrink:0;background-size:cover;background-position:center;overflow:visible}
-.pav{position:absolute;bottom:-30px;left:16px;width:60px;height:60px;border-radius:50%;border:3px solid var(--bg);background:linear-gradient(135deg,var(--gold),#a06010);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#000;overflow:hidden;cursor:pointer}
+.pcov{height:88px;background:linear-gradient(135deg,#110800,#3d2200);position:relative;flex-shrink:0;background-size:cover;background-position:center}
+.pav{position:absolute;bottom:-30px;left:16px;width:60px;height:60px;border-radius:50%;border:3px solid var(--bg);background:linear-gradient(135deg,var(--gold),#a06010);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#000;overflow:hidden;cursor:pointer;z-index:10;box-shadow:0 0 0 0 transparent}
 .pav img{width:100%;height:100%;object-fit:cover}
 .ceditbtn{position:absolute;bottom:8px;right:12px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.15);color:var(--tx);padding:4px 11px;border-radius:7px;font-size:11px;cursor:pointer}
-.pinfo{padding:36px 16px 9px;flex-shrink:0}
+.pinfo{padding:38px 16px 9px;flex-shrink:0}
 .pname{font-size:15px;font-weight:700;color:var(--tx)}
 .pnum{font-size:11px;color:var(--mu2);margin-bottom:3px}.pnum em{color:var(--gold);font-style:normal;font-weight:600}
 .pbio{font-size:12px;line-height:1.5;color:var(--tx2);margin-bottom:7px}
@@ -225,6 +225,19 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .ch-modal-foot{display:flex;gap:8px}
 .ch-modal-cancel{flex:1;background:transparent;border:1px solid var(--bd);color:var(--mu2);padding:9px;border-radius:9px;cursor:pointer;font-size:12px}
 .ch-modal-ok{flex:1;background:var(--gold);border:none;color:#000;padding:9px;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700}
+
+.rp-btn.reposted i{color:var(--gn)}.rp-btn.reposted span{color:var(--gn)}
+.ch-modal{position:absolute;inset:0;background:rgba(0,0,0,.8);z-index:250;display:none;align-items:center;justify-content:center;padding:24px}
+.ch-modal.on{display:flex}
+.ch-modal-box{background:var(--sf);border:1px solid var(--gold);border-radius:16px;padding:24px;width:100%;max-width:320px}
+.ch-modal-title{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:12px;font-family:var(--fb)}
+.ch-modal-inp{width:100%;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:11px 12px;color:var(--tx);font-size:13px;outline:none;margin-bottom:12px;font-family:var(--fb)}
+.ch-modal-inp:focus{border-color:var(--gold)}
+.ch-modal-inp::placeholder{color:var(--mu)}
+.ch-modal-foot{display:flex;gap:8px}
+.ch-modal-cancel{flex:1;background:transparent;border:1px solid var(--bd);color:var(--mu2);padding:9px;border-radius:9px;cursor:pointer;font-size:12px;font-family:var(--fb)}
+.ch-modal-ok{flex:1;background:var(--gold);border:none;color:#000;padding:9px;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700;font-family:var(--fb)}
+.update-toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--gold);color:#000;padding:10px 18px;border-radius:10px;font-size:12px;font-weight:700;z-index:400;cursor:pointer;box-shadow:0 4px 20px rgba(247,147,26,.4)}
 </style>
 </head>
 <body>
@@ -262,7 +275,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   <div class="ovh"><button class="ovb" onclick="document.getElementById('inst-ov').classList.remove('on')"><i class="ti ti-arrow-left"></i></button><div class="ovt">Install JL App</div></div>
   <div class="scroll" style="padding:24px 20px;text-align:center">
     <div style="font-family:var(--fd);font-size:36px;font-weight:800;color:var(--tx);margin-bottom:4px">J<span style="color:var(--gold)">L</span></div>
-    <div style="font-size:12px;color:var(--mu2);margin-bottom:24px">Finance . Markets . Analytics</div>
+    <div style="font-size:12px;color:var(--mu2);margin-bottom:24px">Analytics</div>
     <div style="font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:24px">Install JL directly on your device. Works like a native app.</div>
     <button onclick="instAndroid()" style="width:100%;background:var(--gold);color:#000;border:none;padding:14px;border-radius:13px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:10px"><i class="ti ti-brand-android" style="font-size:20px"></i> Install for Android</button>
     <button onclick="instIOS()" style="width:100%;background:var(--sf2);color:var(--tx);border:1px solid var(--bd);padding:14px;border-radius:13px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:10px"><i class="ti ti-brand-apple" style="font-size:20px"></i> Install for iPhone / iPad</button>
@@ -276,17 +289,23 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 <div class="sc on" id="sc-feed">
   <div class="sh" style="justify-content:center;position:relative">
     <button onclick="showInstPage()" style="position:absolute;left:0;background:none;border:none;cursor:pointer;color:var(--mu2);font-size:18px;padding:4px" title="Install App"><i class="ti ti-download"></i></button>
-    <div class="logo">J<em>L</em></div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px">
+  <svg width="60" height="28" viewBox="0 0 60 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <polyline points="0,14 8,14 12,4 16,24 20,10 24,18 28,14 36,14" stroke="#F7931A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="38" y="21" font-family="Syne,sans-serif" font-weight="800" font-size="18" fill="#f0ede6">J<tspan fill="#F7931A">L</tspan></text>
+  </svg>
+</div>
   </div>
   <div class="krow" id="fk">
     <button class="kachel ak" onclick="filterFeed(this,'all')">Following</button>
     <button class="kachel" onclick="filterFeed(this,'discover')">Discover</button>
     <button class="kachel" onclick="filterFeed(this,'bitcoin')">Bitcoin</button>
-    <button class="kachel" onclick="filterFeed(this,'aktien')">Stocks</button>
-    <button class="kachel" onclick="filterFeed(this,'etf')">ETF</button>
-    <button class="kachel" onclick="filterFeed(this,'wirtschaft')">Economy</button>
-    <button class="kachel" onclick="filterFeed(this,'politik')">Politics</button>
-    <button class="kachel" onclick="filterFeed(this,'prognosen')">Forecasts</button>
+    <button class="kachel" onclick="filterFeed(this,'stocks')">Stocks</button>
+    <button class="kachel" onclick="filterFeed(this,'ETF')">ETF</button>
+    <button class="kachel" onclick="filterFeed(this,'economy')">Economy</button>
+    <button class="kachel" onclick="filterFeed(this,'politics')">Politics</button>
+    <button class="kachel" onclick="filterFeed(this,'analysis')">Analysis</button>
+    <button class="kachel" onclick="filterFeed(this,'forecasts')">Forecasts</button>
   </div>
   <div class="scroll"><div class="spin" id="fspin"></div><div id="fposts"></div></div>
 </div>
@@ -303,7 +322,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
     <button class="kachel ak" onclick="fpuls(this,'all')">All</button>
     <button class="kachel" onclick="fpuls(this,'crypto')">Crypto</button>
     <button class="kachel" onclick="fpuls(this,'stocks')">Stocks</button>
-    <button class="kachel" onclick="fpuls(this,'etf')">ETF</button>
+    <button class="kachel" onclick="fpuls(this,'ETF')">ETF</button>
     <button class="kachel" onclick="fpuls(this,'pol')">Politics</button>
   </div>
   <div class="scroll" id="puls-scroll">
@@ -332,7 +351,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       <div class="cc" onclick="openCD('asml')"><div class="cct"><div><div class="ccn">ASML Holding</div><div class="ccs">AEX Demo</div></div><div style="text-align:right"><div class="ccp">820EUR</div><div class="ccc up">+1.5%</div></div></div><div class="cw"><canvas id="ch-asml"></canvas></div></div>
       <div class="cc" onclick="openCD('novo')"><div class="cct"><div><div class="ccn">Novo Nordisk</div><div class="ccs">CPH Demo</div></div><div style="text-align:right"><div class="ccp">DKK 780</div><div class="ccc dn">-0.8%</div></div></div><div class="cw"><canvas id="ch-novo"></canvas></div></div>
     </div>
-    <div data-pc="etf">
+    <div data-pc="ETF">
       <div class="ssep" style="border-top:none;margin-top:0;padding-top:10px">World ETFs</div>
       <div class="cc" onclick="openCD('iwda')"><div class="cct"><div><div class="ccn">iShares MSCI World (IWDA)</div><div class="ccs">XETRA Demo</div></div><div style="text-align:right"><div class="ccp">98EUR</div><div class="ccc up">+0.3%</div></div></div><div class="cw"><canvas id="ch-iwda"></canvas></div></div>
       <div class="cc" onclick="openCD('vwrl')"><div class="cct"><div><div class="ccn">Vanguard FTSE All-World (VWRL)</div><div class="ccs">LSE Demo</div></div><div style="text-align:right"><div class="ccp">$105</div><div class="ccc up">+0.4%</div></div></div><div class="cw"><canvas id="ch-vwrl"></canvas></div></div>
@@ -355,7 +374,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       <div id="pol-list"></div>
     </div>
   </div>
-  <div class="cd" id="cd"><div class="cdh"><button class="cdb2" onclick="closeCD()"><i class="ti ti-arrow-left"></i></button><div class="cdt" id="cd-t">Chart</div></div><div class="scroll"><div class="cdp" id="cd-p">-</div><div class="cdchg" id="cd-c">-</div><div class="cdcw"><canvas id="cd-cv"></canvas></div><div class="rbs"><button class="rb ak" onclick="setCDR(this,'1')">1D</button><button class="rb" onclick="setCDR(this,'7')">7D</button><button class="rb" onclick="setCDR(this,'30')">1M</button><button class="rb" onclick="setCDR(this,'90')">3M</button><button class="rb" onclick="setCDR(this,'max')">Max</button></div><div class="cdst" id="cd-st"></div></div></div>
+  <div class="cd" id="cd"><div class="cdh"><button class="cdb2" onclick="closeCD()"><i class="ti ti-arrow-left"></i></button><div class="cdt" id="cd-t">Chart</div></div><div class="scroll"><div class="cdp" id="cd-p">-</div><div class="cdchg" id="cd-c">-</div><div class="cdcw"><canvas id="cd-cv"></canvas></div><div class="rbs"><button class="rb ak" onclick="setCDR(this,'1')">1D</button><button class="rb" onclick="setCDR(this,'7')">7D</button><button class="rb" onclick="setCDR(this,'30')">1M</button><button class="rb" onclick="setCDR(this,'180')">6M</button><button class="rb" onclick="setCDR(this,'365')">1Y</button><button class="rb" onclick="setCDR(this,'1825')">5Y</button><button class="rb" onclick="setCDR(this,'max')">Max</button></div><div class="cdst" id="cd-st"></div></div></div>
   <div class="ov" id="pov"><div class="ovh"><button class="ovb" onclick="document.getElementById('pov').classList.remove('on')"><i class="ti ti-arrow-left"></i></button><div class="ovt" id="pov-t"></div></div><div class="scroll" id="pov-b"></div></div>
 </div>
 
@@ -374,7 +393,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
     </div>
     <button class="ib2" style="position:absolute;right:16px" onclick="openNM()"><i class="ti ti-edit"></i></button>
   </div>
-  <div id="msgs-panel" class="scroll"><div id="convlist"></div></div>
+  <div id="msgs-panel" class="scroll" style="flex-direction:column"><div id="convlist" style="flex:1"></div></div>
   <div id="notif-panel" class="scroll" style="display:none"><div id="notif-list"><div class="spin"></div></div></div>
   <div class="chov" id="chov"><div class="chh"><button class="ovb" onclick="closeChat()"><i class="ti ti-arrow-left"></i></button><div class="av" id="ch-av" style="width:32px;height:32px;font-size:10px"></div><div style="flex:1;padding-left:8px"><div style="font-size:13px;font-weight:600;color:var(--tx)" id="ch-nm"></div></div></div><div class="chm" id="chm"></div><div class="chir"><input class="chi" id="chi" placeholder="Message ..." onkeydown="if(event.key==='Enter')sendMsg()"><button class="chs" onclick="sendMsg()"><i class="ti ti-send"></i></button></div></div>
   <div class="ov" id="nmov"><div class="ovh"><button class="ovb" onclick="document.getElementById('nmov').classList.remove('on')"><i class="ti ti-arrow-left"></i></button><div class="ovt">New Message</div></div><div class="sbar2"><div class="sbox"><i class="ti ti-search"></i><input type="text" id="nms" placeholder="Search users ..." oninput="searchNM()"></div></div><div class="scroll" id="nmlist"></div></div>
@@ -391,7 +410,6 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   <div class="scroll">
     <div class="pcov" id="mycov">
       <div class="pav" id="myav" onclick="document.getElementById('avinp').click()"></div>
-      <button class="ceditbtn" onclick="document.getElementById('covinp').click()">Change Cover</button>
       <input type="file" id="avinp" accept="image/*" style="display:none" onchange="upAv(this)">
       <input type="file" id="covinp" accept="image/*" style="display:none" onchange="upCov(this)">
     </div>
@@ -422,7 +440,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
     </div>
     <div style="padding:0 14px 3px;font-size:10px;color:var(--mu);letter-spacing:.7px;text-transform:uppercase;font-weight:700">Channels</div>
     <div class="chgrid" id="opchs"></div>
-    <div class="ptabs"><div class="ptab ak" onclick="opFilt(this,'all')">All</div><div class="ptab" onclick="opFilt(this,'bitcoin')">Bitcoin</div><div class="ptab" onclick="opFilt(this,'aktien')">Stocks</div><div class="ptab" onclick="opFilt(this,'reposts')">Reposts</div></div>
+    <div class="ptabs"><div class="ptab ak" onclick="opFilt(this,'all')">All</div><div class="ptab" onclick="opFilt(this,'bitcoin')">Bitcoin</div><div class="ptab" onclick="opFilt(this,'stocks')">Stocks</div><div class="ptab" onclick="opFilt(this,'reposts')">Reposts</div></div>
     <div id="opposts"></div><div style="height:16px"></div>
   </div>
 </div>
@@ -468,11 +486,12 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
     <div style="font-size:10px;color:var(--mu);margin-top:8px;margin-bottom:3px">Choose channel:</div>
     <div class="mcats" id="mcats">
       <button class="pcat ak" data-cat="bitcoin" onclick="sCat(this)">Bitcoin</button>
-      <button class="pcat" data-cat="aktien" onclick="sCat(this)">Stocks</button>
-      <button class="pcat" data-cat="etf" onclick="sCat(this)">ETF</button>
-      <button class="pcat" data-cat="wirtschaft" onclick="sCat(this)">Economy</button>
-      <button class="pcat" data-cat="politik" onclick="sCat(this)">Politics</button>
-      <button class="pcat" data-cat="prognosen" onclick="sCat(this)">Forecasts</button>
+      <button class="pcat" data-cat="stocks" onclick="sCat(this)">Stocks</button>
+      <button class="pcat" data-cat="ETF" onclick="sCat(this)">ETF</button>
+      <button class="pcat" data-cat="economy" onclick="sCat(this)">Economy</button>
+      <button class="pcat" data-cat="politics" onclick="sCat(this)">Politics</button>
+      <button class="pcat" data-cat="analysis" onclick="sCat(this)">Analysis</button>
+      <button class="pcat" data-cat="forecasts" onclick="sCat(this)">Forecasts</button>
     </div>
     <div id="ccats"></div>
     <div class="mft">
@@ -487,6 +506,16 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   <div class="ch-modal-box">
     <div class="ch-modal-title">Create Channel</div>
     <input class="ch-modal-inp" id="ch-modal-inp" placeholder="Channel name (e.g. Gold, Real Estate)" onkeydown="if(event.key==='Enter')chModalOk()">
+    <div class="ch-modal-foot">
+      <button class="ch-modal-cancel" onclick="chModalClose()">Cancel</button>
+      <button class="ch-modal-ok" onclick="chModalOk()">Create</button>
+    </div>
+  </div>
+</div>
+<div class="ch-modal" id="ch-modal" onclick="if(event.target===this)chModalClose()">
+  <div class="ch-modal-box">
+    <div class="ch-modal-title">Create Channel</div>
+    <input class="ch-modal-inp" id="ch-modal-inp" placeholder="e.g. Gold, Real Estate, Macro" onkeydown="if(event.key==='Enter')chModalOk()">
     <div class="ch-modal-foot">
       <button class="ch-modal-cancel" onclick="chModalClose()">Cancel</button>
       <button class="ch-modal-ok" onclick="chModalOk()">Create</button>
@@ -515,10 +544,11 @@ let customChs=[],myPFilt='all',curPD=null;
 let followingIds=new Set();
 let deferredPrompt=null;
 
-const DCH=['bitcoin','aktien','etf','wirtschaft','politik','prognosen'];
+const DCH=['bitcoin','stocks','ETF','economy','politics','forecasts'];
 const CID={btc:'bitcoin',eth:'ethereum',sol:'solana',bnb:'binancecoin',xrp:'ripple',ada:'cardano',doge:'dogecoin',dot:'polkadot',avax:'avalanche-2',link:'chainlink'};
 const CNM={btc:'Bitcoin (BTC)',eth:'Ethereum (ETH)',sol:'Solana (SOL)',bnb:'BNB',xrp:'XRP',ada:'Cardano (ADA)',doge:'Dogecoin (DOGE)',dot:'Polkadot (DOT)',avax:'Avalanche (AVAX)',link:'Chainlink (LINK)'};
 
+const _openParties=new Set();
 const PARTIES=[
   {id:'cdu',name:'CDU/CSU',color:'#666',pols:[{i:'FM',n:'Friedrich Merz',r:'Party Leader'},{i:'MS',n:'Markus Soeder',r:'CSU Leader Bavaria'},{i:'CL2',n:'Carsten Linnemann',r:'CDU Secretary General'},{i:'AL',n:'Armin Laschet',r:'Former NRW Minister-President'}]},
   {id:'spd',name:'SPD',color:'#c0392b',pols:[{i:'OS',n:'Olaf Scholz',r:'Federal Chancellor'},{i:'SK',n:'Saskia Esken',r:'Party Chair'},{i:'LK',n:'Lars Klingbeil',r:'Party Chair'},{i:'RM',n:'Rolf Muetzenich',r:'Caucus Leader'}]},
@@ -531,6 +561,7 @@ const PARTIES=[
 
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('ibanner').classList.add('show')});
 function showInstPage(){document.getElementById('inst-ov').classList.add('on')}
+function closeInstPage(){document.getElementById('inst-ov').classList.remove('on')}
 function instAndroid(){
   if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById('ibanner').classList.remove('show')})}
   else{document.getElementById('inst-steps').innerHTML='<b>Android Chrome:</b><br>1. Tap the 3-dot menu top right<br>2. Tap "Add to Home Screen"<br>3. Tap "Install"'}
@@ -576,7 +607,7 @@ async function doReg(){
     const counterRef=doc(db,'meta','userCount');
     let userNum=1;
     await runTransaction(db,async tx=>{const snap=await tx.get(counterRef);if(snap.exists())userNum=snap.data().count+1;tx.set(counterRef,{count:userNum})});
-    const num='#'+String(userNum).padStart(4,'0');
+    const num='#'+String(userNum);
     await setDoc(doc(db,'users',uc.user.uid),{uid:uc.user.uid,name,num,bio:'',avatarUrl:'',coverUrl:'',followers:0,following:0,posts:0,customChannels:[],createdAt:serverTimestamp()});
     await setDoc(doc(db,'nameIndex',name.toLowerCase()),{uid:uc.user.uid});
   }catch(err){setAErr(am(err.code))}
@@ -665,7 +696,10 @@ function renderCCats(){
   const c=document.getElementById('ccats');if(!c||!customChs.length){if(c)c.innerHTML='';return}
   c.innerHTML='<div class="mcats">'+customChs.map(ch=>`<button class="pcat" data-cat="${ch}" onclick="sCat(this)">${chLbl(ch)}</button>`).join('')+'</div>';
 }
-function chLbl(ch){return ch?ch.charAt(0).toUpperCase()+ch.slice(1).replace(/_/g,' '):''}
+function chLbl(ch){
+  const map={bitcoin:'Bitcoin',aktien:'Stocks',etf:'ETF',wirtschaft:'Economy',politik:'Politics',prognosen:'Forecasts'};
+  return map[ch]||(ch?ch.charAt(0).toUpperCase()+ch.slice(1).replace(/_/g,' '):'');
+}
 
 function addCh(){
   document.getElementById('ch-modal').classList.add('on');
@@ -772,7 +806,7 @@ function pH(p){
             <span id="lc-${p.id}">${p.likes||0}</span>
           </button>
           <button class="pa" onclick="toggleQC('${p.id}')"><i class="ti ti-message-circle"></i> <span>${p.comments||0}</span></button>
-          <button class="pa" onclick="openPD('${p.id}')"><i class="ti ti-layout-list"></i></button>
+
           <button class="pa" onclick="shareP('${p.id}')"><i class="ti ti-share"></i></button>
         </div>
       </div>
@@ -810,7 +844,7 @@ async function likeP(pid,btn){
   document.querySelectorAll(`[id="lb-${pid}"]`).forEach(b=>{
     b.classList.toggle('liked',!liked);
     const icon=b.querySelector('i');const cnt=b.querySelector('span');
-    if(icon)icon.className=`ti ${!liked?'ti-heart-filled':'ti-heart'}`;
+    if(icon)icon.className='ti '+((!liked)?'ti-heart-filled':'ti-heart');
     if(cnt)cnt.textContent=nCount;
   });
   if(!liked&&d.authorId!==CU.uid)await addNotif(d.authorId,'like',`${UP?.name} liked your post`,pid);
@@ -907,6 +941,7 @@ async function submitCmt(){
 async function submitPost(){
   if(!CU||!UP){showToast('Please sign in');return}
   const text=document.getElementById('pta').value.trim();if(!text){showToast('Please enter text');return}
+  if(!checkRateLimit()){showToast('Too many posts. Please wait a moment.');return}
   const btn=document.getElementById('pbtn');btn.textContent='...';btn.disabled=true;
   try{
     const{db,collection,addDoc,doc,updateDoc,increment,serverTimestamp}=window._fb;
@@ -983,7 +1018,7 @@ async function openOP(uid){
   document.getElementById('opav').innerHTML=u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase();
   if(u.coverUrl){const oc=document.getElementById('opcov');oc.style.backgroundImage=`url(${u.coverUrl})`;oc.style.backgroundSize='cover'}
   const isF=followingIds.has(uid);
-  const fb=document.getElementById('op-fb');fb.classList.toggle('following',isF);fb.textContent=isF?'Following':'Follow';
+  const fb=document.getElementById('op-fb');fb.classList.toggle('following',isF);fb.textContent=isF?'Unfollow':'Follow';
   const chs=[...DCH,...(u.customChannels||[])];
   document.getElementById('opchs').innerHTML=chs.map(ch=>`<div class="ck" onclick="opChFilt(this,'${uid}','${ch}')"><div class="ckn">${chLbl(ch)}</div></div>`).join('');
   const ps=await getDocs(query(collection(db,'posts'),orderBy('createdAt','desc')));
@@ -1038,7 +1073,7 @@ async function togFollow(){
     followingIds.add(curOP);
     await updateDoc(doc(db,'users',curOP),{followers:increment(1)});
     await updateDoc(doc(db,'users',CU.uid),{following:increment(1)});
-    btn.classList.add('following');btn.textContent='Following';
+    btn.classList.add('following');btn.textContent='Unfollow';
     // Reload UP to get accurate counts
     UP.following=(UP.following||0)+1;
     await addNotif(curOP,'follow',`${UP.name} started following you`,'');
@@ -1047,8 +1082,10 @@ async function togFollow(){
   const{db:db2,doc:doc2,getDoc:getDoc2}=window._fb;
   const mySnap=await getDoc2(doc2(db2,'users',CU.uid));
   if(mySnap.exists()){UP.following=mySnap.data().following||0;UP.followers=mySnap.data().followers||0}
+  // reload fresh counts
+  try{const fr=await window._fb.getDoc(window._fb.doc(window._fb.db,'users',CU.uid));if(fr.exists()){UP.following=fr.data().following||0;UP.followers=fr.data().followers||0}}catch(e){}
   document.getElementById('ps-f').innerHTML=`<strong>${UP.followers||0}</strong> Followers`;
-  document.getElementById('ps-g').innerHTML=`<strong>${UP.following}</strong> Following`;
+  document.getElementById('ps-g').innerHTML=`<strong>${UP.following||0}</strong> Following`;
   startFeed();
 }
 function closeOP(){document.getElementById('opov').classList.remove('on');curOP=null}
@@ -1071,7 +1108,7 @@ async function qFol(uid,btn){
   const{db,doc,setDoc,deleteDoc,updateDoc,increment,getDoc}=window._fb;
   const fid=`${CU.uid}_${uid}`;const fRef=doc(db,'follows',fid);const snap=await getDoc(fRef);const isF=snap.exists();
   if(isF){await deleteDoc(fRef);followingIds.delete(uid);await updateDoc(doc(db,'users',uid),{followers:increment(-1)});await updateDoc(doc(db,'users',CU.uid),{following:increment(-1)});btn.classList.remove('following');btn.textContent='Follow';}
-  else{await setDoc(fRef,{followerId:CU.uid,followingId:uid,createdAt:new Date()});followingIds.add(uid);await updateDoc(doc(db,'users',uid),{followers:increment(1)});await updateDoc(doc(db,'users',CU.uid),{following:increment(1)});btn.classList.add('following');btn.textContent='Following';await addNotif(uid,'follow',`${UP?.name} started following you`,'')}
+  else{await setDoc(fRef,{followerId:CU.uid,followingId:uid,createdAt:new Date()});followingIds.add(uid);await updateDoc(doc(db,'users',uid),{followers:increment(1)});await updateDoc(doc(db,'users',CU.uid),{following:increment(1)});btn.classList.add('following');btn.textContent='Unfollow';await addNotif(uid,'follow',`${UP?.name} started following you`,'')}
   startFeed();
 }
 
@@ -1082,11 +1119,28 @@ async function loadConvs(){
   if(msgUnsub)msgUnsub();
   msgUnsub=onSnapshot(q,snap=>{
     const convs=snap.docs.map(d=>({id:d.id,...d.data()}));
-    const c=document.getElementById('convlist');if(c)c.style.display='block';
-    if(!convs.length){c.innerHTML='<div class="empty"><i class="ti ti-message-circle-off"></i><p>No messages yet.<br>Tap the edit icon to start a conversation!</p></div>';return}
-    c.innerHTML=convs.map(cv=>{const oid=cv.members.find(m=>m!==CU.uid);const nm=cv.memberNames?.[oid]||'-';const av=cv.memberAvatars?.[oid]||'';return`<div class="citem" onclick="openChat('${cv.id}','${oid}')"><div class="av" style="width:38px;height:38px;font-size:10px">${av?`<img src="${av}">`:(nm||'?').substring(0,2).toUpperCase()}</div><div style="flex:1;min-width:0"><div class="cnm">${esc(nm)}</div><div class="cprev">${esc(cv.lastMsg||'')}</div></div><div class="ctm">${cv.lastAt?tAgo(cv.lastAt.toDate()):''}</div></div>`}).join('');
+    const c=document.getElementById('convlist');if(!c)return;
+    if(!convs.length){
+      c.innerHTML='<div class="empty"><i class="ti ti-message-circle-off"></i><p>No messages yet.<br>Tap the pencil icon to start!</p></div>';
+      return;
+    }
+    c.innerHTML=convs.map(cv=>{
+      const oid=cv.members.find(m=>m!==CU.uid);
+      const nm=esc(cv.memberNames?.[oid]||'Unknown');
+      const av=cv.memberAvatars?.[oid]||'';
+      const avH=av?`<img src="${av}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(nm[0]||'?').toUpperCase()+(nm[1]||'');
+      return`<div class="citem" onclick="openChat('${cv.id}','${oid}')">
+        <div class="av" style="width:42px;height:42px;font-size:11px;flex-shrink:0">${avH}</div>
+        <div style="flex:1;min-width:0;padding-left:2px">
+          <div class="cnm">${nm}</div>
+          <div class="cprev">${esc(cv.lastMsg||'Tap to chat')}</div>
+        </div>
+        <div class="ctm">${cv.lastAt?tAgo(cv.lastAt.toDate()):''}</div>
+      </div>`;
+    }).join('');
   });
 }
+
 async function openChat(cid,oid){
   curConv=cid;
   const{db,doc,getDoc,collection,query,orderBy,onSnapshot}=window._fb;
@@ -1134,13 +1188,7 @@ async function renderParties(){
     return`<div class="poc"><div class="potop"><div class="podot" style="background:${p.color}"></div><div class="pon">${p.name}</div><div class="popct">${pct}%</div></div><div class="bt"><div class="bf" style="width:${pct}%;background:${p.color}"></div></div><div class="pbs"><button class="pb2${isV?' voted':''}" id="vb-${p.id}" onclick="voteP('${p.id}')">${isV?'Voted':'Vote'}</button>${isV?`<button class="pb2" onclick="abstainP('${p.id}')">Abstain</button>`:''}<button class="pb2 det" onclick="togPD('${p.id}')">Politicians</button></div><div id="pd-${p.id}" style="display:none;margin-top:8px;border-top:1px solid var(--bd);padding-top:8px">${polsH}</div></div>`;
   }).join('');
 }
-function togPD(id){
-  const el=document.getElementById('pd-'+id);if(!el)return;
-  const isOpen=el.style.display!=='none';
-  // Don't close when re-clicking same party
-  if(!isOpen)el.style.display='block';
-  else el.style.display='none';
-}
+function togPD(id){const el=document.getElementById('pd-'+id);if(!el)return;const open=el.style.display!=='none';el.style.display=open?'none':'block';if(open)_openParties.delete(id);else _openParties.add(id);}
 async function voteP(id){
   if(!CU)return;if(myVote===id){showToast('Already voted for this party');return}
   const{db,doc,setDoc,updateDoc,increment,getDoc}=window._fb;
@@ -1148,14 +1196,14 @@ async function voteP(id){
   const vr=doc(db,'votes',id);const vs=await getDoc(vr);
   if(vs.exists())await updateDoc(vr,{count:increment(1)});else await setDoc(vr,{count:1});
   await setDoc(doc(db,'userVotes',CU.uid),{partyId:id});
-  myVote=id;showToast('Vote submitted');renderParties();
+  myVote=id;showToast('Voted ✓');renderParties().then(()=>{_openParties.forEach(id=>{const el=document.getElementById('pd-'+id);if(el)el.style.display='block'});});
 }
 async function abstainP(id){
   if(!CU||myVote!==id)return;
   const{db,doc,updateDoc,deleteDoc,increment}=window._fb;
   try{await updateDoc(doc(db,'votes',id),{count:increment(-1)})}catch(e){}
   try{await deleteDoc(doc(db,'userVotes',CU.uid))}catch(e){}
-  myVote=null;showToast('Vote removed');renderParties();
+  myVote=null;showToast('Vote removed');renderParties().then(()=>{_openParties.forEach(id=>{const el=document.getElementById('pd-'+id);if(el)el.style.display='block'});});
 }
 async function votePol(pId,polName,dir,btn){
   if(!CU)return;
@@ -1246,6 +1294,14 @@ function goTo(s){
 }
 
 let toastT;
+// Simple rate limit for posts
+const _postTimes=[];
+function checkRateLimit(){
+  const now=Date.now();
+  const recent=_postTimes.filter(t=>now-t<60000);// last 60s
+  _postTimes.length=0;_postTimes.push(...recent,now);
+  return recent.length<5;// max 5 posts/min
+}
 function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800)}
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
@@ -1275,3 +1331,13 @@ function shareP(id){if(navigator.share)navigator.share({title:'JL',url:location.
 </script>
 </body>
 </html>
+
+// Hash-based routing so page reload returns to correct screen
+function updateHash(s){history.replaceState(null,'','#'+s)}
+const _origGoTo=goTo;
+function goTo(s){_origGoTo(s);updateHash(s)}
+// On load, restore screen from hash
+window.addEventListener('DOMContentLoaded',()=>{
+  const h=location.hash.replace('#','');
+  if(h&&document.getElementById('sc-'+h))setTimeout(()=>{if(CU)_origGoTo(h)},1000);
+});
