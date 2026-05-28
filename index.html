@@ -128,7 +128,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .tp{padding:5px 12px;border-radius:17px;background:var(--sf2);border:1px solid var(--bd);font-size:11px;color:var(--mu2);white-space:nowrap;cursor:pointer}.tp:hover{border-color:var(--gold);color:var(--gold)}
 .crow{display:flex;align-items:center;gap:11px;padding:10px 16px;border-bottom:1px solid var(--bd);cursor:pointer}.crow:hover{background:var(--sf)}
 .crnm{font-size:13px;font-weight:500;color:var(--tx)}.crds{font-size:11px;color:var(--mu2);margin-top:1px}
-.fbtn{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:5px 12px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}.fbtn.following{background:var(--gold);color:#000}
+.fbtn{background:var(--sf2);border:1px solid var(--bd);color:var(--mu2);padding:5px 12px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}.fbtn.following{background:var(--gold);border-color:var(--gold);color:#000}
 .mbtn{background:transparent;border:1px solid var(--bd);color:var(--mu2);padding:5px 11px;border-radius:7px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:3px}.mbtn:hover{border-color:var(--gold);color:var(--gold)}
 .pcov{height:88px;background:linear-gradient(135deg,#110800,#3d2200);position:relative;flex-shrink:0;background-size:cover;background-position:center}
 .pav{position:absolute;bottom:-30px;left:16px;width:60px;height:60px;border-radius:50%;border:3px solid var(--bg);background:linear-gradient(135deg,var(--gold),#a06010);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#000;overflow:hidden;cursor:pointer;z-index:10;box-shadow:0 0 0 0 transparent}
@@ -504,7 +504,10 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   <div class="scroll">
     <div class="pcov" id="opcov" style="height:80px"><div class="pav" id="opav" style="bottom:-26px;width:54px;height:54px;font-size:17px;cursor:default"></div></div>
     <div style="padding:32px 16px 9px">
-      <div class="pname" id="op-nm"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+        <div class="pname" id="op-nm" title="Click to copy username" style="cursor:pointer;flex:1;min-width:0"></div>
+        <button onclick="shareOP()" style="background:none;border:1px solid var(--bd);color:var(--mu2);width:28px;height:28px;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0" title="Share profile"><i class="ti ti-share"></i></button>
+      </div>
       <div class="pnum"><em id="op-num">#-</em></div>
       <div class="pbio" id="op-bio" style="margin-top:3px"></div>
       <div class="pstats" style="margin-top:7px"><div class="pst"><strong id="op-pc">0</strong> Posts</div><div class="pst"><strong id="op-fc">0</strong> Followers</div></div>
@@ -524,15 +527,21 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 </div>
 
 <div class="setov" id="setov">
-  <div class="ovh"><button class="ovb" onclick="closeSet()"><i class="ti ti-arrow-left"></i></button><div class="ovt">Settings</div></div>
+  <div class="ovh"><button class="ovb" onclick="closeSet()"><i class="ti ti-arrow-left"></i></button><div class="ovt" data-i18n="settings">Settings</div></div>
   <div class="scroll">
-    <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700">Account</div>
-    <div class="seti" onclick="openEditProf()"><i class="ti ti-user-edit"></i><div class="setin"><div class="setit">Edit Profile</div><div class="setis">Name, bio and photo</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
-    <div class="seti" onclick="showInstPage();closeSet()"><i class="ti ti-download"></i><div class="setin"><div class="setit">Install App</div><div class="setis">Add to home screen</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
-    <div class="seti" onclick="openChSettings()"><i class="ti ti-hash"></i><div class="setin"><div class="setit">Manage Channels</div><div class="setis">Add or remove your channels</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
-    <div class="seti" onclick="showToast('Privacy settings coming soon')"><i class="ti ti-shield"></i><div class="setin"><div class="setit">Privacy</div><div class="setis">Visibility and data</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
-    <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px">Session</div>
-    <div class="seti" onclick="confirmOut()"><i class="ti ti-logout" style="color:#f87171"></i><div class="setin"><div class="setit" style="color:#f87171">Sign Out</div><div class="setis">Log out of your account</div></div></div>
+    <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700" data-i18n="account">Account</div>
+    <div class="seti" onclick="openEditProf()"><i class="ti ti-user-edit"></i><div class="setin"><div class="setit" data-i18n="editProfile">Edit Profile</div><div class="setis" data-i18n="editProfileSub">Name, bio and photo</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
+    <div class="seti" onclick="showInstPage();closeSet()"><i class="ti ti-download"></i><div class="setin"><div class="setit" data-i18n="installApp">Install App</div><div class="setis" data-i18n="installAppSub">Add to home screen</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
+    <div class="seti" onclick="openChSettings()"><i class="ti ti-hash"></i><div class="setin"><div class="setit" data-i18n="manageChannels">Manage Channels</div><div class="setis" data-i18n="manageChannelsSub">Add or remove your channels</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
+    <div class="seti" onclick="showToast(t('privacySoon'))"><i class="ti ti-shield"></i><div class="setin"><div class="setit" data-i18n="privacy">Privacy</div><div class="setis" data-i18n="privacySub">Visibility and data</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
+    <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px" data-i18n="languageLbl">Language</div>
+    <div style="display:flex;gap:6px;padding:8px 16px">
+      <button id="lang-en" onclick="setLang('en')" style="flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:var(--sf2);color:var(--mu2)">🇬🇧 EN</button>
+      <button id="lang-de" onclick="setLang('de')" style="flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:var(--sf2);color:var(--mu2)">🇩🇪 DE</button>
+      <button id="lang-es" onclick="setLang('es')" style="flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:var(--sf2);color:var(--mu2)">🇪🇸 ES</button>
+    </div>
+    <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px" data-i18n="session">Session</div>
+    <div class="seti" onclick="confirmOut()"><i class="ti ti-logout" style="color:#f87171"></i><div class="setin"><div class="setit" style="color:#f87171" data-i18n="signOut">Sign Out</div><div class="setis" data-i18n="signOutSub">Log out of your account</div></div></div>
   </div>
 </div>
 
@@ -612,12 +621,12 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 <div class="toast" id="toast"></div>
 <div class="bnav">
   <div style="padding:8px 14px 20px;display:none" class="desk-logo"><svg width="72" height="32" viewBox="0 0 72 32" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="0,16 8,16 11,5 14,27 17,11 20,21 23,16 32,16" stroke="#F7931A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="36" y="23" font-family="Syne,sans-serif" font-weight="800" font-size="20" fill="#f0ede6">J<tspan fill="#F7931A">L</tspan></text></svg></div>
-  <button class="bn ak" id="bn-feed" onclick="goTo('feed')"><i class="ti ti-home"></i><span>Feed</span></button>
-  <button class="bn" id="bn-puls" onclick="goTo('puls')"><i class="ti ti-activity"></i><span>Puls</span></button>
-  <button class="bn" id="bn-search" onclick="goTo('search')"><i class="ti ti-search"></i><span>Search</span></button>
-  <button class="bn" id="bn-messages" onclick="goTo('messages')"><i class="ti ti-message-circle"></i><span>Messages</span><div class="nbadge" id="nbadge"></div></button>
-  <button class="bn" id="bn-portfolio" onclick="goTo('portfolio')"><i class="ti ti-briefcase"></i><span>Portfolio</span></button>
-  <button class="bn" id="bn-profile" onclick="goTo('profile')"><i class="ti ti-user"></i><span>Profile</span></button>
+  <button class="bn ak" id="bn-feed" onclick="goTo('feed')"><i class="ti ti-home"></i><span data-i18n="nav_feed">Feed</span></button>
+  <button class="bn" id="bn-puls" onclick="goTo('puls')"><i class="ti ti-activity"></i><span data-i18n="nav_puls">Puls</span></button>
+  <button class="bn" id="bn-search" onclick="goTo('search')"><i class="ti ti-search"></i><span data-i18n="nav_search">Search</span></button>
+  <button class="bn" id="bn-messages" onclick="goTo('messages')"><i class="ti ti-message-circle"></i><span data-i18n="nav_messages">Messages</span><div class="nbadge" id="nbadge"></div></button>
+  <button class="bn" id="bn-portfolio" onclick="goTo('portfolio')"><i class="ti ti-briefcase"></i><span data-i18n="nav_portfolio">Portfolio</span></button>
+  <button class="bn" id="bn-profile" onclick="goTo('profile')"><i class="ti ti-user"></i><span data-i18n="nav_profile">Profile</span></button>
 </div>
 </div>
 
@@ -1220,14 +1229,14 @@ async function openOP(uid){
   const snap=await getDoc(doc(db,'users',uid));if(!snap.exists())return;
   const u=snap.data();
   document.getElementById('op-t').textContent=u.name||'Profile';
-  document.getElementById('op-nm').textContent=u.name||'';
+  const opnm=document.getElementById('op-nm');opnm.textContent=u.name||'';opnm.onclick=()=>{navigator.clipboard?.writeText(u.name||'').then(()=>showToast('📋 '+t('copied'))).catch(()=>{})};
   document.getElementById('op-num').textContent=u.num||'#-';
   document.getElementById('op-bio').textContent=u.bio||'';
   document.getElementById('op-fc').textContent=u.followers||0;
   document.getElementById('opav').innerHTML=u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase();
   if(u.coverUrl){const oc=document.getElementById('opcov');oc.style.backgroundImage=`url(${u.coverUrl})`;oc.style.backgroundSize='cover'}
   const isF=followingIds.has(uid);
-  const fb=document.getElementById('op-fb');fb.classList.toggle('following',isF);fb.textContent=isF?'Unfollow':'Follow';
+  const fb=document.getElementById('op-fb');fb.classList.toggle('following',isF);fb.textContent=isF?t('unfollow'):t('follow');
   const chs=[...DCH,...(u.customChannels||[])];
   document.getElementById('opchs').innerHTML=chs.map(ch=>`<div class="ck" onclick="opChFilt(this,'${uid}','${ch}')"><div class="ckn">${chLbl(ch)}</div></div>`).join('');
   const ps=await getDocs(query(collection(db,'posts'),orderBy('createdAt','desc')));
@@ -1275,14 +1284,14 @@ async function togFollow(){
     await deleteDoc(fRef);followingIds.delete(curOP);
     await updateDoc(doc(db,'users',curOP),{followers:increment(-1)});
     await updateDoc(doc(db,'users',CU.uid),{following:increment(-1)});
-    btn.classList.remove('following');btn.textContent='Follow';
+    btn.classList.remove('following');btn.textContent=t('follow');
     UP.following=Math.max(0,(UP.following||1)-1);
   } else {
     await setDoc(fRef,{followerId:CU.uid,followingId:curOP,createdAt:new Date()});
     followingIds.add(curOP);
     await updateDoc(doc(db,'users',curOP),{followers:increment(1)});
     await updateDoc(doc(db,'users',CU.uid),{following:increment(1)});
-    btn.classList.add('following');btn.textContent='Unfollow';
+    btn.classList.add('following');btn.textContent=t('unfollow');
     // Reload UP to get accurate counts
     UP.following=(UP.following||0)+1;
     await addNotif(curOP,'follow',`${UP.name} started following you`,'');
@@ -1308,7 +1317,7 @@ async function loadUsers(){
 function renderUsers(users){
   const c=document.getElementById('clist');
   if(!users.length){c.innerHTML='<div class="empty"><i class="ti ti-users"></i><p>No creators found</p></div>';return}
-  c.innerHTML=users.map(u=>{const isF=followingIds.has(u.uid);return`<div class="crow" onclick="openOP('${u.uid}')"><div class="av" style="width:36px;height:36px">${u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase()}</div><div style="flex:1"><div class="crnm">${esc(u.name||'')}</div><div class="crds">${esc(u.num||'')} - ${u.followers||0} followers</div></div><button class="fbtn${isF?' following':''}" onclick="event.stopPropagation();qFol('${u.uid}',this)">${isF?'Following':'Follow'}</button></div>`}).join('');
+  c.innerHTML=users.map(u=>{const isF=followingIds.has(u.uid);return`<div class="crow" onclick="openOP('${u.uid}')"><div class="av" style="width:36px;height:36px">${u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase()}</div><div style="flex:1"><div class="crnm">${esc(u.name||'')}</div><div class="crds">${esc(u.num||'')} - ${u.followers||0} followers</div></div><button class="fbtn${isF?' following':''}" onclick="event.stopPropagation();qFol('${u.uid}',this)">${isF?t('following_btn'):t('follow')}</button></div>`}).join('');
 }
 function doSearch(){const q=document.getElementById('sinp').value.toLowerCase().trim();if(!q){renderUsers(allUsers);return}renderUsers(allUsers.filter(u=>(u.name||'').toLowerCase().includes(q)||(u.num||'').toLowerCase().includes(q)))}
 function tagS(t){document.getElementById('sinp').value=t;goTo('search');doSearch()}
@@ -1316,8 +1325,8 @@ async function qFol(uid,btn){
   if(!CU)return;
   const{db,doc,setDoc,deleteDoc,updateDoc,increment,getDoc}=window._fb;
   const fid=`${CU.uid}_${uid}`;const fRef=doc(db,'follows',fid);const snap=await getDoc(fRef);const isF=snap.exists();
-  if(isF){await deleteDoc(fRef);followingIds.delete(uid);await updateDoc(doc(db,'users',uid),{followers:increment(-1)});await updateDoc(doc(db,'users',CU.uid),{following:increment(-1)});btn.classList.remove('following');btn.textContent='Follow';}
-  else{await setDoc(fRef,{followerId:CU.uid,followingId:uid,createdAt:new Date()});followingIds.add(uid);await updateDoc(doc(db,'users',uid),{followers:increment(1)});await updateDoc(doc(db,'users',CU.uid),{following:increment(1)});btn.classList.add('following');btn.textContent='Unfollow';await addNotif(uid,'follow',`${UP?.name} started following you`,'')}
+  if(isF){await deleteDoc(fRef);followingIds.delete(uid);await updateDoc(doc(db,'users',uid),{followers:increment(-1)});await updateDoc(doc(db,'users',CU.uid),{following:increment(-1)});btn.classList.remove('following');btn.textContent=t('follow');}
+  else{await setDoc(fRef,{followerId:CU.uid,followingId:uid,createdAt:new Date()});followingIds.add(uid);await updateDoc(doc(db,'users',uid),{followers:increment(1)});await updateDoc(doc(db,'users',CU.uid),{following:increment(1)});btn.classList.add('following');btn.textContent=t('following_btn');await addNotif(uid,'follow',`${UP?.name} started following you`,'')}
   startFeed();
 }
 
@@ -1646,9 +1655,9 @@ function renderPortfolio(){
   const pnlCol=pnl>=0?'#4ade80':'#f87171',sg=pnl>=0?'+':'';
   const tb=document.getElementById('port-total-box');
   if(tb)tb.innerHTML=`<div class="ptot">
-    <div style="font-size:10px;color:var(--mu2);letter-spacing:.7px;text-transform:uppercase;margin-bottom:5px">Total Portfolio Value</div>
+    <div style="font-size:10px;color:var(--mu2);letter-spacing:.7px;text-transform:uppercase;margin-bottom:5px">${t('totalValue')}</div>
     <div class="ptot-v">$${fmt(totalVal)}</div>
-    ${totalCost>0?`<div class="ptot-chg" style="color:${pnlCol}">${sg}$${fmt(Math.abs(pnl))} (${sg}${pct.toFixed(2)}%) all time</div>`:'<div style="font-size:12px;color:var(--mu2);margin-top:4px">Add holdings to track P&L</div>'}
+    ${totalCost>0?`<div class="ptot-chg" style="color:${pnlCol}">${sg}$${fmt(Math.abs(pnl))} (${sg}${pct.toFixed(2)}%) all time</div>`:`<div style="font-size:12px;color:var(--mu2);margin-top:4px">${t('addFirst')}</div>`}
   </div>`;
   if(!portHoldings.length){
     const pl=document.getElementById('port-list');
@@ -1712,8 +1721,88 @@ function showHoldMenu(id){
 async function delHolding(id){
   const{db,doc,deleteDoc}=window._fb;
   await deleteDoc(doc(db,`users/${CU.uid}/holdings`,id));
-  showToast('Holding removed');
+  showToast(t('removed'));
 }
+
+// ── i18n ───────────────────────────────────────────────────────────────────
+const I18N={
+  en:{
+    nav_feed:'Feed',nav_puls:'Puls',nav_search:'Search',nav_messages:'Messages',nav_portfolio:'Portfolio',nav_profile:'Profile',
+    settings:'Settings',account:'Account',editProfile:'Edit Profile',editProfileSub:'Name, bio and photo',
+    installApp:'Install App',installAppSub:'Add to home screen',manageChannels:'Manage Channels',manageChannelsSub:'Add or remove your channels',
+    privacy:'Privacy',privacySub:'Visibility and data',privacySoon:'Privacy settings coming soon',
+    languageLbl:'Language',session:'Session',signOut:'Sign Out',signOutSub:'Log out of your account',
+    follow:'Follow',following_btn:'Following',unfollow:'Unfollow',
+    addHolding:'Add Holding',totalValue:'Total Portfolio Value',addFirst:'Add holdings to track P&L',
+    crypto:'Crypto',stocks_lbl:'Stocks',etf_lbl:'ETF',tcg_lbl:'TCG Cards',
+    myProfile:'My Profile',portfolio_title:'Portfolio',search_title:'Search',
+    newPost:'New Post',post_btn:'Post',cancel:'Cancel',
+    copied:'Username copied!',removed:'Removed',
+  },
+  de:{
+    nav_feed:'Feed',nav_puls:'Puls',nav_search:'Suche',nav_messages:'Nachrichten',nav_portfolio:'Portfolio',nav_profile:'Profil',
+    settings:'Einstellungen',account:'Konto',editProfile:'Profil bearbeiten',editProfileSub:'Name, Bio und Foto',
+    installApp:'App installieren',installAppSub:'Zum Startbildschirm hinzufügen',manageChannels:'Kanäle verwalten',manageChannelsSub:'Kanäle hinzufügen oder entfernen',
+    privacy:'Datenschutz',privacySub:'Sichtbarkeit und Daten',privacySoon:'Datenschutzeinstellungen demnächst',
+    languageLbl:'Sprache',session:'Sitzung',signOut:'Abmelden',signOutSub:'Von deinem Konto abmelden',
+    follow:'Folgen',following_btn:'Folge ich',unfollow:'Entfolgen',
+    addHolding:'Position hinzufügen',totalValue:'Gesamtportefeuillewert',addFirst:'Positionen für P&V hinzufügen',
+    crypto:'Krypto',stocks_lbl:'Aktien',etf_lbl:'ETF',tcg_lbl:'Sammelkarten',
+    myProfile:'Mein Profil',portfolio_title:'Portfolio',search_title:'Suche',
+    newPost:'Neuer Beitrag',post_btn:'Posten',cancel:'Abbrechen',
+    copied:'Benutzername kopiert!',removed:'Entfernt',
+  },
+  es:{
+    nav_feed:'Feed',nav_puls:'Pulso',nav_search:'Buscar',nav_messages:'Mensajes',nav_portfolio:'Cartera',nav_profile:'Perfil',
+    settings:'Ajustes',account:'Cuenta',editProfile:'Editar perfil',editProfileSub:'Nombre, bio y foto',
+    installApp:'Instalar App',installAppSub:'Añadir a pantalla de inicio',manageChannels:'Gestionar canales',manageChannelsSub:'Añadir o quitar canales',
+    privacy:'Privacidad',privacySub:'Visibilidad y datos',privacySoon:'Privacidad próximamente',
+    languageLbl:'Idioma',session:'Sesión',signOut:'Cerrar sesión',signOutSub:'Salir de tu cuenta',
+    follow:'Seguir',following_btn:'Siguiendo',unfollow:'Dejar de seguir',
+    addHolding:'Añadir posición',totalValue:'Valor total de cartera',addFirst:'Añade posiciones para ver P&G',
+    crypto:'Cripto',stocks_lbl:'Acciones',etf_lbl:'ETF',tcg_lbl:'Cartas TCG',
+    myProfile:'Mi Perfil',portfolio_title:'Cartera',search_title:'Buscar',
+    newPost:'Nueva publicación',post_btn:'Publicar',cancel:'Cancelar',
+    copied:'¡Usuario copiado!',removed:'Eliminado',
+  }
+};
+let curLang=localStorage.getItem('jl_lang')||'en';
+function t(k){return I18N[curLang]?.[k]||I18N.en[k]||k}
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.dataset.i18n,a=el.dataset.i18nAttr;
+    if(a)el.setAttribute(a,t(k));else el.textContent=t(k);
+  });
+  // Titles that contain an <em>.</em> child
+  [['#sc-profile .stitle','myProfile'],['#sc-portfolio .stitle','portfolio_title'],['#sc-search .stitle','search_title']].forEach(([sel,key])=>{
+    const el=document.querySelector(sel);if(el)el.innerHTML=t(key)+'<em style="color:var(--gold);font-style:normal">.</em>';
+  });
+  // Dynamic buttons with icons or sub-elements
+  const addBtn=document.querySelector('.padd');if(addBtn)addBtn.innerHTML=`<i class="ti ti-plus"></i> ${t('addHolding')}`;
+  const portTitle=document.querySelector('#port-pm .mtitle');if(portTitle)portTitle.textContent=t('addHolding');
+  const portCrypto=document.querySelector('#port-cats [data-cat="crypto"]');if(portCrypto)portCrypto.textContent=t('crypto');
+  const portStocks=document.querySelector('#port-cats [data-cat="stocks"]');if(portStocks)portStocks.textContent=t('stocks_lbl');
+  const portEtf=document.querySelector('#port-cats [data-cat="etf"]');if(portEtf)portEtf.textContent=t('etf_lbl');
+  const portTcg=document.querySelector('#port-cats [data-cat="tcg"]');if(portTcg)portTcg.textContent=t('tcg_lbl');
+  const newPostTitle=document.querySelector('#pm .mtitle');if(newPostTitle)newPostTitle.textContent=t('newPost');
+  const postBtn=document.getElementById('pbtn');if(postBtn)postBtn.textContent=t('post_btn');
+  // Language button active state
+  ['en','de','es'].forEach(l=>{
+    const b=document.getElementById('lang-'+l);
+    if(b){b.style.borderColor=curLang===l?'var(--gold)':'var(--bd)';b.style.color=curLang===l?'var(--gold)':'var(--mu2)';b.style.background=curLang===l?'var(--gdim)':'var(--sf2)'}
+  });
+  // Re-render visible dynamic screens
+  if(document.getElementById('sc-portfolio')?.classList.contains('on'))renderPortfolio();
+  if(document.getElementById('sc-search')?.classList.contains('on'))renderUsers(allUsers);
+}
+function setLang(l){curLang=l;localStorage.setItem('jl_lang',l);applyLang();showToast(l==='de'?'Sprache geändert':l==='es'?'Idioma cambiado':'Language changed')}
+function shareOP(){
+  const nm=document.getElementById('op-nm')?.textContent||'';
+  const url=location.href.split('#')[0];
+  if(navigator.share)navigator.share({title:nm+' on JL',text:'Check out '+nm+' on JL',url});
+  else navigator.clipboard?.writeText(url).then(()=>showToast('Link copied!')).catch(()=>showToast('Link: '+url));
+}
+applyLang();
 </script>
 </body>
 </html>
