@@ -551,7 +551,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   </div>
   <div id="msgs-panel" class="scroll" style="display:flex;flex-direction:column"><div id="convlist" style="flex:1"><div class="spin"></div></div></div>
   <div id="notif-panel" class="scroll" style="display:none"><div id="notif-list"><div class="spin"></div></div></div>
-  <div class="chov" id="chov"><div class="chh"><button class="ovb" onclick="closeChat()"><i class="ti ti-arrow-left"></i></button><div class="av" id="ch-av" style="width:32px;height:32px;font-size:10px"></div><div style="flex:1;padding-left:8px"><div style="font-size:13px;font-weight:600;color:var(--tx)" id="ch-nm"></div></div></div><div class="chm" id="chm"></div><div class="chir"><input class="chi" id="chi" placeholder="Message ..." onkeydown="if(event.key==='Enter')sendMsg()"><button class="chs" onclick="sendMsg()"><i class="ti ti-send"></i></button></div></div>
+  <div class="chov" id="chov"><div class="chh"><button class="ovb" onclick="closeChat()"><i class="ti ti-arrow-left"></i></button><div class="av" id="ch-av" style="width:32px;height:32px;font-size:10px;cursor:pointer" onclick="curChatOid&&openOP(curChatOid)"></div><div style="flex:1;padding-left:8px;cursor:pointer" onclick="curChatOid&&openOP(curChatOid)"><div style="font-size:13px;font-weight:600;color:var(--tx)" id="ch-nm"></div><div style="font-size:10px;color:var(--mu2)">Tap to view profile</div></div></div><div class="chm" id="chm"></div><div class="chir"><input class="chi" id="chi" placeholder="Message ..." onkeydown="if(event.key==='Enter')sendMsg()"><button class="chs" onclick="sendMsg()"><i class="ti ti-send"></i></button></div></div>
   <div class="ov" id="nmov"><div class="ovh"><button class="ovb" onclick="document.getElementById('nmov').classList.remove('on')"><i class="ti ti-arrow-left"></i></button><div class="ovt">New Message</div></div><div class="sbar2"><div class="sbox"><i class="ti ti-search"></i><input type="text" id="nms" placeholder="Search users ..." oninput="searchNM()"></div></div><div class="scroll" id="nmlist"></div></div>
 </div>
 
@@ -607,7 +607,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       </div>
       <div class="pnum"><em id="op-num">#-</em></div>
       <div class="pbio" id="op-bio" style="margin-top:3px"></div>
-      <div class="pstats" style="margin-top:7px"><div class="pst"><strong id="op-pc">0</strong> Posts</div><div class="pst"><strong id="op-fc">0</strong> Followers</div></div>
+      <div class="pstats" style="margin-top:7px"><div class="pst"><strong id="op-pc">0</strong> Posts</div><div class="pst"><strong id="op-fc">0</strong> Followers</div><div class="pst"><strong id="op-gc">0</strong> Following</div></div>
       <button class="mbtn" style="margin-top:9px" onclick="msgUser()"><i class="ti ti-message-circle"></i> Send Message</button>
     </div>
     <div style="padding:0 14px 3px;font-size:10px;color:var(--mu);letter-spacing:.7px;text-transform:uppercase;font-weight:700">Channels</div>
@@ -760,10 +760,11 @@ function tick(){const n=new Date();document.getElementById('clk').textContent=n.
 setInterval(tick,10000);tick();
 
 let CU=null,UP=null,selCat='all';
-let feedUnsub=null,chatUnsub=null,msgUnsub=null,notifUnsub=null;
+let feedUnsub=null,chatUnsub=null,msgUnsub=null,notifUnsub=null,opUnsub=null;
 let pulsInited=false,chartI={},cdChart=null,curCDCoin=null;
-let allUsers=[],myVote=null,curOP=null,curConv=null;
+let allUsers=[],myVote=null,curOP=null,curConv=null,curChatOid=null;
 let customChs=[],myPFilt='all',curPD=null;
+let _notifUnread=0,_msgUnread=0,_lastRead={};
 let followingIds=new Set();
 let repostIds=new Set();
 let deferredPrompt=null;
@@ -1145,6 +1146,7 @@ function pH(p){
   const liked=CU&&(p.likedBy||[]).includes(CU.uid);
   const rpd=repostIds.has(p.id);
   const myAvH=UP?.avatarUrl?`<img src="${UP.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(UP?.name||'?').substring(0,2).toUpperCase();
+  const isOwn=CU&&p.authorId===CU.uid;
   return`<div class="pi" data-id="${p.id}">
     <div class="pr">
       <div class="av" onclick="openOP('${p.authorId}')">${avH}</div>
@@ -1153,6 +1155,7 @@ function pH(p){
           <span class="pan" onclick="openOP('${p.authorId}')">${esc(p.authorName||'Anonymous')}</span>
           <span class="cbadge ${cb}" onclick="goToCh('${p.channel||''}')">${cl}</span>
           <span class="ptm">${t}</span>
+          ${isOwn?`<button class="pa" onclick="delPost('${p.id}')" style="margin-left:auto;color:var(--mu)" title="Delete post"><i class="ti ti-trash" style="font-size:13px"></i></button>`:''}
         </div>
         <div class="ptxt" onclick="openPD('${p.id}')">${linkText(p.text||'')}</div>
         ${img}
@@ -1234,12 +1237,12 @@ function loadNotifs(){
   if(notifUnsub)notifUnsub();
   notifUnsub=onSnapshot(q,snap=>{
     const notifs=snap.docs.map(d=>({id:d.id,...d.data()}));
-    const unread=notifs.filter(n=>!n.read).length;
-    const badge=document.getElementById('nbadge');
-    if(unread>0){badge.textContent=unread>9?'9+':unread;badge.classList.add('show')}else{badge.classList.remove('show')}
+    _notifUnread=notifs.filter(n=>!n.read).length;
+    updateNavBadge();
     renderNotifs(notifs);
   });
 }
+function updateNavBadge(){const b=document.getElementById('nbadge');const n=_notifUnread+_msgUnread;if(n>0){b.textContent=n>9?'9+':n;b.classList.add('show')}else{b.classList.remove('show')}}
 function renderNotifs(notifs){
   const c=document.getElementById('notif-list');if(!c)return;
   if(!notifs.length){c.innerHTML='<div class="empty"><i class="ti ti-bell-off"></i><p>No notifications yet</p></div>';return}
@@ -1289,7 +1292,7 @@ async function loadCmts(pid,cid){
   const snap=await getDocs(query(collection(db,`posts/${pid}/comments`),orderBy('createdAt','asc')));
   const cmts=snap.docs.map(d=>({id:d.id,...d.data()}));
   if(!cmts.length){c.innerHTML='<div class="empty" style="padding:18px 20px 10px"><p>No comments yet. Be the first!</p></div>';return}
-  c.innerHTML=cmts.map(cm=>{const cav=cm.authorAvatar?`<img src="${cm.authorAvatar}">`:(cm.authorName||'?').substring(0,2).toUpperCase();return`<div class="cmt"><div class="cmtav">${cav}</div><div><div class="cmtnm">${esc(cm.authorName||'')}</div><div class="cmttx">${linkText(cm.text||'')}</div><div class="cmttm">${cm.createdAt?tAgo(cm.createdAt.toDate()):''}</div></div></div>`}).join('');
+  c.innerHTML=cmts.map(cm=>{const cav=cm.authorAvatar?`<img src="${cm.authorAvatar}">`:(cm.authorName||'?').substring(0,2).toUpperCase();const ownCmt=CU&&cm.authorId===CU.uid;return`<div class="cmt"><div class="cmtav">${cav}</div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:4px"><div class="cmtnm">${esc(cm.authorName||'')}</div>${ownCmt?`<button onclick="delCmt('${pid}','${cm.id}')" style="background:none;border:none;color:var(--mu);cursor:pointer;margin-left:auto;padding:2px 3px;line-height:1" title="Delete comment"><i class="ti ti-trash" style="font-size:12px"></i></button>`:''}</div><div class="cmttx">${linkText(cm.text||'')}</div><div class="cmttm">${cm.createdAt?tAgo(cm.createdAt.toDate()):''}</div></div></div>`}).join('');
 }
 async function submitCmt(){
   if(!CU||!UP||!curPD)return;
@@ -1303,6 +1306,24 @@ async function submitCmt(){
   await loadCmts(curPD,'pd-cmts');
 }
 
+async function delPost(pid){
+  if(!CU)return;
+  if(!confirm('Delete this post?'))return;
+  const{db,doc,deleteDoc,updateDoc,increment}=window._fb;
+  await deleteDoc(doc(db,'posts',pid));
+  try{await updateDoc(doc(db,'users',CU.uid),{posts:increment(-1)})}catch(e){}
+  UP.posts=Math.max(0,(UP.posts||1)-1);
+  document.querySelector(`.pi[data-id="${pid}"]`)?.remove();
+  showToast('Post deleted');
+}
+async function delCmt(pid,cmtId){
+  if(!CU)return;
+  const{db,doc,deleteDoc,updateDoc,increment}=window._fb;
+  await deleteDoc(doc(db,`posts/${pid}/comments`,cmtId));
+  try{await updateDoc(doc(db,'posts',pid),{comments:increment(-1)})}catch(e){}
+  await loadCmts(pid,'pd-cmts');
+  showToast('Comment deleted');
+}
 async function submitPost(){
   if(!CU||!UP){showToast('Please sign in');return}
   const text=document.getElementById('pta').value.trim();if(!text){showToast('Please enter text');return}
@@ -1372,7 +1393,8 @@ async function showFL(type){
 async function openOP(uid){
   if(uid===CU?.uid){goTo('profile');return}
   curOP=uid;
-  const{db,doc,getDoc,collection,query,orderBy,getDocs}=window._fb;
+  if(opUnsub){opUnsub();opUnsub=null;}
+  const{db,doc,getDoc,collection,query,orderBy,getDocs,onSnapshot}=window._fb;
   const snap=await getDoc(doc(db,'users',uid));if(!snap.exists())return;
   const u=snap.data();
   document.getElementById('op-t').textContent=u.name||'Profile';
@@ -1380,22 +1402,40 @@ async function openOP(uid){
   document.getElementById('op-num').textContent=u.num||'#-';
   document.getElementById('op-bio').textContent=u.bio||'';
   document.getElementById('op-fc').textContent=u.followers||0;
+  document.getElementById('op-gc').textContent=u.following||0;
   document.getElementById('opav').innerHTML=u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase();
   if(u.coverUrl){const oc=document.getElementById('opcov');oc.style.backgroundImage=`url(${u.coverUrl})`;oc.style.backgroundSize='cover'}
   const isF=followingIds.has(uid);
   const fb=document.getElementById('op-fb');fb.classList.toggle('following',isF);fb.textContent=isF?t('unfollow'):t('follow');
   const chs=[...DCH,...(u.customChannels||[])];
-  document.getElementById('opchs').innerHTML=chs.map(ch=>`<div class="ck" onclick="opChFilt(this,'${uid}','${ch}')"><div class="ckn">${chLbl(ch)}</div></div>`).join('');
+  document.getElementById('opchs').innerHTML=
+    `<div class="ck ak" onclick="opAllCk(this,'${uid}')"><div class="ckn">All Posts</div></div>`+
+    chs.map(ch=>`<div class="ck" onclick="opChFilt(this,'${uid}','${ch}')"><div class="ckn">${chLbl(ch)}</div></div>`).join('');
   const ps=await getDocs(query(collection(db,'posts'),orderBy('createdAt','desc')));
   const posts=ps.docs.map(d=>({id:d.id,...d.data()})).filter(p=>p.authorId===uid);
   document.getElementById('op-pc').textContent=posts.length;
   document.getElementById('opposts').innerHTML=posts.length?posts.map(p=>pH(p)).join(''):'<div class="empty"><i class="ti ti-pencil-off"></i><p>No posts yet</p></div>';
   document.querySelectorAll('#opov .ptab').forEach(t=>t.classList.remove('ak'));document.querySelector('#opov .ptab').classList.add('ak');
   document.getElementById('opov').classList.add('on');
+  opUnsub=onSnapshot(doc(db,'users',uid),sn=>{
+    if(!sn.exists())return;
+    const d=sn.data();
+    document.getElementById('op-fc').textContent=d.followers||0;
+    document.getElementById('op-gc').textContent=d.following||0;
+  });
+}
+async function opAllCk(el,uid){
+  document.querySelectorAll('#opchs .ck').forEach(c=>c.classList.remove('ak'));el.classList.add('ak');
+  const{db,collection,query,orderBy,getDocs}=window._fb;
+  const ps=await getDocs(query(collection(db,'posts'),orderBy('createdAt','desc')));
+  const posts=ps.docs.map(d=>({id:d.id,...d.data()})).filter(p=>p.authorId===uid);
+  document.getElementById('opposts').innerHTML=posts.length?posts.map(p=>pH(p)).join(''):'<div class="empty"><i class="ti ti-pencil-off"></i><p>No posts yet</p></div>';
+  document.querySelectorAll('#opov .ptabs .ptab').forEach(t=>t.classList.remove('ak'));document.querySelector('#opov .ptabs .ptab')?.classList.add('ak');
 }
 async function opFilt(el,ch){
   if(!curOP)return;
   document.querySelectorAll('#opov .ptabs .ptab').forEach(t=>t.classList.remove('ak'));el.classList.add('ak');
+  if(ch==='all'){document.querySelectorAll('#opchs .ck').forEach(c=>c.classList.remove('ak'));document.querySelector('#opchs .ck')?.classList.add('ak');}
   if(ch==='reposts'){
     const{db,collection,query,where,getDocs,doc,getDoc}=window._fb;
     const c=document.getElementById('opposts');c.innerHTML='<div class="spin"></div>';
@@ -1464,7 +1504,7 @@ async function togFollow(){
   document.getElementById('ps-g').innerHTML=`<strong>${UP.following||0}</strong> Following`;
   startFeed();
 }
-function closeOP(){document.getElementById('opov').classList.remove('on');curOP=null}
+function closeOP(){document.getElementById('opov').classList.remove('on');if(opUnsub){opUnsub();opUnsub=null;}curOP=null}
 
 async function loadUsers(){
   const{db,collection,query,limit,getDocs}=window._fb;
@@ -1524,6 +1564,16 @@ function loadConvs(){
       .map(d=>({id:d.id,...d.data()}))
       .sort((a,b)=>(b.lastAt?.toMillis?.()||0)-(a.lastAt?.toMillis?.()||0));
     const c=document.getElementById('convlist');if(!c)return;
+    // Compute unread message count
+    let unread=0;
+    convs.forEach(cv=>{
+      const lastAt=cv.lastAt?.toMillis?.()||0;
+      const lastRead=_lastRead[cv.id]||(parseInt(localStorage.getItem('jl_lastRead_'+cv.id)||'0'));
+      if(!_lastRead[cv.id]&&lastRead)_lastRead[cv.id]=lastRead;
+      if(lastAt>0&&lastRead>0&&lastAt>lastRead&&cv.lastSenderId&&cv.lastSenderId!==CU.uid)unread++;
+      else if(lastAt>0&&lastRead===0&&cv.lastSenderId&&cv.lastSenderId!==CU.uid)unread++;
+    });
+    _msgUnread=unread;updateNavBadge();
     if(!convs.length){
       c.innerHTML='<div class="empty"><i class="ti ti-message-circle-off"></i><p>No messages yet.</p><button onclick="openNM()" style="margin-top:12px;background:var(--gold);color:#000;border:none;padding:9px 20px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer">Start a Conversation</button></div>';
       return;
@@ -1533,13 +1583,19 @@ function loadConvs(){
       const nm=esc(cv.memberNames?.[oid]||'Unknown');
       const av=cv.memberAvatars?.[oid]||'';
       const avH=av?`<img src="${av}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(nm[0]||'?').toUpperCase()+(nm[1]||'');
+      const lastAt=cv.lastAt?.toMillis?.()||0;
+      const lastRead=_lastRead[cv.id]||(parseInt(localStorage.getItem('jl_lastRead_'+cv.id)||'0'));
+      const hasUnread=lastAt>0&&cv.lastSenderId&&cv.lastSenderId!==CU.uid&&(lastRead===0||lastAt>lastRead);
       return`<div class="citem" onclick="openChat('${cv.id}','${oid}')">
         <div class="av" style="width:42px;height:42px;font-size:11px;flex-shrink:0">${avH}</div>
         <div style="flex:1;min-width:0;padding-left:2px">
-          <div class="cnm">${nm}</div>
-          <div class="cprev">${esc(cv.lastMsg||'Tap to chat')}</div>
+          <div class="cnm" style="${hasUnread?'font-weight:700;color:var(--tx)':''}">${nm}</div>
+          <div class="cprev" style="${hasUnread?'color:var(--tx2);font-weight:500':''}">${esc(cv.lastMsg||'Tap to chat')}</div>
         </div>
-        <div class="ctm">${cv.lastAt?tAgo(cv.lastAt.toDate()):''}</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <div class="ctm">${cv.lastAt?tAgo(cv.lastAt.toDate()):''}</div>
+          ${hasUnread?'<div style="width:8px;height:8px;border-radius:50%;background:var(--gold)"></div>':''}
+        </div>
       </div>`;
     }).join('');
   },err=>{
@@ -1549,7 +1605,9 @@ function loadConvs(){
 }
 
 async function openChat(cid,oid){
-  curConv=cid;
+  curConv=cid;curChatOid=oid;
+  _lastRead[cid]=Date.now();try{localStorage.setItem('jl_lastRead_'+cid,Date.now())}catch(e){}
+  _msgUnread=Math.max(0,_msgUnread-1);updateNavBadge();
   const{db,doc,getDoc,collection,query,orderBy,onSnapshot}=window._fb;
   // Load other user info
   const us=await getDoc(doc(db,'users',oid));
@@ -1589,12 +1647,11 @@ async function openChat(cid,oid){
     setTimeout(scrollBottom,50);
   });
 }
-async function sendMsg(){if(!CU||!curConv)return;const inp=document.getElementById('chi');const text=inp.value.trim();if(!text)return;inp.value='';const{db,collection,addDoc,doc,updateDoc,serverTimestamp}=window._fb;await addDoc(collection(db,`conversations/${curConv}/messages`),{text,senderId:CU.uid,createdAt:serverTimestamp()});await updateDoc(doc(db,'conversations',curConv),{lastMsg:text,lastAt:serverTimestamp()})}
+async function sendMsg(){if(!CU||!curConv)return;const inp=document.getElementById('chi');const text=inp.value.trim();if(!text)return;inp.value='';const{db,collection,addDoc,doc,updateDoc,serverTimestamp}=window._fb;await addDoc(collection(db,`conversations/${curConv}/messages`),{text,senderId:CU.uid,createdAt:serverTimestamp()});await updateDoc(doc(db,'conversations',curConv),{lastMsg:text,lastAt:serverTimestamp(),lastSenderId:CU.uid})}
 function closeChat(){
   document.getElementById('chov').classList.remove('on');
   if(chatUnsub){chatUnsub();chatUnsub=null;}
-  curConv=null;
-  // Ensure msgs panel is visible after returning from chat
+  curConv=null;curChatOid=null;
   switchMT('msgs');
 }
 async function openNM(){
@@ -1636,7 +1693,7 @@ async function renderParties(){
     return`<div class="poc"><div class="potop"><div class="podot" style="background:${p.color}"></div><div class="pon">${p.name}</div><div class="popct">${pct}%</div></div><div class="bt"><div class="bf" style="width:${pct}%;background:${p.color}"></div></div><div class="pbs"><button class="pb2${isV?' voted':''}" id="vb-${p.id}" onclick="voteP('${p.id}')">${isV?'Voted':'Vote'}</button>${isV?`<button class="pb2" onclick="abstainP('${p.id}')">Abstain</button>`:''}<button class="pb2 det" onclick="togPD('${p.id}')">Politicians</button></div><div id="pd-${p.id}" style="display:none;margin-top:8px;border-top:1px solid var(--bd);padding-top:8px">${polsH}</div></div>`;
   }).join('');
 }
-function togPD(id){const el=document.getElementById('pd-'+id);if(!el)return;const open=el.style.display!=='none';el.style.display=open?'none':'block';if(open)_openParties.delete(id);else _openParties.add(id);}
+function togPD(id){const el=document.getElementById('pd-'+id);if(!el)return;const open=el.style.display!=='none';PARTIES.forEach(p=>{if(p.id!==id){const o=document.getElementById('pd-'+p.id);if(o)o.style.display='none';_openParties.delete(p.id);}});el.style.display=open?'none':'block';if(open)_openParties.delete(id);else _openParties.add(id);}
 async function voteP(id){
   if(!CU)return;if(myVote===id){showToast('Already voted for this party');return}
   const{db,doc,setDoc,updateDoc,increment,getDoc}=window._fb;
@@ -1795,8 +1852,8 @@ function linkText(s){
 }
 function goToPuls(asset){goTo('puls');setTimeout(()=>openCD(asset),120);}
 function togTCG(id){const body=document.getElementById('tcg-'+id);const icon=document.getElementById('tcgi-'+id);if(!body)return;const open=body.style.display!=='none';body.style.display=open?'none':'block';if(icon)icon.style.transform=open?'':'rotate(180deg)';}
-function togWatch(id){const body=document.getElementById('watch-'+id);const icon=document.getElementById('watchi-'+id);if(!body)return;const open=body.style.display!=='none';body.style.display=open?'none':'block';if(icon)icon.style.transform=open?'':'rotate(180deg)';}
-function togTCGSub(id){const body=document.getElementById('tcgsub-'+id);const icon=document.getElementById('tcgsubi-'+id);if(!body)return;const open=body.style.display!=='none';body.style.display=open?'none':'block';if(icon)icon.style.transform=open?'':'rotate(180deg)';}
+function togWatch(id){const body=document.getElementById('watch-'+id);const icon=document.getElementById('watchi-'+id);if(!body)return;const open=body.style.display!=='none';document.querySelectorAll('.watch-models').forEach(el=>{if(el.id!=='watch-'+id){el.style.display='none';const ic=document.getElementById('watchi-'+el.id.slice(6));if(ic)ic.style.transform='';}});body.style.display=open?'none':'block';if(icon)icon.style.transform=open?'':'rotate(180deg)';}
+function togTCGSub(id){const body=document.getElementById('tcgsub-'+id);const icon=document.getElementById('tcgsubi-'+id);if(!body)return;const open=body.style.display!=='none';document.querySelectorAll('[id^="tcgsub-"]').forEach(el=>{if(el.id!=='tcgsub-'+id){el.style.display='none';const ic=document.getElementById('tcgsubi-'+el.id.slice(7));if(ic)ic.style.transform='';}});body.style.display=open?'none':'block';if(icon)icon.style.transform=open?'':'rotate(180deg)';}
 function searchWatch(brand,q){const c=document.getElementById('wmodels-'+brand);if(!c)return;c.querySelectorAll('.watch-model').forEach(m=>{const name=(m.querySelector('.watch-model-name')?.textContent||'').toLowerCase();m.style.display=!q||name.includes(q.toLowerCase())?'':'none';});}
 async function repostP(pid,btn){
   if(!CU||!UP){showToast('Please sign in');return}
