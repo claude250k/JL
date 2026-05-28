@@ -37,7 +37,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .sbar{height:44px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .sbar-t{font-size:15px;font-weight:600;color:var(--tx)}
 .sbar-i{display:flex;gap:5px;align-items:center;color:var(--tx);font-size:13px}
-.sc{display:none;flex-direction:column;flex:1;overflow:hidden;position:relative;min-height:0}.sc.on{display:flex}.sc#sc-profile{overflow:visible}
+.sc{display:none;flex-direction:column;flex:1;overflow:hidden;position:relative;min-height:0}.sc.on{display:flex}
 .sh{padding:8px 16px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative}
 .logo{font-family:var(--fd);font-size:22px;font-weight:800;letter-spacing:-.5px;color:var(--tx)}.logo em{color:var(--gold);font-style:normal}
 .stitle{font-size:16px;font-weight:700;color:var(--tx)}
@@ -221,7 +221,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   .sc{max-width:600px;border-right:1px solid var(--bd)}
 }
 
-.ch-modal{position:absolute;inset:0;background:rgba(0,0,0,.8);z-index:250;display:none;align-items:center;justify-content:center;padding:24px}
+.ch-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:250;display:none;align-items:center;justify-content:center;padding:24px}
 .ch-modal.on{display:flex}
 .ch-modal-box{background:var(--sf);border:1px solid var(--gold);border-radius:16px;padding:24px;width:100%;max-width:320px}
 .ch-modal-title{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:12px}
@@ -233,7 +233,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .ch-modal-ok{flex:1;background:var(--gold);border:none;color:#000;padding:9px;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700}
 
 .rp-btn.reposted i{color:var(--gn)}.rp-btn.reposted span{color:var(--gn)}
-.ch-modal{position:absolute;inset:0;background:rgba(0,0,0,.8);z-index:250;display:none;align-items:center;justify-content:center;padding:24px}
+.ch-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:250;display:none;align-items:center;justify-content:center;padding:24px}
 .ch-modal.on{display:flex}
 .ch-modal-box{background:var(--sf);border:1px solid var(--gold);border-radius:16px;padding:24px;width:100%;max-width:320px}
 .ch-modal-title{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:12px;font-family:var(--fb)}
@@ -245,40 +245,49 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .ch-modal-ok{flex:1;background:var(--gold);border:none;color:#000;padding:9px;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700;font-family:var(--fb)}
 .update-toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--gold);color:#000;padding:10px 18px;border-radius:10px;font-size:12px;font-weight:700;z-index:400;cursor:pointer;box-shadow:0 4px 20px rgba(247,147,26,.4)}
 
-/* ── DESKTOP LAYOUT ── */
-@media(min-width:600px){
-  html,body{background:var(--bg);justify-content:flex-start}
-  .shell{width:100%;max-width:1200px;height:100vh;border-radius:0;border:none;flex-direction:row;margin:0 auto;box-shadow:none}
-  /* Sidebar nav */
-  .bnav{flex-direction:column;width:220px;height:100vh;border-top:none;border-right:1px solid var(--bd);justify-content:flex-start;align-items:flex-start;padding:16px 10px;gap:2px;flex-shrink:0;overflow-y:auto;position:sticky;top:0}
-  .bn{flex-direction:row;justify-content:flex-start;gap:14px;padding:11px 14px;width:100%;border-radius:12px;min-width:0}
-  .bn i{font-size:22px}.bn span{font-size:14px;font-weight:500;display:block}
-  .bn.ak{background:var(--gdim)}
-  .bn:hover{background:var(--sf)}
-  .nbadge{top:6px;right:6px}
-  /* Main content */
-  .shell>.sc{order:2;flex:1;min-width:0;max-width:640px;border-right:1px solid var(--bd)}
-  .shell>.asc{order:2;max-width:480px;border-right:1px solid var(--bd)}
-  /* Right panel */
-  .shell::after{content:'';flex:1;min-width:0}
-  /* Status bar hidden on desktop */
-  .sbar{display:none}
-  /* Nav order */
-  .bnav{order:1}
-  /* Overlays full height */
-  .ov,.pdov,.setov,.editov,.chov,.inst-ov,.ch-modal{border-radius:0}
-  /* Toast position */
-  .toast{top:20px;left:50%;transform:translateX(-50%);position:fixed}
-  /* Install banner */
-  .ibanner{max-width:640px}
-  /* Desktop: add JL logo top of sidebar */
-  .bnav::before{content:'';display:block;height:50px}
-}
-@media(min-width:900px){
-  .bnav{width:240px}
+
   .shell>.sc{max-width:680px}
 }
 @media(min-width:600px){.desk-logo{display:block!important}}
+
+/* ── RESPONSIVE: Mobile = phone shell, Desktop = Twitter layout ── */
+@media(min-width:640px){
+  html,body{justify-content:flex-start;overflow:auto;background:var(--bg)}
+  .shell{
+    width:100%;max-width:none;height:100vh;min-height:100vh;
+    border-radius:0;border:none;flex-direction:row;
+    box-shadow:none;overflow:hidden
+  }
+  .bnav{
+    flex-direction:column;width:220px;min-width:220px;height:100vh;
+    border-top:none;border-right:1px solid var(--bd);
+    justify-content:flex-start;align-items:flex-start;
+    padding:12px 8px;gap:2px;flex-shrink:0;overflow-y:auto
+  }
+  .bn{
+    flex-direction:row;justify-content:flex-start;
+    gap:14px;padding:11px 14px;width:100%;
+    border-radius:12px;min-width:0
+  }
+  .bn i{font-size:20px}
+  .bn span{font-size:14px;font-weight:500;display:block}
+  .bn.ak{background:var(--gdim)}
+  .bn:hover:not(.ak){background:var(--sf)}
+  .nbadge{top:5px;right:5px}
+  .shell>.sc,.shell>.asc{
+    flex:1;min-width:0;max-width:680px;
+    border-right:1px solid var(--bd);order:2
+  }
+  .bnav{order:1}
+  .sbar{display:none}
+  .toast{position:fixed;top:20px}
+  .ibanner{max-width:680px}
+  .desk-logo{display:block!important}
+}
+@media(min-width:900px){
+  .bnav{width:240px;min-width:240px}
+  .shell>.sc{max-width:720px}
+}
 </style>
 </head>
 <body>
@@ -328,17 +337,10 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 </div>
 
 <div class="sc on" id="sc-feed">
-  <div class="sh" style="justify-content:center;position:relative">
-    <button onclick="showInstPage()" style="position:absolute;left:0;background:none;border:none;cursor:pointer;color:var(--mu2);font-size:18px;padding:4px" title="Install App"><i class="ti ti-download"></i></button>
-    
-    <div style="display:flex;align-items:center;justify-content:center;gap:6px">
-  <svg width="60" height="28" viewBox="0 0 60 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <polyline points="0,14 8,14 12,4 16,24 20,10 24,18 28,14 36,14" stroke="#F7931A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="38" y="21" font-family="Syne,sans-serif" font-weight="800" font-size="18" fill="#f0ede6">J<tspan fill="#F7931A">L</tspan></text>
-  </svg>
-</div>
+  <div class="sh" style="justify-content:center">
+    <div style="display:flex;align-items:center;justify-content:center"><svg width="72" height="32" viewBox="0 0 72 32" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="0,16 8,16 11,5 14,27 17,11 20,21 23,16 32,16" stroke="#F7931A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="36" y="23" font-family="Syne,sans-serif" font-weight="800" font-size="20" fill="#f0ede6">J<tspan fill="#F7931A">L</tspan></text></svg></div>
   </div>
-  <div class="krow" id="fk">
+  <div class="krow"<div class="krow" id="fk">
     <button class="kachel ak" onclick="filterFeed(this,'all')">Following</button>
     <button class="kachel" onclick="filterFeed(this,'discover')">Discover ✦</button>
     <button class="kachel" onclick="filterFeed(this,'bitcoin')">Bitcoin</button>
@@ -568,9 +570,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 </div>
 <div class="toast" id="toast"></div>
 <div class="bnav">
-  <div style="padding:8px 14px 16px;display:none" class="desk-logo">
-    <svg width="60" height="28" viewBox="0 0 72 32" fill="none"><polyline points="0,16 8,16 11,5 14,27 17,11 20,21 23,16 32,16" stroke="#F7931A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="36" y="23" font-family="Syne,sans-serif" font-weight="800" font-size="20" fill="#f0ede6">J<tspan fill="#F7931A">L</tspan></text></svg>
-  </div>
+  <div style="padding:8px 14px 20px;display:none" class="desk-logo"><svg width="72" height="32" viewBox="0 0 72 32" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="0,16 8,16 11,5 14,27 17,11 20,21 23,16 32,16" stroke="#F7931A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="36" y="23" font-family="Syne,sans-serif" font-weight="800" font-size="20" fill="#f0ede6">J<tspan fill="#F7931A">L</tspan></text></svg></div>
   <button class="bn ak" id="bn-feed" onclick="goTo('feed')"><i class="ti ti-home"></i><span>Feed</span></button>
   <button class="bn" id="bn-puls" onclick="goTo('puls')"><i class="ti ti-activity"></i><span>Puls</span></button>
   <button class="bn" id="bn-search" onclick="goTo('search')"><i class="ti ti-search"></i><span>Search</span></button>
@@ -578,6 +578,10 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   <button class="bn" id="bn-profile" onclick="goTo('profile')"><i class="ti ti-user"></i><span>Profile</span></button>
 </div>
 </div>
+
+// Hash routing - restore page on reload
+function updateHash(s){try{history.replaceState(null,'','#'+s)}catch(e){}}
+const _validScreens=['feed','puls','search','messages','profile'];
 
 <script>
 function tick(){const n=new Date();document.getElementById('clk').textContent=n.getHours()+':'+(n.getMinutes()<10?'0':'')+n.getMinutes()}
@@ -879,12 +883,27 @@ function manageFeedChannels(){
   document.getElementById('app').appendChild(ov);
 }
 function toggleFeedCh(ch,cb){
-  const savedStr=localStorage.getItem('jl_feed_chs');
   const all=[...DCH,...customChs];
+  const savedStr=localStorage.getItem('jl_feed_chs');
   let active=savedStr?JSON.parse(savedStr):[...all];
   if(cb.checked){if(!active.includes(ch))active.push(ch)}
   else{active=active.filter(c=>c!==ch)}
   localStorage.setItem('jl_feed_chs',JSON.stringify(active));
+  // Update feed kacheln live
+  updateFeedKacheln(active);
+}
+function updateFeedKacheln(active){
+  const fk=document.getElementById('fk');if(!fk)return;
+  const all=[...DCH,...customChs];
+  // Rebuild kacheln (keep Following + Discover always)
+  let h='<button class="kachel ak" onclick="filterFeed(this,'all')">Following</button>';
+  h+='<button class="kachel" onclick="filterFeed(this,'discover')">Discover ✦</button>';
+  all.forEach(ch=>{
+    if(!active||active.includes(ch))
+      h+=`<button class="kachel" onclick="filterFeed(this,'${ch}')">${chLbl(ch)}</button>`;
+  });
+  h+='<button class="kachel" onclick="manageFeedChannels()" style="border-color:var(--gold);color:var(--gold)">+ Channels</button>';
+  fk.innerHTML=h;
 }
 function filterFeed(btn,cat){
   // 'discover' shows all posts from everyone (explore/for-you)
@@ -948,7 +967,8 @@ function pH(p){
           </button>
           <button class="pa" onclick="toggleQC('${p.id}')"><i class="ti ti-message-circle"></i> <span>${p.comments||0}</span></button>
 
-          <button class="pa" onclick="shareP('${p.id}')"><i class="ti ti-share"></i></button>
+          <button class="pa" id="rp-\${p.id}" onclick="repostP('\${p.id}',this)"><i class="ti ti-repeat"></i> <span>\${p.reposts||0}</span></button>
+          <button class="pa" onclick="shareP('\${p.id}')"><i class="ti ti-share"></i></button>
         </div>
       </div>
     </div>
@@ -983,11 +1003,16 @@ async function likeP(pid,btn){
   const nCount=(d.likes||0)+(liked?-1:1);
   await updateDoc(ref,{likes:increment(liked?-1:1),likedBy:nArr});
   document.querySelectorAll('[id="lb-'+pid+'"]').forEach(b=>{
-    b.classList.toggle('liked',!liked);
-    const icon=b.querySelector('i');const cnt=b.querySelector('span');
-    if(icon){icon.className='';icon.className='ti ti-'+((!liked)?'heart-filled':'heart');}
+    const nowLiked=!liked;
+    b.classList.toggle('liked',nowLiked);
+    const icon=b.querySelector('i');
+    const cnt=b.querySelector('span');
+    if(icon){
+      icon.className='ti ti-heart'+(nowLiked?'-filled':'');
+      icon.style.color=nowLiked?'var(--gold)':'';
+    }
     if(cnt)cnt.textContent=nCount;
-    if(!liked)b.style.color='var(--gold)';else b.style.color='';
+    b.style.color=nowLiked?'var(--gold)':'';
   });
   if(!liked&&d.authorId!==CU.uid)await addNotif(d.authorId,'like',`${UP?.name} liked your post`,pid);
 }
@@ -1342,7 +1367,17 @@ async function startConv(oid){
   if(!cid){const os=await getDoc(doc(db,'users',oid));const o=os.exists()?os.data():{name:'-',avatarUrl:''};const nc=await addDoc(collection(db,'conversations'),{members:[CU.uid,oid],memberNames:{[CU.uid]:UP.name||'',[oid]:o.name||''},memberAvatars:{[CU.uid]:UP.avatarUrl||'',[oid]:o.avatarUrl||''},lastMsg:'',lastAt:serverTimestamp()});cid=nc.id;}
   openChat(cid,oid);
 }
-async function msgUser(){if(!CU||!curOP)return;closeOP();goTo('messages');await startConv(curOP)}
+async function msgUser(){
+  if(!CU||!curOP)return;
+  const uid=curOP;
+  closeOP();
+  goTo('messages');
+  switchMT('msgs');
+  // Small delay to let UI settle, then open/create conversation
+  setTimeout(async()=>{
+    await startConv(uid);
+  },300);
+}
 
 async function renderParties(){
   const{db,collection,getDocs}=window._fb;let votes={},polVotes={};
@@ -1452,6 +1487,7 @@ function sCat(btn){document.querySelectorAll('#pm .pcat').forEach(b=>b.classList
 function prevImg(inp){if(!inp.files[0])return;const p=document.getElementById('uprev');p.src=URL.createObjectURL(inp.files[0]);p.style.display='block'}
 
 function goTo(s){
+  updateHash(s);
   document.querySelectorAll('.sc').forEach(e=>e.classList.remove('on'));
   document.querySelectorAll('.bn').forEach(e=>e.classList.remove('ak'));
   document.getElementById('sc-'+s).classList.add('on');
@@ -1530,13 +1566,3 @@ function shareP(id){if(navigator.share)navigator.share({title:'JL',url:location.
 </script>
 </body>
 </html>
-
-// Hash-based routing so page reload returns to correct screen
-function updateHash(s){history.replaceState(null,'','#'+s)}
-const _origGoTo=goTo;
-function goTo(s){_origGoTo(s);updateHash(s)}
-// On load, restore screen from hash
-window.addEventListener('DOMContentLoaded',()=>{
-  const h=location.hash.replace('#','');
-  if(h&&document.getElementById('sc-'+h))setTimeout(()=>{if(CU)_origGoTo(h)},1000);
-});
