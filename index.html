@@ -861,7 +861,7 @@ wFB(()=>{
   const{auth,onAuthStateChanged}=window._fb;
   onAuthStateChanged(auth,async u=>{
     if(u){CU=u;await loadUP(u.uid);document.getElementById('asc').style.display='none';updateUI();startFeed();loadUsers();loadConvs();loadNotifs();renderParties();loadMyVote();loadFollowing();loadPortfolio();loadReposts();}
-    else{CU=null;UP=null;followingIds=new Set();portHoldings=[];if(portUnsub2){portUnsub2();portUnsub2=null;}document.getElementById('asc').style.display='flex';}
+    else{CU=null;UP=null;followingIds=new Set();portHoldings=[];_msgUnread=0;_notifUnread=0;if(msgUnsub){msgUnsub();msgUnsub=null;}if(notifUnsub){notifUnsub();notifUnsub=null;}if(feedUnsub){feedUnsub();feedUnsub=null;}if(portUnsub2){portUnsub2();portUnsub2=null;}updateNavBadge();document.getElementById('asc').style.display='flex';}
   });
 });
 
@@ -1688,17 +1688,16 @@ function loadConvs(){
     const convs=snap.docs
       .map(d=>({id:d.id,...d.data()}))
       .sort((a,b)=>(b.lastAt?.toMillis?.()||0)-(a.lastAt?.toMillis?.()||0));
-    const c=document.getElementById('convlist');if(!c)return;
-    // Compute unread message count
+    // Compute unread count and update badge before any DOM checks
     let unread=0;
     convs.forEach(cv=>{
       const lastAt=cv.lastAt?.toMillis?.()||0;
       const lastRead=_lastRead[cv.id]||(parseInt(localStorage.getItem('jl_lastRead_'+cv.id)||'0'));
       if(!_lastRead[cv.id]&&lastRead)_lastRead[cv.id]=lastRead;
-      if(lastAt>0&&lastRead>0&&lastAt>lastRead&&cv.lastSenderId&&cv.lastSenderId!==CU.uid)unread++;
-      else if(lastAt>0&&lastRead===0&&cv.lastSenderId&&cv.lastSenderId!==CU.uid)unread++;
+      if(lastAt>0&&cv.lastSenderId&&cv.lastSenderId!==CU.uid&&(lastRead===0||lastAt>lastRead))unread++;
     });
     _msgUnread=unread;updateNavBadge();
+    const c=document.getElementById('convlist');if(!c)return;
     if(!convs.length){
       c.innerHTML='<div class="empty"><i class="ti ti-message-circle-off"></i><p>No messages yet.</p><button onclick="openNM()" style="margin-top:12px;background:var(--gold);color:#000;border:none;padding:9px 20px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer">Start a Conversation</button></div>';
       return;
