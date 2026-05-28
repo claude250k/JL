@@ -848,7 +848,7 @@ wFB(()=>{
   const{auth,onAuthStateChanged}=window._fb;
   onAuthStateChanged(auth,async u=>{
     if(u){CU=u;await loadUP(u.uid);document.getElementById('asc').style.display='none';updateUI();startFeed();loadUsers();loadConvs();loadNotifs();renderParties();loadMyVote();loadFollowing();loadPortfolio();loadReposts();}
-    else{CU=null;UP=null;followingIds=new Set();document.getElementById('asc').style.display='flex';}
+    else{CU=null;UP=null;followingIds=new Set();portHoldings=[];if(portUnsub2){portUnsub2();portUnsub2=null;}document.getElementById('asc').style.display='flex';}
   });
 });
 
@@ -1420,7 +1420,7 @@ async function showFL(type){
   const uids=snap.docs.map(d=>type==='followers'?d.data().followerId:d.data().followingId);
   if(!uids.length){fl.innerHTML='<div class="empty"><p>No '+type+' yet</p></div>';return}
   const users=await Promise.all(uids.map(id=>getDoc(doc(db,'users',id))));
-  fl.innerHTML=users.filter(s=>s.exists()).map(s=>{const u=s.data();return`<div class="crow" onclick="openOP('${u.uid}')"><div class="av" style="width:36px;height:36px">${u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase()}</div><div style="flex:1"><div class="crnm">${esc(u.name||'')}</div><div class="crds">${esc(u.num||'')}</div></div></div>`}).join('');
+  fl.innerHTML=users.filter(s=>s.exists()).map(s=>{const u=s.data();return`<div class="crow" onclick="document.getElementById('fl-ov').classList.remove('on');openOP('${u.uid}')"><div class="av" style="width:36px;height:36px">${u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase()}</div><div style="flex:1"><div class="crnm">${esc(u.name||'')}</div><div class="crds">${esc(u.num||'')}</div></div></div>`}).join('');
 }
 
 async function openOP(uid){
@@ -1561,7 +1561,7 @@ async function viewOpPortfolio(){
   document.getElementById('opport-total').innerHTML='<div class="spin" style="margin:24px auto"></div>';
   document.getElementById('opport-list').innerHTML='';
   document.getElementById('opportov').classList.add('on');
-  const hSnap=await getDocs(query(collection(db,`users/${curOP}/holdings`),orderBy('addedAt','desc')));
+  const hSnap=await getDocs(query(collection(db,`users/${curOP}/portfolio`),orderBy('addedAt','desc')));
   const holdings=hSnap.docs.map(d=>({id:d.id,...d.data()}));
   const cgIds=[...new Set(holdings.filter(h=>h.category==='crypto').map(h=>PHCID[h.symbol?.toLowerCase()]).filter(Boolean))];
   if(cgIds.length){
@@ -2004,7 +2004,7 @@ const PHDEMO={nvda:876,aapl:218,msft:415,amzn:186,goog:174,meta:512,tsla:248,sap
 async function loadPortfolio(){
   if(!CU)return;
   const{db,collection,query,orderBy,onSnapshot}=window._fb;
-  const q=query(collection(db,`users/${CU.uid}/holdings`),orderBy('addedAt','desc'));
+  const q=query(collection(db,`users/${CU.uid}/portfolio`),orderBy('addedAt','desc'));
   if(portUnsub2)portUnsub2();
   portUnsub2=onSnapshot(q,snap=>{
     portHoldings=snap.docs.map(d=>({id:d.id,...d.data()}));
@@ -2112,14 +2112,14 @@ async function saveHolding(){
     if(cnt>=1){showToast('Pro coming soon — upgrade for unlimited holdings');closeAddHolding();return}
   }
   const{db,collection,addDoc,serverTimestamp}=window._fb;
-  await addDoc(collection(db,`users/${CU.uid}/holdings`),{name,symbol:symbol||name,category:portCat,amount,buyPrice,addedAt:serverTimestamp()});
+  await addDoc(collection(db,`users/${CU.uid}/portfolio`),{name,symbol:symbol||name,category:portCat,amount,buyPrice,addedAt:serverTimestamp()});
   closeAddHolding();showToast(`${name} added to portfolio`);
 }
 
 function showHoldMenu(id){showHoldDetail(id)}
 async function delHolding(id){
   const{db,doc,deleteDoc}=window._fb;
-  await deleteDoc(doc(db,`users/${CU.uid}/holdings`,id));
+  await deleteDoc(doc(db,`users/${CU.uid}/portfolio`,id));
   showToast(t('removed'));
 }
 function showHoldDetail(id){
@@ -2169,7 +2169,7 @@ async function saveHoldEdit(){
   if(isNaN(amount)||amount<=0){showToast('Enter a valid amount');return}
   if(isNaN(price)||price<0){showToast('Enter a valid price');return}
   const{db,doc,updateDoc}=window._fb;
-  await updateDoc(doc(db,`users/${CU.uid}/holdings`,curHoldId),{amount,buyPrice:price});
+  await updateDoc(doc(db,`users/${CU.uid}/portfolio`,curHoldId),{amount,buyPrice:price});
   showToast('Position updated!');closeHoldOv();
 }
 async function removeHolding(){
