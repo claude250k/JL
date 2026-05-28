@@ -229,6 +229,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 }
 
 .rp-btn.reposted{color:var(--gold)}.rp-btn.reposted i{color:var(--gold)}.rp-btn.reposted span{color:var(--gold)}
+.qblock{border:1px solid var(--bd);border-radius:10px;padding:8px 10px;margin:5px 0 6px;background:var(--sf);cursor:pointer;transition:border-color .15s}.qblock:hover{border-color:rgba(247,147,26,.3)}
 .ch-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:250;display:none;align-items:center;justify-content:center;padding:24px}
 .ch-modal.on{display:flex}
 .ch-modal-box{background:var(--sf);border:1px solid var(--gold);border-radius:16px;padding:24px;width:100%;max-width:320px}
@@ -550,8 +551,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 
 <div class="sc" id="sc-search">
   <div class="sh" style="justify-content:center;position:relative"><div class="stitle">Search<em style="color:var(--gold);font-style:normal">.</em></div><div style="position:absolute;right:16px"><button class="ib2" onclick="loadUsers();showToast('Refreshing...')" title="Refresh"><i class="ti ti-refresh"></i></button></div></div>
-  <div class="sbar2"><div class="sbox"><i class="ti ti-search"></i><input type="text" id="sinp" placeholder="Name or #number ..." oninput="doSearch()"></div></div>
-  <div class="tpills"><div class="tp" onclick="tagS('Bitcoin')">#Bitcoin</div><div class="tp" onclick="tagS('Stocks')">#Stocks</div><div class="tp" onclick="tagS('ETF')">#ETF</div><div class="tp" onclick="tagS('Economy')">#Economy</div><div class="tp" onclick="tagS('Analysis')">#Analysis</div><div class="tp" onclick="tagS('Politics')">#Politics</div></div>
+  <div class="sbar2"><div class="sbox"><i class="ti ti-search"></i><input type="text" id="sinp" placeholder="Name or #number ..." oninput="doSearch()"><button id="sinp-clear" onclick="clearSearch()" style="display:none;background:none;border:none;color:var(--mu2);cursor:pointer;padding:0 4px;line-height:1;font-size:16px" title="Clear"><i class="ti ti-x"></i></button></div></div>
   <div class="scroll"><div class="sl">Creators</div><div id="clist"><div class="spin"></div></div></div>
 </div>
 
@@ -615,7 +615,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
     </div>
     <div style="padding:0 14px 3px;font-size:10px;color:var(--mu);letter-spacing:.7px;text-transform:uppercase;font-weight:700" data-i18n="channels_lbl">Channels</div>
     <div class="chgrid" id="mychs"></div>
-    <div class="ptabs"><div class="ptab ak" onclick="ptab(this,'posts')" data-i18n="tab_posts">Posts</div><div class="ptab" onclick="ptab(this,'reposts')" data-i18n="tab_reposts">Reposts</div><div class="ptab" onclick="ptab(this,'likes')" data-i18n="tab_likes">Likes</div></div>
+    <div class="ptabs"><div class="ptab ak" onclick="ptab(this,'posts')" data-i18n="tab_posts">Posts</div><div class="ptab" onclick="ptab(this,'reposts')" data-i18n="tab_reposts">Reposts</div><div class="ptab" onclick="ptab(this,'likes')" data-i18n="tab_likes">Likes</div><div class="ptab" onclick="ptab(this,'saved')"><i class="ti ti-bookmark" style="font-size:12px"></i></div></div>
     <div id="myposts"></div><div style="height:16px"></div>
   </div>
   <div class="fl-ov" id="fl-ov"><div class="ovh"><button class="ovb" onclick="document.getElementById('fl-ov').classList.remove('on')"><i class="ti ti-arrow-left"></i></button><div class="ovt" id="fl-title">Followers</div></div><div class="scroll" id="fl-content"></div></div>
@@ -698,6 +698,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   <div class="msh">
     <div class="mtitle">New Post</div>
     <textarea class="pta" id="pta" placeholder="What's on your mind? Use @ to mention someone" oninput="onMentionInput(this)"></textarea>
+    <div id="quote-prev" style="display:none"></div>
     <img id="uprev" class="uprev">
     <div style="font-size:10px;color:var(--mu);margin-top:8px;margin-bottom:3px">Choose channel:</div>
     <div class="mcats" id="mcats">
@@ -711,6 +712,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       <button class="pcat" data-cat="forecasts" onclick="sCat(this)">Forecasts</button>
     </div>
     <div id="ccats"></div>
+    <button onclick="addCh()" type="button" style="background:none;border:1px dashed var(--bd);color:var(--mu2);padding:3px 9px;border-radius:13px;font-size:10px;font-weight:600;cursor:pointer;margin-top:4px"><i class="ti ti-plus" style="font-size:10px"></i> New channel</button>
     <div class="mft">
       <label class="uic" for="iminp"><i class="ti ti-photo"></i></label>
       <input type="file" id="iminp" accept="image/*" style="display:none" onchange="prevImg(this)">
@@ -1084,6 +1086,7 @@ async function chModalOk(){
   const fk=document.getElementById('fk');
   const btn=document.createElement('button');btn.className='kachel';btn.textContent=chLbl(id);btn.onclick=()=>filterFeed(btn,id);fk.appendChild(btn);
   renderMyChs();renderCCats();showToast(`Channel "${n.trim()}" created`);
+  if(document.getElementById('pm').classList.contains('on'))setTimeout(()=>{const b=document.querySelector(`#ccats .pcat[data-cat="${id}"]`);if(b)b.click();},60);
 }
 async function upAv(inp){
   if(!inp.files[0]||!CU)return;showToast('Uploading...');
@@ -1208,6 +1211,7 @@ function pH(p){
   const avH=p.authorAvatar?`<img src="${p.authorAvatar}">`:(p.authorName||'?').substring(0,2).toUpperCase();
   const liked=CU&&(p.likedBy||[]).includes(CU.uid);
   const rpd=repostIds.has(p.id);
+  const svd=isSaved(p.id);
   const myAvH=UP?.avatarUrl?`<img src="${UP.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(UP?.name||'?').substring(0,2).toUpperCase();
   const isOwn=CU&&p.authorId===CU.uid;
   return`<div class="pi" data-id="${p.id}">
@@ -1220,6 +1224,7 @@ function pH(p){
           <span class="ptm">${t}</span>
         </div>
         <div class="ptxt" onclick="openPD('${p.id}')">${linkText(p.text||'')}</div>
+        ${qblockH(p.quoteOf)}
         ${img}
         <div class="pacts">
           <button class="pa${liked?' liked':''}" id="lb-${p.id}" onclick="likeP('${p.id}',this)">
@@ -1227,8 +1232,8 @@ function pH(p){
             <span>${p.likes||0}</span>
           </button>
           <button class="pa" onclick="toggleQC('${p.id}')"><i class="ti ti-message-circle"></i> <span id="cc-${p.id}">${p.comments||0}</span></button>
-
-          <button class="pa rp-btn${rpd?' reposted':''}" id="rp-${p.id}" onclick="repostP('${p.id}',this)" style="${rpd?'color:var(--gold)':''}"><i class="ti ti-repeat" style="${rpd?'color:var(--gold)':''}"></i> <span>${p.reposts||0}</span></button>
+          <button class="pa rp-btn${rpd?' reposted':''}" id="rp-${p.id}" onclick="rpMenu('${p.id}',this)" style="${rpd?'color:var(--gold)':''}"><i class="ti ti-repeat" style="${rpd?'color:var(--gold)':''}"></i> <span>${p.reposts||0}</span></button>
+          <button class="pa${svd?' liked':''}" id="sv-${p.id}" onclick="toggleSave('${p.id}',this)"><i class="ti ${svd?'ti-bookmark-filled':'ti-bookmark'}"></i></button>
           <button class="pa" onclick="shareP('${p.id}')"><i class="ti ti-share"></i></button>
         </div>
       </div>
@@ -1424,6 +1429,7 @@ async function submitPost(){
   try{
     const{db,collection,addDoc,doc,updateDoc,increment,serverTimestamp}=window._fb;
     const post={text,channel:selCat,imageUrl:'',authorId:CU.uid,authorName:UP.name||'',authorAvatar:UP.avatarUrl||'',likes:0,likedBy:[],comments:0,createdAt:serverTimestamp()};
+    if(_quotePost)post.quoteOf={pid:_quotePost.pid,authorName:_quotePost.authorName||'',authorAvatar:_quotePost.authorAvatar||'',text:(_quotePost.text||'').substring(0,200)};
     const file=document.getElementById('iminp').files[0];
     if(file){try{const{storage,ref,uploadBytes,getDownloadURL}=window._fb;const r=ref(storage,`posts/${CU.uid}/${Date.now()}`);await uploadBytes(r,file);post.imageUrl=await getDownloadURL(r);}catch(e){}}
     await addDoc(collection(db,'posts'),post);
@@ -1431,6 +1437,7 @@ async function submitPost(){
     UP.posts=(UP.posts||0)+1;
     parseMentions(text,'');
     document.getElementById('pta').value='';document.getElementById('iminp').value='';document.getElementById('uprev').style.display='none';
+    clearQuote();
     closePM();showToast('Posted to #'+chLbl(selCat));loadMyPosts('all');
   }catch(e){showToast('Error: '+e.message)}
   btn.textContent='Post';btn.disabled=false;
@@ -1474,12 +1481,13 @@ async function loadMyPosts(ch){
   if(!posts.length){c.innerHTML=`<div class="empty"><i class="ti ti-pencil-off"></i><p>${ch==='all'?t('no_posts_yet'):t('no_posts_ch')}</p></div>`;return}
   c.innerHTML=posts.map(p=>pH(p)).join('');
 }
-function myCFilt(el,ch){document.querySelectorAll('#mychs .ck').forEach(c=>c.classList.remove('ak'));el.classList.add('ak');myPFilt=ch;if(myTab==='posts')loadMyPosts(ch);else if(myTab==='reposts')loadMyReposts(ch);else loadMyLikes(ch);}
+function myCFilt(el,ch){document.querySelectorAll('#mychs .ck').forEach(c=>c.classList.remove('ak'));el.classList.add('ak');myPFilt=ch;if(myTab==='posts')loadMyPosts(ch);else if(myTab==='reposts')loadMyReposts(ch);else if(myTab==='saved')loadMySaved();else loadMyLikes(ch);}
 function ptab(el,tab){
   document.querySelectorAll('#sc-profile .ptabs .ptab').forEach(t=>t.classList.remove('ak'));el.classList.add('ak');
   myTab=tab;
   if(tab==='posts')loadMyPosts(myPFilt);
   else if(tab==='reposts')loadMyReposts(myPFilt);
+  else if(tab==='saved')loadMySaved();
   else loadMyLikes(myPFilt);
 }
 
@@ -1704,7 +1712,8 @@ function renderUsers(users){
   if(!users.length){c.innerHTML='<div class="empty"><i class="ti ti-users"></i><p>No creators found</p></div>';return}
   c.innerHTML=users.map(u=>{const isF=followingIds.has(u.uid);return`<div class="crow" onclick="openOP('${u.uid}')"><div class="av" style="width:36px;height:36px">${u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase()}</div><div style="flex:1"><div class="crnm">${esc(u.name||'')}</div><div class="crds">${esc(u.num||'')} - ${u.followers||0} followers</div></div><button class="fbtn${isF?' following':''}" onclick="event.stopPropagation();qFol('${u.uid}',this)">${isF?t('following_btn'):t('follow')}</button></div>`}).join('');
 }
-function doSearch(){const q=document.getElementById('sinp').value.toLowerCase().trim();if(!q){renderUsers(allUsers);return}renderUsers(allUsers.filter(u=>(u.name||'').toLowerCase().includes(q)||(u.num||'').toLowerCase().includes(q)))}
+function doSearch(){const q=document.getElementById('sinp').value.toLowerCase().trim();const clr=document.getElementById('sinp-clear');if(clr)clr.style.display=q?'block':'none';if(!q){renderUsers(allUsers);return}renderUsers(allUsers.filter(u=>(u.name||'').toLowerCase().includes(q)||(u.num||'').toLowerCase().includes(q)))}
+function clearSearch(){const el=document.getElementById('sinp');if(el)el.value='';const clr=document.getElementById('sinp-clear');if(clr)clr.style.display='none';renderUsers(allUsers);}
 function tagS(t){document.getElementById('sinp').value=t;goTo('search');doSearch()}
 async function qFol(uid,btn){
   if(!CU)return;
@@ -1974,8 +1983,8 @@ function fpuls(btn,cat){document.querySelectorAll('#pk .kachel').forEach(b=>b.cl
 function rfPuls(){pulsInited=false;initPuls()}
 function initPuls(){if(pulsInited)return;pulsInited=true;fetchPuls();setInterval(fetchPuls,60000)}
 
-function openPM(){if(!CU){showToast('Please sign in');return}document.getElementById('pm').classList.add('on')}
-function closePM(){document.getElementById('pm').classList.remove('on')}
+function openPM(){if(!CU){showToast('Please sign in');return}document.getElementById('pm').classList.add('on');renderQuotePreview();}
+function closePM(){document.getElementById('pm').classList.remove('on');clearQuote();}
 function sCat(btn){document.querySelectorAll('#pm .pcat').forEach(b=>b.classList.remove('ak'));btn.classList.add('ak');selCat=btn.dataset.cat}
 function prevImg(inp){if(!inp.files[0])return;const p=document.getElementById('uprev');p.src=URL.createObjectURL(inp.files[0]);p.style.display='block'}
 
@@ -2509,6 +2518,79 @@ function swipeBack(){
     ['hold-ov',()=>closeHoldOv()],
   ];
   for(const[id,fn]of checks){const el=document.getElementById(id);if(el&&el.classList.contains('on')){fn();return;}}
+}
+
+// ── QUOTE BLOCK ─────────────────────────────────────────────────────────────
+let _quotePost=null;
+function qblockH(q){
+  if(!q)return'';
+  const av=q.authorAvatar?`<img src="${q.authorAvatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:esc((q.authorName||'?').substring(0,2).toUpperCase());
+  return`<div class="qblock" onclick="event.stopPropagation();openPD('${q.pid}')"><div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><div style="width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#000;background:linear-gradient(135deg,var(--gold),#b06010);overflow:hidden;flex-shrink:0">${av}</div><span style="font-size:10px;font-weight:600;color:var(--mu2)">${esc(q.authorName||'')}</span></div><div style="font-size:12px;color:var(--tx2);line-height:1.4">${esc((q.text||'').substring(0,140))}</div></div>`;
+}
+function renderQuotePreview(){
+  const el=document.getElementById('quote-prev');if(!el)return;
+  if(!_quotePost){el.style.display='none';return}
+  const av=_quotePost.authorAvatar?`<img src="${_quotePost.authorAvatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:esc((_quotePost.authorName||'?').substring(0,2).toUpperCase());
+  el.style.display='block';
+  el.innerHTML=`<div class="qblock" style="position:relative"><button onclick="clearQuote()" style="position:absolute;top:4px;right:6px;background:none;border:none;color:var(--mu2);cursor:pointer;font-size:16px;line-height:1;padding:0">&times;</button><div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><div style="width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#000;background:linear-gradient(135deg,var(--gold),#b06010);overflow:hidden;flex-shrink:0">${av}</div><span style="font-size:11px;font-weight:600;color:var(--tx2)">${esc(_quotePost.authorName||'')}</span></div><div style="font-size:12px;color:var(--tx2);line-height:1.4">${esc((_quotePost.text||'').substring(0,160))}</div></div>`;
+}
+function clearQuote(){_quotePost=null;const el=document.getElementById('quote-prev');if(el)el.style.display='none';}
+async function openQuote(pid){
+  closeRpMenu();
+  if(!window._fb)return;
+  const{db,doc,getDoc}=window._fb;
+  const snap=await getDoc(doc(db,'posts',pid));if(!snap.exists())return;
+  _quotePost={pid,...snap.data()};
+  openPM();
+}
+
+// ── REPOST MINI-MENU ─────────────────────────────────────────────────────────
+let _rpMenuEl=null,_rpMenuPid=null;
+function _getRpMenu(){
+  if(!_rpMenuEl){_rpMenuEl=document.createElement('div');_rpMenuEl.style.cssText='position:fixed;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;z-index:500;min-width:140px;overflow:hidden;display:none;box-shadow:0 4px 20px rgba(0,0,0,.6)';document.body.appendChild(_rpMenuEl);}
+  return _rpMenuEl;
+}
+function closeRpMenu(){if(_rpMenuEl)_rpMenuEl.style.display='none';_rpMenuPid=null;}
+function rpMenu(pid,btn){
+  if(!CU){showToast('Please sign in');return}
+  _rpMenuPid=pid;
+  const alreadyRp=repostIds.has(pid);
+  const menu=_getRpMenu();
+  const rect=btn.getBoundingClientRect();
+  menu.style.left=Math.max(8,rect.left-50)+'px';
+  menu.style.top=(rect.bottom+4)+'px';
+  menu.style.display='block';
+  const mi=(icon,label,color,cb)=>`<div onclick="${cb}" style="display:flex;align-items:center;gap:9px;padding:10px 14px;cursor:pointer;font-size:12px;color:${color}" onmouseover="this.style.background='var(--sf3)'" onmouseout="this.style.background=''"><i class="ti ${icon}" style="font-size:14px"></i>${label}</div>`;
+  menu.innerHTML=
+    (alreadyRp?mi('ti-repeat','Undo Repost','var(--gold)',`repostP('${pid}',document.getElementById('rp-${pid}'));closeRpMenu()`):mi('ti-repeat','Repost','var(--tx)',`repostP('${pid}',document.getElementById('rp-${pid}'));closeRpMenu()`))+
+    `<div style="height:1px;background:var(--bd)"></div>`+
+    mi('ti-quote','Quote','var(--tx)',`openQuote('${pid}')`);
+}
+document.addEventListener('click',e=>{if(_rpMenuEl&&_rpMenuEl.style.display!=='none'&&!_rpMenuEl.contains(e.target))closeRpMenu();},{capture:true,passive:true});
+
+// ── SAVE / BOOKMARK ──────────────────────────────────────────────────────────
+function isSaved(pid){try{return(JSON.parse(localStorage.getItem('jl_saved')||'[]')).includes(pid);}catch{return false;}}
+function toggleSave(pid,btn){
+  try{
+    const s=JSON.parse(localStorage.getItem('jl_saved')||'[]');
+    const was=s.includes(pid);
+    localStorage.setItem('jl_saved',JSON.stringify(was?s.filter(x=>x!==pid):[...s,pid]));
+    btn.classList.toggle('liked',!was);
+    const ic=btn.querySelector('i');if(ic)ic.className=!was?'ti ti-bookmark-filled':'ti ti-bookmark';
+    showToast(!was?'Saved!':'Removed from saved');
+    if(myTab==='saved')loadMySaved();
+  }catch(e){}
+}
+async function loadMySaved(){
+  const c=document.getElementById('myposts');c.innerHTML='<div class="spin"></div>';
+  try{
+    const ids=JSON.parse(localStorage.getItem('jl_saved')||'[]');
+    if(!ids.length){c.innerHTML=`<div class="empty"><i class="ti ti-bookmark"></i><p>No saved posts yet</p></div>`;return}
+    const{db,doc,getDoc}=window._fb;
+    const snaps=await Promise.all(ids.map(pid=>getDoc(doc(db,'posts',pid))));
+    const posts=snaps.filter(s=>s.exists()).map(s=>({id:s.id,...s.data()}));
+    c.innerHTML=posts.length?posts.map(p=>pH(p)).join(''):`<div class="empty"><i class="ti ti-bookmark"></i><p>No saved posts yet</p></div>`;
+  }catch(e){c.innerHTML='<div class="empty"><p>Could not load saved posts</p></div>';}
 }
 
 // ── @MENTION DROPDOWN ───────────────────────────────────────────────────────
