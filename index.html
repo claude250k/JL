@@ -313,6 +313,21 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .pin-key{background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:18px;font-size:20px;font-weight:600;color:var(--tx);cursor:pointer;text-align:center;font-family:var(--fd);transition:background .1s;display:flex;align-items:center;justify-content:center}
 .pin-key:active{background:var(--sf3)}
 .pin-err{color:#f87171;font-size:12px;margin-top:12px;min-height:18px;text-align:center}
+.tcg-set{margin:8px 12px;background:var(--cbg);border:1px solid var(--bd);border-radius:14px;overflow:hidden}.tcg-set:hover{border-color:rgba(247,147,26,.3)}
+.tcg-set-hd{padding:10px 13px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}.tcg-set-hd:hover{background:var(--sf)}
+.tcg-prod-row{display:flex;justify-content:space-between;align-items:center;padding:5px 13px;border-top:1px solid var(--bd)}
+.tcg-cards-body{border-top:1px solid var(--bd)}
+.tcg-card-row{display:flex;align-items:center;padding:7px 13px;border-bottom:1px solid var(--bd);gap:8px}
+.tcg-card-name{font-size:12px;font-weight:500;color:var(--tx);flex:1}.tcg-card-rare{font-size:10px;color:var(--mu2)}.tcg-card-val{font-size:12px;font-weight:700;color:var(--gold)}
+.watch-soon{background:linear-gradient(90deg,rgba(247,147,26,.07),rgba(247,147,26,.03));border:1px solid rgba(247,147,26,.2);border-radius:10px;padding:9px 13px;margin:8px 12px;display:flex;align-items:center;gap:8px}
+.watch-brand{margin:5px 12px;background:var(--cbg);border:1px solid var(--bd);border-radius:13px;overflow:hidden}
+.watch-brand-top{display:flex;align-items:center;gap:10px;padding:11px 13px;cursor:pointer}.watch-brand-top:hover{background:var(--sf)}
+.watch-bi{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.watch-models{padding:8px 13px;border-top:1px solid var(--bd)}
+.watch-sinp{width:100%;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:6px 10px;color:var(--tx);font-size:11px;outline:none;margin-bottom:6px}.watch-sinp:focus{border-color:var(--gold)}.watch-sinp::placeholder{color:var(--mu)}
+.watch-model{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bd)}.watch-model:last-child{border-bottom:none}
+.watch-model-name{font-size:12px;font-weight:500;color:var(--tx)}.watch-model-price{font-size:12px;font-weight:600;color:var(--tx2)}
+.htag{color:var(--gold);cursor:pointer;font-weight:500}.htag:hover{opacity:.8}
 </style>
 </head>
 <body>
@@ -387,8 +402,9 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 </div>
 
 <div class="sc on" id="sc-feed">
-  <div class="sh" style="justify-content:center">
+  <div class="sh" style="justify-content:center;position:relative">
     <div style="display:flex;align-items:center;justify-content:center"><svg width="72" height="32" viewBox="0 0 72 32" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="0,16 8,16 11,5 14,27 17,11 20,21 23,16 32,16" stroke="#F7931A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="36" y="23" font-family="Syne,sans-serif" font-weight="800" font-size="20" fill="#f0ede6">J<tspan fill="#F7931A">L</tspan></text></svg></div>
+    <div style="position:absolute;right:16px"><button class="ib2" onclick="startFeed()" title="Refresh"><i class="ti ti-refresh"></i></button></div>
   </div>
   <div class="krow"<div class="krow" id="fk">
     <button class="kachel ak" onclick="filterFeed(this,'all')">Following</button>
@@ -419,6 +435,8 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
     <button class="kachel" onclick="fpuls(this,'stocks')">Stocks</button>
     <button class="kachel" onclick="fpuls(this,'ETF')">ETF</button>
     <button class="kachel" onclick="fpuls(this,'pol')">Politics</button>
+    <button class="kachel" onclick="fpuls(this,'tcg')">TCG</button>
+    <button class="kachel" onclick="fpuls(this,'watches')">Watches</button>
   </div>
   <div class="scroll" id="puls-scroll">
     <div data-pc="crypto">
@@ -468,13 +486,73 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       <div style="padding:10px 14px 2px"><div style="font-size:13px;font-weight:700;color:var(--tx)">Sunday Poll - Bundestag</div><div style="font-size:11px;color:var(--mu2);margin-top:2px">Anonymous vote - abstain or rate politicians</div></div>
       <div id="pol-list"></div>
     </div>
+    <div data-pc="tcg">
+      <div style="padding:10px 14px 4px"><div style="font-size:13px;font-weight:700;color:var(--tx)">Pokémon TCG</div><div style="font-size:11px;color:var(--mu2);margin-top:2px">Set prices &amp; card values · Demo data</div></div>
+      <div class="tcg-set">
+        <div class="tcg-set-hd" onclick="togTCG('sv08')"><div><div class="ccn">Scarlet &amp; Violet — Surging Sparks</div><div class="ccs">SV08 · Nov 2024</div></div><i class="ti ti-chevron-down" id="tcgi-sv08" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div>
+        <div class="tcg-prod-row"><span style="font-size:12px;color:var(--tx2)">Booster Pack</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--tx)">~$4.99</span><span class="ccc up">+1.2%</span></div></div>
+        <div class="tcg-prod-row"><span style="font-size:12px;color:var(--tx2)">Elite Trainer Box</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--tx)">~$64.99</span><span class="ccc up">+3.5%</span></div></div>
+        <div class="tcg-prod-row"><span style="font-size:12px;color:var(--tx2)">Booster Bundle</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--tx)">~$29.99</span><span class="ccc dn">-0.8%</span></div></div>
+        <div class="cw"><canvas id="ch-sv08"></canvas></div>
+        <div class="tcg-cards-body" id="tcg-sv08" style="display:none">
+          <div style="padding:7px 13px 4px;font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.7px;text-transform:uppercase">Top Cards</div>
+          <div class="tcg-card-row"><span class="tcg-card-name">Pikachu ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$280</span></div>
+          <div class="tcg-card-row"><span class="tcg-card-name">Umbreon ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$185</span></div>
+          <div class="tcg-card-row"><span class="tcg-card-name">Raichu ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$125</span></div>
+          <div class="tcg-card-row"><span class="tcg-card-name">Latios ex</span><span class="tcg-card-rare">HR</span><span class="tcg-card-val">~$95</span></div>
+          <div class="tcg-card-row"><span class="tcg-card-name">Terapagos ex</span><span class="tcg-card-rare">IR</span><span class="tcg-card-val">~$65</span></div>
+          <div class="tcg-card-row"><span class="tcg-card-name">Bianca's Devotion</span><span class="tcg-card-rare">HR</span><span class="tcg-card-val">~$55</span></div>
+          <div class="tcg-card-row" style="border-bottom:none"><span class="tcg-card-name">Darkrai ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$40</span></div>
+        </div>
+      </div>
+      <div class="tcg-set">
+        <div class="tcg-set-hd" onclick="togTCG('sv07')"><div><div class="ccn">Scarlet &amp; Violet — Stellar Crown</div><div class="ccs">SV07 · Sep 2024</div></div><i class="ti ti-chevron-down" id="tcgi-sv07" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div>
+        <div class="tcg-prod-row"><span style="font-size:12px;color:var(--tx2)">Booster Pack</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--tx)">~$4.99</span><span class="ccc up">+0.8%</span></div></div>
+        <div class="tcg-prod-row"><span style="font-size:12px;color:var(--tx2)">Elite Trainer Box</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--tx)">~$59.99</span><span class="ccc dn">-1.2%</span></div></div>
+        <div class="cw"><canvas id="ch-sv07"></canvas></div>
+        <div class="tcg-cards-body" id="tcg-sv07" style="display:none">
+          <div style="padding:7px 13px 4px;font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.7px;text-transform:uppercase">Top Cards</div>
+          <div class="tcg-card-row"><span class="tcg-card-name">Ceruledge ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$220</span></div>
+          <div class="tcg-card-row"><span class="tcg-card-name">Milotic ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$165</span></div>
+          <div class="tcg-card-row"><span class="tcg-card-name">Cobalion ex</span><span class="tcg-card-rare">SIR</span><span class="tcg-card-val">~$110</span></div>
+          <div class="tcg-card-row" style="border-bottom:none"><span class="tcg-card-name">Pecharunt ex</span><span class="tcg-card-rare">IR</span><span class="tcg-card-val">~$75</span></div>
+        </div>
+      </div>
+      <div class="tcg-set">
+        <div class="tcg-set-hd" onclick="togTCG('svpf')"><div><div class="ccn">Scarlet &amp; Violet — Paldean Fates</div><div class="ccs">SV4.5 · Jan 2024</div></div><i class="ti ti-chevron-down" id="tcgi-svpf" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div>
+        <div class="tcg-prod-row"><span style="font-size:12px;color:var(--tx2)">Booster Pack</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--tx)">~$6.50</span><span class="ccc up">+8.2%</span></div></div>
+        <div class="tcg-prod-row"><span style="font-size:12px;color:var(--tx2)">Elite Trainer Box</span><div style="display:flex;align-items:center;gap:6px"><span style="font-size:13px;font-weight:700;color:var(--tx)">~$85.00</span><span class="ccc up">+12.4%</span></div></div>
+        <div class="cw"><canvas id="ch-svpf"></canvas></div>
+        <div class="tcg-cards-body" id="tcg-svpf" style="display:none">
+          <div style="padding:7px 13px 4px;font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.7px;text-transform:uppercase">Top Cards</div>
+          <div class="tcg-card-row"><span class="tcg-card-name">Shiny Charizard ex</span><span class="tcg-card-rare">SSR</span><span class="tcg-card-val">~$450</span></div>
+          <div class="tcg-card-row"><span class="tcg-card-name">Shiny Gardevoir ex</span><span class="tcg-card-rare">SSR</span><span class="tcg-card-val">~$280</span></div>
+          <div class="tcg-card-row"><span class="tcg-card-name">Shiny Mewtwo ex</span><span class="tcg-card-rare">SSR</span><span class="tcg-card-val">~$210</span></div>
+          <div class="tcg-card-row" style="border-bottom:none"><span class="tcg-card-name">Shiny Pikachu ex</span><span class="tcg-card-rare">SSR</span><span class="tcg-card-val">~$180</span></div>
+        </div>
+      </div>
+    </div>
+    <div data-pc="watches">
+      <div class="watch-soon"><i class="ti ti-clock" style="color:var(--gold);font-size:16px;flex-shrink:0"></i><div><div style="font-size:12px;font-weight:700;color:var(--gold)">Coming Soon</div><div style="font-size:11px;color:var(--mu2);margin-top:1px">Live watch market data in development · Prices are approximate</div></div></div>
+      <div style="padding:6px 14px 4px"><div style="font-size:13px;font-weight:700;color:var(--tx)">Top 10 Watch Brands</div><div style="font-size:11px;color:var(--mu2);margin-top:2px">Estimated market values · Not financial advice</div></div>
+      <div class="watch-brand"><div class="watch-brand-top" onclick="togWatch('rolex')"><div class="watch-bi" style="background:#1a6035">Ro</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">Rolex</div><div style="font-size:11px;color:var(--mu2)">Swiss luxury · Submariner, Daytona</div></div><i class="ti ti-chevron-down" id="watchi-rolex" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div><div class="watch-models" id="watch-rolex" style="display:none"><input class="watch-sinp" placeholder="Search Rolex models..." oninput="searchWatch('rolex',this.value)"><div id="wmodels-rolex"><div class="watch-model"><span class="watch-model-name">Daytona 116500LN</span><span class="watch-model-price">~$35,000</span></div><div class="watch-model"><span class="watch-model-name">Submariner 126610LN</span><span class="watch-model-price">~$15,500</span></div><div class="watch-model"><span class="watch-model-name">GMT-Master II 126710BLNR</span><span class="watch-model-price">~$18,000</span></div><div class="watch-model"><span class="watch-model-name">Yacht-Master 42</span><span class="watch-model-price">~$16,500</span></div><div class="watch-model"><span class="watch-model-name">Day-Date 228396TBR</span><span class="watch-model-price">~$45,000</span></div></div></div></div>
+      <div class="watch-brand"><div class="watch-brand-top" onclick="togWatch('patek')"><div class="watch-bi" style="background:#2c4a7c">PP</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">Patek Philippe</div><div style="font-size:11px;color:var(--mu2)">Geneva · Nautilus, Calatrava</div></div><i class="ti ti-chevron-down" id="watchi-patek" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div><div class="watch-models" id="watch-patek" style="display:none"><div class="watch-model"><span class="watch-model-name">Nautilus 5711/1A</span><span class="watch-model-price">~$130,000</span></div><div class="watch-model"><span class="watch-model-name">Calatrava 5196P</span><span class="watch-model-price">~$35,000</span></div><div class="watch-model"><span class="watch-model-name">Aquanaut 5167A</span><span class="watch-model-price">~$35,000</span></div></div></div>
+      <div class="watch-brand"><div class="watch-brand-top" onclick="togWatch('ap')"><div class="watch-bi" style="background:#262626">AP</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">Audemars Piguet</div><div style="font-size:11px;color:var(--mu2)">Le Brassus · Royal Oak</div></div><i class="ti ti-chevron-down" id="watchi-ap" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div><div class="watch-models" id="watch-ap" style="display:none"><div class="watch-model"><span class="watch-model-name">Royal Oak 15202ST</span><span class="watch-model-price">~$55,000</span></div><div class="watch-model"><span class="watch-model-name">Royal Oak Offshore 26237ST</span><span class="watch-model-price">~$32,000</span></div><div class="watch-model"><span class="watch-model-name">Code 11.59 26393BC</span><span class="watch-model-price">~$48,000</span></div></div></div>
+      <div class="watch-brand"><div class="watch-brand-top" onclick="togWatch('rm')"><div class="watch-bi" style="background:#3a1a1a">RM</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">Richard Mille</div><div style="font-size:11px;color:var(--mu2)">Les Breuleux · RM 011, RM 035</div></div><i class="ti ti-chevron-down" id="watchi-rm" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div><div class="watch-models" id="watch-rm" style="display:none"><div class="watch-model"><span class="watch-model-name">RM 011 Felipe Massa</span><span class="watch-model-price">~$120,000</span></div><div class="watch-model"><span class="watch-model-name">RM 035 Rafael Nadal</span><span class="watch-model-price">~$95,000</span></div><div class="watch-model"><span class="watch-model-name">RM 055 Bubba Watson</span><span class="watch-model-price">~$80,000</span></div></div></div>
+      <div class="watch-brand"><div class="watch-brand-top" onclick="togWatch('omega')"><div class="watch-bi" style="background:#1a3a6c">Ω</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">Omega</div><div style="font-size:11px;color:var(--mu2)">Biel · Speedmaster, Seamaster</div></div><i class="ti ti-chevron-down" id="watchi-omega" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div><div class="watch-models" id="watch-omega" style="display:none"><div class="watch-model"><span class="watch-model-name">Speedmaster Moonwatch 310.30</span><span class="watch-model-price">~$6,500</span></div><div class="watch-model"><span class="watch-model-name">Seamaster 300M 210.30</span><span class="watch-model-price">~$5,200</span></div><div class="watch-model"><span class="watch-model-name">Constellation Manhattan</span><span class="watch-model-price">~$4,800</span></div></div></div>
+      <div class="watch-brand"><div class="watch-brand-top" onclick="togWatch('iwc')"><div class="watch-bi" style="background:#3a2a1a">IWC</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">IWC Schaffhausen</div><div style="font-size:11px;color:var(--mu2)">Schaffhausen · Pilot, Portugieser</div></div><i class="ti ti-chevron-down" id="watchi-iwc" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div><div class="watch-models" id="watch-iwc" style="display:none"><div class="watch-model"><span class="watch-model-name">Pilot's Watch Mark XX</span><span class="watch-model-price">~$5,500</span></div><div class="watch-model"><span class="watch-model-name">Portugieser 7-Day 5007</span><span class="watch-model-price">~$9,800</span></div><div class="watch-model"><span class="watch-model-name">Big Pilot 43 5026</span><span class="watch-model-price">~$8,500</span></div></div></div>
+      <div class="watch-brand"><div class="watch-brand-top" onclick="togWatch('jlc')"><div class="watch-bi" style="background:#2a3a1a">JLC</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">Jaeger-LeCoultre</div><div style="font-size:11px;color:var(--mu2)">Le Sentier · Reverso, Master</div></div><i class="ti ti-chevron-down" id="watchi-jlc" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div><div class="watch-models" id="watch-jlc" style="display:none"><div class="watch-model"><span class="watch-model-name">Reverso Classic Large</span><span class="watch-model-price">~$7,500</span></div><div class="watch-model"><span class="watch-model-name">Master Control Chronograph</span><span class="watch-model-price">~$9,200</span></div><div class="watch-model"><span class="watch-model-name">Polaris Mariner</span><span class="watch-model-price">~$8,000</span></div></div></div>
+      <div class="watch-brand"><div class="watch-brand-top" onclick="togWatch('breitling')"><div class="watch-bi" style="background:#1a3a5a">Br</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">Breitling</div><div style="font-size:11px;color:var(--mu2)">Grenchen · Navitimer, SuperOcean</div></div><i class="ti ti-chevron-down" id="watchi-breitling" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div><div class="watch-models" id="watch-breitling" style="display:none"><div class="watch-model"><span class="watch-model-name">Navitimer B01 46mm</span><span class="watch-model-price">~$8,500</span></div><div class="watch-model"><span class="watch-model-name">SuperOcean Heritage 46</span><span class="watch-model-price">~$5,800</span></div><div class="watch-model"><span class="watch-model-name">Avenger Chronograph 45</span><span class="watch-model-price">~$6,200</span></div></div></div>
+      <div class="watch-brand"><div class="watch-brand-top" onclick="togWatch('tagh')"><div class="watch-bi" style="background:#1a1a3a">TH</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">TAG Heuer</div><div style="font-size:11px;color:var(--mu2)">La Chaux-de-Fonds · Carrera, Monaco</div></div><i class="ti ti-chevron-down" id="watchi-tagh" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div><div class="watch-models" id="watch-tagh" style="display:none"><div class="watch-model"><span class="watch-model-name">Carrera Heuer 02</span><span class="watch-model-price">~$5,200</span></div><div class="watch-model"><span class="watch-model-name">Monaco Heuer 02 Black</span><span class="watch-model-price">~$6,800</span></div><div class="watch-model"><span class="watch-model-name">Aquaracer Professional 300</span><span class="watch-model-price">~$2,800</span></div></div></div>
+      <div class="watch-brand" style="margin-bottom:8px"><div class="watch-brand-top" onclick="togWatch('cartier')"><div class="watch-bi" style="background:#4a1a2a">Ca</div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--tx)">Cartier</div><div style="font-size:11px;color:var(--mu2)">Paris · Santos, Tank, Ballon Bleu</div></div><i class="ti ti-chevron-down" id="watchi-cartier" style="color:var(--mu2);font-size:14px;transition:transform .2s"></i></div><div class="watch-models" id="watch-cartier" style="display:none"><div class="watch-model"><span class="watch-model-name">Santos de Cartier Large</span><span class="watch-model-price">~$8,500</span></div><div class="watch-model"><span class="watch-model-name">Tank Must Large Steel</span><span class="watch-model-price">~$3,500</span></div><div class="watch-model"><span class="watch-model-name">Ballon Bleu 42mm</span><span class="watch-model-price">~$7,500</span></div></div></div>
+    </div>
   </div>
   <div class="cd" id="cd"><div class="cdh"><button class="cdb2" onclick="closeCD()"><i class="ti ti-arrow-left"></i></button><div class="cdt" id="cd-t">Chart</div></div><div class="scroll"><div class="cdp" id="cd-p">-</div><div class="cdchg" id="cd-c">-</div><div class="cdcw"><canvas id="cd-cv"></canvas></div><div class="rbs"><button class="rb ak" onclick="setCDR(this,'1')">1D</button><button class="rb" onclick="setCDR(this,'7')">7D</button><button class="rb" onclick="setCDR(this,'30')">1M</button><button class="rb" onclick="setCDR(this,'180')">6M</button><button class="rb" onclick="setCDR(this,'365')">1Y</button><button class="rb" onclick="setCDR(this,'1825')">5Y</button><button class="rb" onclick="setCDR(this,'max')">Max</button></div><div class="cdst" id="cd-st"></div></div></div>
   <div class="ov" id="pov"><div class="ovh"><button class="ovb" onclick="document.getElementById('pov').classList.remove('on')"><i class="ti ti-arrow-left"></i></button><div class="ovt" id="pov-t"></div></div><div class="scroll" id="pov-b"></div></div>
 </div>
 
 <div class="sc" id="sc-search">
-  <div class="sh" style="justify-content:center;position:relative"><div class="stitle">Search<em style="color:var(--gold);font-style:normal">.</em></div></div>
+  <div class="sh" style="justify-content:center;position:relative"><div class="stitle">Search<em style="color:var(--gold);font-style:normal">.</em></div><div style="position:absolute;right:16px"><button class="ib2" onclick="loadUsers();showToast('Refreshing...')" title="Refresh"><i class="ti ti-refresh"></i></button></div></div>
   <div class="sbar2"><div class="sbox"><i class="ti ti-search"></i><input type="text" id="sinp" placeholder="Name or #number ..." oninput="doSearch()"></div></div>
   <div class="tpills"><div class="tp" onclick="tagS('Bitcoin')">#Bitcoin</div><div class="tp" onclick="tagS('Stocks')">#Stocks</div><div class="tp" onclick="tagS('ETF')">#ETF</div><div class="tp" onclick="tagS('Economy')">#Economy</div><div class="tp" onclick="tagS('Analysis')">#Analysis</div><div class="tp" onclick="tagS('Politics')">#Politics</div></div>
   <div class="scroll"><div class="sl">Creators</div><div id="clist"><div class="spin"></div></div></div>
@@ -486,7 +564,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       <button id="tab-notif" onclick="switchMT('notif')" style="padding:5px 16px;border-radius:8px;font-size:12px;border:none;cursor:pointer;background:transparent;color:var(--mu2)">Notifications</button>
       <button id="tab-msgs" onclick="switchMT('msgs')" style="padding:5px 16px;border-radius:8px;font-size:12px;border:none;cursor:pointer;background:var(--sf3);color:var(--tx);font-weight:500">Messages</button>
     </div>
-
+    <div style="position:absolute;right:16px"><button class="ib2" onclick="loadConvs();showToast('Refreshing...')" title="Refresh"><i class="ti ti-refresh"></i></button></div>
   </div>
   <div id="msgs-panel" class="scroll" style="flex-direction:column"><div id="convlist" style="flex:1"></div></div>
   <div id="notif-panel" class="scroll" style="display:none"><div id="notif-list"><div class="spin"></div></div></div>
@@ -495,8 +573,9 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 </div>
 
 <div class="sc" id="sc-portfolio">
-  <div class="sh" style="justify-content:center">
+  <div class="sh" style="justify-content:center;position:relative">
     <div class="stitle">Portfolio<em style="color:var(--gold);font-style:normal">.</em></div>
+    <div style="position:absolute;right:16px"><button class="ib2" onclick="refreshPortPrices().then(renderPortfolio);showToast('Refreshing...')" title="Refresh"><i class="ti ti-refresh"></i></button></div>
   </div>
   <div class="scroll">
     <div id="port-total-box"></div>
@@ -1069,7 +1148,7 @@ function pH(p){
           <span class="cbadge ${cb}" onclick="goToCh('${p.channel||''}')">${cl}</span>
           <span class="ptm">${t}</span>
         </div>
-        <div class="ptxt" onclick="openPD('${p.id}')">${esc(p.text||'')}</div>
+        <div class="ptxt" onclick="openPD('${p.id}')">${linkText(p.text||'')}</div>
         ${img}
         <div class="pacts">
           <button class="pa${liked?' liked':''}" id="lb-${p.id}" onclick="likeP('${p.id}',this)">
@@ -1191,7 +1270,7 @@ async function openPD(pid){
   const img=p.imageUrl?`<img src="${p.imageUrl}" class="pimg">`:'';
   const avH=p.authorAvatar?`<img src="${p.authorAvatar}">`:(p.authorName||'?').substring(0,2).toUpperCase();
   const liked=CU&&(p.likedBy||[]).includes(CU.uid);
-  document.getElementById('pd-content').innerHTML=`<div class="pi" style="cursor:default"><div class="pr"><div class="av" onclick="openOP('${p.authorId}')">${avH}</div><div class="pb"><div class="ptop"><span class="pan" onclick="openOP('${p.authorId}')">${esc(p.authorName||'')}</span><span class="cbadge ${cb}">${cl}</span><span class="ptm">${t}</span></div><div class="ptxt" style="cursor:default">${esc(p.text||'')}</div>${img}<div class="pacts"><button class="pa${liked?' liked':''}" id="lb-${p.id}" onclick="likeP('${p.id}',this)"><i class="ti ${liked?'ti-heart-filled':'ti-heart'}"></i><span id="lc-${p.id}">${p.likes||0}</span></button></div></div></div></div>`;
+  document.getElementById('pd-content').innerHTML=`<div class="pi" style="cursor:default"><div class="pr"><div class="av" onclick="openOP('${p.authorId}')">${avH}</div><div class="pb"><div class="ptop"><span class="pan" onclick="openOP('${p.authorId}')">${esc(p.authorName||'')}</span><span class="cbadge ${cb}">${cl}</span><span class="ptm">${t}</span></div><div class="ptxt" style="cursor:default">${linkText(p.text||'')}</div>${img}<div class="pacts"><button class="pa${liked?' liked':''}" id="lb-${p.id}" onclick="likeP('${p.id}',this)"><i class="ti ${liked?'ti-heart-filled':'ti-heart'}"></i><span id="lc-${p.id}">${p.likes||0}</span></button></div></div></div></div>`;
   await loadCmts(pid,'pd-cmts');
   document.getElementById('pdov').classList.add('on');
   document.getElementById('pd-inp').focus();
@@ -1204,7 +1283,7 @@ async function loadCmts(pid,cid){
   const snap=await getDocs(query(collection(db,`posts/${pid}/comments`),orderBy('createdAt','asc')));
   const cmts=snap.docs.map(d=>({id:d.id,...d.data()}));
   if(!cmts.length){c.innerHTML='<div class="empty" style="padding:18px 20px 10px"><p>No comments yet. Be the first!</p></div>';return}
-  c.innerHTML=cmts.map(cm=>{const cav=cm.authorAvatar?`<img src="${cm.authorAvatar}">`:(cm.authorName||'?').substring(0,2).toUpperCase();return`<div class="cmt"><div class="cmtav">${cav}</div><div><div class="cmtnm">${esc(cm.authorName||'')}</div><div class="cmttx">${esc(cm.text||'')}</div><div class="cmttm">${cm.createdAt?tAgo(cm.createdAt.toDate()):''}</div></div></div>`}).join('');
+  c.innerHTML=cmts.map(cm=>{const cav=cm.authorAvatar?`<img src="${cm.authorAvatar}">`:(cm.authorName||'?').substring(0,2).toUpperCase();return`<div class="cmt"><div class="cmtav">${cav}</div><div><div class="cmtnm">${esc(cm.authorName||'')}</div><div class="cmttx">${linkText(cm.text||'')}</div><div class="cmttm">${cm.createdAt?tAgo(cm.createdAt.toDate()):''}</div></div></div>`}).join('');
 }
 async function submitCmt(){
   if(!CU||!UP||!curPD)return;
@@ -1591,6 +1670,7 @@ async function fetchPuls(){
   }catch(e){const b={btc:94000,eth:3200,sol:190,bnb:400,xrp:.6,ada:.45,doge:.15,dot:8,avax:35,link:18};Object.keys(b).forEach(k=>mkC('ch-'+k,demo(b[k],40)))}
   const dm={nvda:840,aapl:216,msft:415,amzn:186,goog:174,meta:512,tsla:248,sap:182,asml:820,novo:780,iwda:98,vwrl:105,acwi:108,spy:524,qqq:448,voo:481,stoxx:52,veur:68,exsa:77,ewj:68,mchi:48,aaxj:72};
   Object.entries(dm).forEach(([k,b])=>mkC('ch-'+k,demo(b,40)));
+  [{k:'sv08',b:65},{k:'sv07',b:60},{k:'svpf',b:85}].forEach(({k,b})=>mkC('ch-'+k,demo(b,40)));
 }
 async function openCD(coin){curCDCoin=coin;document.getElementById('cd-t').textContent=CNM[coin]||coin.toUpperCase();document.getElementById('cd').classList.add('on');document.querySelectorAll('.rb').forEach(b=>b.classList.toggle('ak',b.textContent==='1D'));await loadCD(coin,'1')}
 async function loadCD(coin,days){
@@ -1624,7 +1704,7 @@ function renderCDChart(prices){
 }
 async function setCDR(btn,days){document.querySelectorAll('.rb').forEach(b=>b.classList.remove('ak'));btn.classList.add('ak');await loadCD(curCDCoin,days)}
 function closeCD(){document.getElementById('cd').classList.remove('on')}
-function fpuls(btn,cat){document.querySelectorAll('#pk .kachel').forEach(b=>b.classList.remove('ak'));btn.classList.add('ak');document.querySelectorAll('#puls-scroll [data-pc]').forEach(el=>el.style.display=(cat==='all'||el.dataset.pc===cat)?'':'none')}
+function fpuls(btn,cat){document.querySelectorAll('#pk .kachel').forEach(b=>b.classList.remove('ak'));btn.classList.add('ak');document.querySelectorAll('#puls-scroll [data-pc]').forEach(el=>el.style.display=(cat==='all'||el.dataset.pc===cat)?'':'none');document.getElementById('puls-scroll').scrollTop=0;}
 function rfPuls(){pulsInited=false;initPuls()}
 function initPuls(){if(pulsInited)return;pulsInited=true;fetchPuls();setInterval(fetchPuls,60000)}
 
@@ -1681,6 +1761,12 @@ function showToast(m){const t=document.getElementById('toast');t.textContent=m;t
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;')}
 function tAgo(d){const s=Math.floor((new Date()-d)/1000);if(s<60)return'now';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';return Math.floor(s/86400)+'d'}
+const HASH_MAP={bitcoin:'btc',btc:'btc',ethereum:'eth',eth:'eth',solana:'sol',sol:'sol',bnb:'bnb',xrp:'xrp',ripple:'xrp',ada:'ada',cardano:'ada',doge:'doge',dogecoin:'doge',dot:'dot',polkadot:'dot',avax:'avax',avalanche:'avax',link:'link',chainlink:'link',nvidia:'nvda',nvda:'nvda',apple:'aapl',aapl:'aapl',microsoft:'msft',msft:'msft',amazon:'amzn',amzn:'amzn',google:'goog',alphabet:'goog',goog:'goog',meta:'meta',tesla:'tsla',tsla:'tsla',sap:'sap',spy:'spy',sp500:'spy',qqq:'qqq',voo:'voo',iwda:'iwda',vwrl:'vwrl'};
+function linkText(s){return esc(s).replace(/#(\w+)/g,(m,tag)=>{const key=tag.toLowerCase();const asset=HASH_MAP[key];if(asset)return`<span class="htag" onclick="event.stopPropagation();goToPuls('${asset}')">${m}</span>`;return`<span class="htag">${m}</span>`;});}
+function goToPuls(asset){goTo('puls');setTimeout(()=>openCD(asset),120);}
+function togTCG(id){const body=document.getElementById('tcg-'+id);const icon=document.getElementById('tcgi-'+id);if(!body)return;const open=body.style.display!=='none';body.style.display=open?'none':'block';if(icon)icon.style.transform=open?'':'rotate(180deg)';}
+function togWatch(id){const body=document.getElementById('watch-'+id);const icon=document.getElementById('watchi-'+id);if(!body)return;const open=body.style.display!=='none';body.style.display=open?'none':'block';if(icon)icon.style.transform=open?'':'rotate(180deg)';}
+function searchWatch(brand,q){const c=document.getElementById('wmodels-'+brand);if(!c)return;c.querySelectorAll('.watch-model').forEach(m=>{const name=(m.querySelector('.watch-model-name')?.textContent||'').toLowerCase();m.style.display=!q||name.includes(q.toLowerCase())?'':'none';});}
 async function repostP(pid,btn){
   if(!CU||!UP){showToast('Please sign in');return}
   const{db,doc,getDoc,setDoc,deleteDoc,updateDoc,increment,serverTimestamp}=window._fb;
