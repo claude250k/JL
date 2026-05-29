@@ -372,6 +372,12 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .po-inp-row{display:flex;align-items:center;gap:7px;margin-bottom:7px}
 .po-inp{flex:1;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;padding:8px 11px;color:var(--tx);font-size:12px;outline:none;font-family:var(--fb)}.po-inp:focus{border-color:var(--gold)}.po-inp::placeholder{color:var(--mu)}
 .po-rm{background:none;border:1px solid var(--bd);color:var(--mu2);width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;flex-shrink:0}.po-rm:hover{border-color:#f87171;color:#f87171}
+.po-drag{cursor:grab;color:var(--mu2);font-size:15px;padding:0 2px;user-select:none;flex-shrink:0;touch-action:none}
+.po-drag:active{cursor:grabbing}
+.po-inp-row.drag-over{border-top:2px solid var(--gold);margin-top:5px}
+input[type="date"]{color-scheme:dark;accent-color:#F7931A}
+input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.7) sepia(1) saturate(3) hue-rotate(5deg);cursor:pointer;opacity:.8}
+input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
 </style>
 </head>
 <body>
@@ -585,9 +591,13 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       <div style="padding:10px 14px 6px;display:flex;align-items:center;justify-content:space-between">
         <div>
           <div style="font-size:13px;font-weight:700;color:var(--tx)">Community Pulses</div>
-          <div style="font-size:11px;color:var(--mu2);margin-top:2px">Daily vote · Resets midnight CET</div>
+          <div style="font-size:11px;color:var(--mu2);margin-top:2px">Neueste zuerst · Einmal abstimmen</div>
         </div>
         <button onclick="openCreatePulse()" style="background:var(--gold);border:none;color:#000;padding:5px 13px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;font-family:var(--fb)"><i class="ti ti-plus" style="font-size:12px"></i>Create</button>
+      </div>
+      <div style="padding:0 12px 8px;position:relative">
+        <i class="ti ti-search" style="position:absolute;left:22px;top:50%;transform:translateY(-50%);color:var(--mu2);font-size:13px;pointer-events:none"></i>
+        <input class="ainp" id="pulse-search-inp" placeholder="Pulse suchen..." oninput="filterPulses(this.value)" style="padding-left:32px;margin:0;font-size:12px">
       </div>
       <div id="pulse-list"><div class="spin"></div></div>
     </div>
@@ -1596,10 +1606,10 @@ function pH(p){
           <span class="cbadge ${cb}" onclick="goToCh('${p.channel||''}')" ${chBadgeStyle(rawCh)?`style="${chBadgeStyle(rawCh)}"`:''}>${cl}</span>
           <span class="ptm">${t}</span>
         </div>
-        <div class="ptxt" onclick="openPD('${p.id}')">${linkText(p.text||'')}</div>
+        <div class="ptxt" onclick="${p.pulseId?`openPulseFromPost('${esc(p.pulseId)}')`:`openPD('${p.id}')`}">${linkText(p.text||'')}</div>
         ${qblockH(p.quoteOf)}
         ${img}
-        ${p.pulseId?`<div onclick="event.stopPropagation();openPulseFromPost('${esc(p.pulseId)}')" style="display:inline-flex;align-items:center;gap:5px;background:rgba(247,147,26,.12);border:1px solid rgba(247,147,26,.28);color:var(--gold);padding:3px 11px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;margin-bottom:5px"><i class="ti ti-chart-bar" style="font-size:12px"></i>Open Pulse →</div>`:''}
+        ${p.pulseId?`<div onclick="openPulseFromPost('${esc(p.pulseId)}')" style="display:inline-flex;align-items:center;gap:5px;background:rgba(247,147,26,.12);border:1px solid rgba(247,147,26,.28);color:var(--gold);padding:3px 11px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;margin-bottom:5px"><i class="ti ti-chart-bar" style="font-size:12px"></i>Pulse öffnen →</div>`:''}
         <div class="pacts">
           <button class="pa${liked?' liked':''}" id="lb-${p.id}" onclick="likeP('${p.id}',this)">
             <i class="ti ${liked?'ti-heart-filled':'ti-heart'}"></i>
@@ -3784,29 +3794,47 @@ function openCreatePulse(){
 }
 function closeCreatePulse(){const el=document.getElementById('create-pulse-ov');if(el)el.classList.remove('on');}
 
+let _poDragEl=null;
 function addPulseOption(){
   const ol=document.getElementById('pulse-opts-list');if(!ol)return;
   const count=ol.querySelectorAll('.po-inp-row').length;
   if(count>=10){showToast('Maximum 10 options');return}
-  const row=document.createElement('div');row.className='po-inp-row';
-  row.innerHTML=`<span style="font-size:11px;color:var(--mu2);width:16px;text-align:right;flex-shrink:0">${count+1}</span><input class="po-inp" type="text" placeholder="Option ${count+1}" maxlength="80"><button class="po-rm" onclick="removePulseOption(this)"><i class="ti ti-x"></i></button>`;
+  const row=document.createElement('div');
+  row.className='po-inp-row';
+  row.draggable=true;
+  row.addEventListener('dragstart',e=>{_poDragEl=row;setTimeout(()=>row.style.opacity='.4',0);e.dataTransfer.effectAllowed='move';});
+  row.addEventListener('dragend',()=>{row.style.opacity='';_poDragEl=null;document.querySelectorAll('.po-inp-row').forEach(r=>r.classList.remove('drag-over'));});
+  row.addEventListener('dragover',e=>{e.preventDefault();if(row!==_poDragEl){document.querySelectorAll('.po-inp-row').forEach(r=>r.classList.remove('drag-over'));row.classList.add('drag-over');}});
+  row.addEventListener('drop',e=>{e.preventDefault();if(_poDragEl&&row!==_poDragEl){ol.insertBefore(_poDragEl,row);_renumPulseOpts();}document.querySelectorAll('.po-inp-row').forEach(r=>r.classList.remove('drag-over'));});
+  row.innerHTML=`<span class="po-drag" title="Ziehen zum Sortieren">⠿</span><span class="po-num" style="font-size:11px;color:var(--mu2);width:16px;text-align:right;flex-shrink:0">${count+1}</span><input class="po-inp" type="text" placeholder="Option ${count+1}" maxlength="80"><button class="po-rm" onclick="removePulseOption(this)"><i class="ti ti-x"></i></button>`;
   ol.appendChild(row);
 }
 function removePulseOption(btn){
   const ol=document.getElementById('pulse-opts-list');if(!ol)return;
   if(ol.querySelectorAll('.po-inp-row').length<=2){showToast('Minimum 2 options required');return}
   btn.closest('.po-inp-row').remove();
-  ol.querySelectorAll('.po-inp-row').forEach((row,i)=>{const num=row.querySelector('span');if(num)num.textContent=i+1;const inp=row.querySelector('.po-inp');if(inp)inp.placeholder='Option '+(i+1);});
+  _renumPulseOpts();
+}
+function _renumPulseOpts(){
+  document.querySelectorAll('#pulse-opts-list .po-inp-row').forEach((row,i)=>{
+    const num=row.querySelector('.po-num');if(num)num.textContent=i+1;
+    const inp=row.querySelector('.po-inp');if(inp)inp.placeholder='Option '+(i+1);
+  });
 }
 
+let _pulseSubmitting=false;
 async function submitCreatePulse(){
   if(!CU||!UP){showToast('Please sign in');return}
+  if(_pulseSubmitting)return;
   const title=(document.getElementById('pulse-title-inp')?.value||'').trim();
   if(!title){showToast('Please enter a question');return}
   const endDateStr=document.getElementById('pulse-enddate-inp')?.value;
   if(!endDateStr){showToast('Please set an end date');return}
   const opts=Array.from(document.querySelectorAll('#pulse-opts-list .po-inp')).map(inp=>inp.value.trim()).filter(Boolean);
   if(opts.length<2){showToast('Please add at least 2 options');return}
+  _pulseSubmitting=true;
+  const submitBtn=document.querySelector('#create-pulse-ov .ovh button:last-child');
+  if(submitBtn){submitBtn.disabled=true;submitBtn.textContent='...';}
   const{db,collection,addDoc,doc,updateDoc,increment,serverTimestamp}=window._fb;
   try{
     const options=opts.map((text,i)=>({id:'opt'+i,text,votes:0}));
@@ -3826,30 +3854,41 @@ async function submitCreatePulse(){
     await updateDoc(doc(db,'pulses',pRef.id),{postId:postRef.id});
     localStorage.setItem('jl_pulse_created',getBerlinDate());
     closeCreatePulse();showToast('Pulse created! 🗳️');
-    // Switch to Pulse tab
     const pulseBtn=Array.from(document.querySelectorAll('#pk .kachel')).find(b=>b.textContent==='Pulse');
     if(pulseBtn)pulseBtn.click();
   }catch(e){showToast('Error: '+e.message);}
+  finally{_pulseSubmitting=false;if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Create';}}
 }
 
+let _allPulses=[],_myVotesCache={};
 async function loadPulses(){
   const c=document.getElementById('pulse-list');if(!c)return;
   c.innerHTML='<div class="spin"></div>';
   const{db,collection,query,orderBy,limit,getDocs,doc,getDoc}=window._fb;
   try{
-    const snap=await getDocs(query(collection(db,'pulses'),orderBy('createdAt','desc'),limit(20)));
-    const pulses=snap.docs.map(d=>({id:d.id,...d.data()}));
-    if(!pulses.length){c.innerHTML='<div class="empty"><i class="ti ti-chart-bar"></i><p>No Pulses yet.<br>Be the first to create one!</p></div>';return}
+    const snap=await getDocs(query(collection(db,'pulses'),orderBy('createdAt','desc'),limit(50)));
+    _allPulses=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(!_allPulses.length){c.innerHTML='<div class="empty"><i class="ti ti-chart-bar"></i><p>No Pulses yet.<br>Be the first to create one!</p></div>';return}
     const today=getBerlinDate();
-    const myVotes={};
+    _myVotesCache={};
     if(CU){
-      await Promise.all(pulses.map(async p=>{
-        try{const vs=await getDoc(doc(db,'pulseVotes',CU.uid+'_'+p.id));if(vs.exists())myVotes[p.id]=vs.data();}catch(e){}
+      await Promise.all(_allPulses.map(async p=>{
+        try{const vs=await getDoc(doc(db,'pulseVotes',CU.uid+'_'+p.id));if(vs.exists())_myVotesCache[p.id]=vs.data();}catch(e){}
       }));
     }
-    c.innerHTML=pulses.map(p=>_pulseCardHTML(p,myVotes[p.id],today)).join('');
-    pulses.forEach(p=>_renderPulseMiniChart(p));
+    _renderPulseList(_allPulses);
   }catch(e){c.innerHTML='<div class="empty"><i class="ti ti-alert-circle"></i><p>Error loading Pulses</p></div>';}
+}
+function _renderPulseList(pulses){
+  const c=document.getElementById('pulse-list');if(!c)return;
+  const today=getBerlinDate();
+  if(!pulses.length){c.innerHTML='<div class="empty"><i class="ti ti-search-off"></i><p>Kein Pulse gefunden</p></div>';return}
+  c.innerHTML=pulses.map(p=>_pulseCardHTML(p,_myVotesCache[p.id],today)).join('');
+  pulses.forEach(p=>_renderPulseMiniChart(p));
+}
+function filterPulses(q){
+  const s=q.toLowerCase().trim();
+  _renderPulseList(s?_allPulses.filter(p=>(p.title||'').toLowerCase().includes(s)):_allPulses);
 }
 
 function _pulseCardHTML(p,myVote,today){
@@ -3862,11 +3901,17 @@ function _pulseCardHTML(p,myVote,today){
     const pct=totalVotes>0?Math.round((o.votes||0)/totalVotes*100):0;
     const isWinner=closed&&topOpt&&o.id===topOpt.id;
     const isVoted=votedOptId===o.id;
-    return`<div style="display:flex;align-items:center;gap:7px;padding:2px 14px">
-      <div style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:${PULSE_COLORS[i%PULSE_COLORS.length]}"></div>
-      <div style="flex:1;font-size:11px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(o.text||'')}</div>
-      ${isWinner?'<span style="font-size:10px">🏆</span>':''}
-      <span style="font-size:10px;font-weight:600;color:${isVoted?'var(--gold)':'var(--mu2)'}">${pct}%</span>
+    const col=PULSE_COLORS[i%PULSE_COLORS.length];
+    return`<div style="padding:3px 14px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+        <div style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:${col}"></div>
+        <div style="flex:1;font-size:11px;color:${isVoted?'var(--tx)':'var(--tx2)'};font-weight:${isVoted?600:400};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(o.text||'')}</div>
+        ${isWinner?'<span style="font-size:10px">🏆</span>':''}
+        <span style="font-size:11px;font-weight:700;color:${isVoted?'var(--gold)':isWinner?'var(--gold)':'var(--mu2)'};min-width:28px;text-align:right">${pct}%</span>
+      </div>
+      <div style="height:3px;background:var(--sf3);border-radius:2px;overflow:hidden;margin-left:13px">
+        <div style="height:100%;width:${pct}%;background:${col};border-radius:2px"></div>
+      </div>
     </div>`;
   }).join('')+(opts.length>4?`<div style="font-size:10px;color:var(--mu2);padding:2px 14px 4px">+${opts.length-4} more options</div>`:'');
   return`<div class="pulse-card" onclick="openPulseDetail('${p.id}')">
@@ -3919,41 +3964,45 @@ function _renderPulseDetail(p,myVote,today,closed){
   const opts=p.options||[];
   const totalVotes=opts.reduce((s,o)=>s+(o.votes||0),0);
   const topOpt=closed&&totalVotes>0?opts.reduce((a,b)=>(b.votes||0)>(a.votes||0)?b:a,opts[0]):null;
-  const votedToday=!!(myVote&&myVote.date===today);
+  const hasVoted=!!myVote;
   const votedOptId=myVote?.optionId;
   const hist=p.voteHistory||[];
   const hasHistory=hist.length>=2;
+  const isMyPulse=!!(CU&&p.creatorId===CU.uid);
   const optRows=opts.map((o,i)=>{
     const pct=totalVotes>0?Math.round((o.votes||0)/totalVotes*100):0;
     const isWinner=!!(closed&&topOpt&&o.id===topOpt.id);
     const isVoted=votedOptId===o.id;
-    const canVote=!closed&&!votedToday&&CU;
-    return`<div style="padding:9px 16px;border-bottom:1px solid var(--bd)">
-      <div style="display:flex;align-items:center;gap:9px;margin-bottom:6px">
-        <div style="width:10px;height:10px;border-radius:50%;flex-shrink:0;background:${PULSE_COLORS[i%PULSE_COLORS.length]}"></div>
+    const canVote=!closed&&!hasVoted&&CU;
+    const col=PULSE_COLORS[i%PULSE_COLORS.length];
+    return`<div style="padding:10px 16px;border-bottom:1px solid var(--bd)">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:7px">
+        <div style="width:10px;height:10px;border-radius:50%;flex-shrink:0;background:${col}"></div>
         <div style="flex:1;font-size:13px;color:${isWinner?'var(--gold)':isVoted?'var(--tx)':'var(--tx2)'};font-weight:${isWinner||isVoted?700:400}">${esc(o.text||'')}</div>
         ${isWinner?'<span style="font-size:14px">🏆</span>':''}
-        ${canVote?`<button class="pulse-vote-btn${isVoted?' voted':''}" onclick="voteOnPulse('${p.id}','${o.id}',this)">${isVoted?'Voted ✓':'Vote'}</button>`:''}
+        <span style="font-size:14px;font-weight:800;color:${isVoted?'var(--gold)':isWinner?'var(--gold)':'var(--mu2)'};min-width:38px;text-align:right">${pct}%</span>
+        ${canVote?`<button class="pulse-vote-btn" onclick="voteOnPulse('${p.id}','${o.id}',this)">Wählen</button>`:''}
       </div>
-      <div style="height:5px;background:var(--sf3);border-radius:3px;overflow:hidden;margin-bottom:4px">
-        <div style="height:100%;width:${pct}%;background:${PULSE_COLORS[i%PULSE_COLORS.length]};border-radius:3px;transition:width .7s ease"></div>
+      <div style="height:6px;background:var(--sf3);border-radius:3px;overflow:hidden;margin-bottom:3px">
+        <div style="height:100%;width:${pct}%;background:${col};border-radius:3px;transition:width .7s ease"></div>
       </div>
-      <div style="font-size:10px;color:var(--mu2)">${o.votes||0} vote${(o.votes||0)!==1?'s':''} · ${pct}%</div>
+      <div style="font-size:10px;color:var(--mu2)">${o.votes||0} Stimme${(o.votes||0)!==1?'n':''}</div>
     </div>`;
   }).join('');
   document.getElementById('pulse-detail-body').innerHTML=`
     <div style="padding:13px 16px 9px;border-bottom:1px solid var(--bd)">
-      <div style="font-size:16px;font-weight:800;color:var(--tx);margin-bottom:6px;line-height:1.3;font-family:var(--fd)">${esc(p.title||'')}</div>
+      <div style="font-size:16px;font-weight:800;color:var(--tx);margin-bottom:6px;line-height:1.3">${esc(p.title||'')}</div>
       <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:11px;color:var(--mu2)">
-        <span>by ${esc(p.creatorName||'')}</span><span>·</span>
-        <span>${totalVotes} vote${totalVotes!==1?'s':''}</span><span>·</span>
-        ${closed?'<span class="pulse-closed-bdg">Closed</span>':`<span>${daysLeft(p.endDate)}</span>`}
-        ${votedToday&&!closed?'<span style="color:var(--gold);font-weight:600">· Voted today ✓</span>':''}
-        ${closed&&!votedToday&&!myVote?'':(votedToday?'':'<span style="color:var(--mu2)">· Vote resets midnight CET</span>')}
+        <span>von ${esc(p.creatorName||'')}</span><span>·</span>
+        <span>${totalVotes} Stimme${totalVotes!==1?'n':''}</span><span>·</span>
+        ${closed?'<span class="pulse-closed-bdg">Beendet</span>':`<span>${daysLeft(p.endDate)}</span>`}
+        ${hasVoted&&!closed?'<span style="color:var(--gold);font-weight:600">· Abgestimmt ✓</span>':''}
+        ${!hasVoted&&!closed&&CU?'<span style="color:var(--mu2)">· Einmalige Abstimmung</span>':''}
       </div>
     </div>
     ${hasHistory?`<div style="height:160px;padding:8px 12px 0"><canvas id="pulse-detail-cv"></canvas></div>`:''}
     ${optRows}
+    ${isMyPulse?`<div style="padding:12px 16px;border-top:1px solid var(--bd)"><button onclick="deleteMyPulse('${p.id}','${p.postId||''}')" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;padding:8px 14px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-trash"></i> Pulse löschen</button></div>`:''}
     <div style="height:20px"></div>`;
   if(hasHistory){
     setTimeout(()=>{
@@ -3967,20 +4016,19 @@ function _renderPulseDetail(p,myVote,today,closed){
 }
 
 async function voteOnPulse(pulseId,optionId,btn){
-  if(!CU){showToast('Please sign in');return}
+  if(!CU){showToast('Bitte einloggen');return}
+  if(btn){btn.disabled=true;}
   const today=getBerlinDate();
-  const{db,doc,getDoc,setDoc,runTransaction,serverTimestamp}=window._fb;
+  const{db,doc,getDoc,runTransaction,serverTimestamp}=window._fb;
   try{
     const voteRef=doc(db,'pulseVotes',CU.uid+'_'+pulseId);
     const voteSnap=await getDoc(voteRef);
-    if(voteSnap.exists()&&voteSnap.data().date===today){showToast('Already voted today · Resets midnight CET');return}
-    const prevVote=voteSnap.exists()?voteSnap.data():null;
+    if(voteSnap.exists()){showToast('Bereits abgestimmt – einmal pro Pulse');if(btn)btn.disabled=false;return}
     await runTransaction(db,async tx=>{
       const pSnap=await tx.get(doc(db,'pulses',pulseId));
       if(!pSnap.exists())return;
       const pData=pSnap.data();
       const opts=[...(pData.options||[])];
-      if(prevVote?.optionId){const pi=opts.findIndex(o=>o.id===prevVote.optionId);if(pi>=0)opts[pi]={...opts[pi],votes:Math.max(0,(opts[pi].votes||0)-1)};}
       const ni=opts.findIndex(o=>o.id===optionId);
       if(ni>=0)opts[ni]={...opts[ni],votes:(opts[ni].votes||0)+1};
       const hist=[...(pData.voteHistory||[])];
@@ -3989,15 +4037,27 @@ async function voteOnPulse(pulseId,optionId,btn){
       if(tEntry)tEntry.counts=counts;else hist.push({date:today,counts});
       if(hist.length>60)hist.splice(0,hist.length-60);
       tx.update(doc(db,'pulses',pulseId),{options:opts,voteHistory:hist});
-      tx.set(voteRef,{uid:CU.uid,pulseId,optionId,date:today,votedAt:serverTimestamp()});
+      tx.set(voteRef,{uid:CU.uid,pulseId,optionId,votedAt:serverTimestamp()});
     });
-    showToast('Vote cast! ✓');
+    showToast('Stimme abgegeben ✓');
     const snap=await getDoc(doc(db,'pulses',pulseId));
     if(snap.exists()){
       const p={id:pulseId,...snap.data()};
-      _renderPulseDetail(p,{optionId,date:today},today,!!(p.endDate&&p.endDate<today));
+      _renderPulseDetail(p,{optionId},today,!!(p.endDate&&p.endDate<today));
     }
-  }catch(e){showToast('Error: '+e.message);}
+  }catch(e){showToast('Fehler: '+e.message);if(btn)btn.disabled=false;}
+}
+
+async function deleteMyPulse(pulseId,postId){
+  if(!CU)return;
+  if(!await appConfirm('Diesen Pulse wirklich löschen?'))return;
+  const{db,doc,deleteDoc}=window._fb;
+  try{
+    await deleteDoc(doc(db,'pulses',pulseId));
+    if(postId){try{await deleteDoc(doc(db,'posts',postId));}catch(e){}}
+    closePulseDetail();showToast('Pulse gelöscht');
+    loadPulses();
+  }catch(e){showToast('Fehler: '+e.message);}
 }
 
 function openPulseFromPost(pulseId){
