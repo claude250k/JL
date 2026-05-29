@@ -353,6 +353,8 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .watch-model{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bd)}.watch-model:last-child{border-bottom:none}
 .watch-model-name{font-size:12px;font-weight:500;color:var(--tx)}.watch-model-price{font-size:12px;font-weight:600;color:var(--tx2)}
 .htag{color:var(--gold);cursor:pointer;font-weight:500}.htag:hover{opacity:.8}
+.cb-news{background:rgba(20,184,166,.12);color:#2dd4bf}
+.pol-country-btn{flex:1;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--bd);color:var(--mu2);background:transparent;font-family:var(--fb)}.pol-country-btn.ak{background:var(--gold);color:#000;border-color:var(--gold)}
 .trend-pill{display:inline-flex;align-items:center;gap:5px;background:var(--sf2);border:1px solid var(--bd);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:500;color:var(--tx2);cursor:pointer;white-space:nowrap;transition:border-color .15s,color .15s}.trend-pill:hover,.trend-pill:active{border-color:var(--gold);color:var(--gold)}.trend-pill .tc{font-size:10px;font-weight:600;color:var(--mu2);background:var(--sf3);border-radius:8px;padding:1px 5px}
 .trend-hd{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;color:var(--mu2);letter-spacing:.7px;text-transform:uppercase;padding:12px 16px 8px}
 #trending-section{border-bottom:1px solid var(--bd);padding-bottom:10px}
@@ -490,6 +492,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
   <div class="krow" id="fk">
     <button class="kachel ak" onclick="filterFeed(this,'all')">Following</button>
     <button class="kachel" onclick="filterFeed(this,'discover')">Discover ✦</button>
+    <button class="kachel" onclick="filterFeed(this,'news')">News</button>
     <button class="kachel" onclick="filterFeed(this,'bitcoin')">Bitcoin</button>
     <button class="kachel" onclick="filterFeed(this,'stocks')">Stocks</button>
     <button class="kachel" onclick="filterFeed(this,'ETF')">ETF</button>
@@ -585,7 +588,11 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
       </div>
     </div>
     <div data-pc="pol">
-      <div style="padding:10px 14px 2px"><div style="font-size:13px;font-weight:700;color:var(--tx)">Sunday Poll - Bundestag</div><div style="font-size:11px;color:var(--mu2);margin-top:2px">Anonymous vote - abstain or rate politicians</div></div>
+      <div style="padding:10px 14px 4px"><div style="font-size:13px;font-weight:700;color:var(--tx)">Sunday Poll</div><div style="font-size:11px;color:var(--mu2);margin-top:2px">Anonymous vote · abstain or rate politicians</div></div>
+      <div style="display:flex;gap:6px;padding:4px 14px 10px">
+        <button class="pol-country-btn ak" id="pol-de-btn" onclick="setPolCountry('de')">🇩🇪 Deutschland</button>
+        <button class="pol-country-btn" id="pol-us-btn" onclick="setPolCountry('us')">🇺🇸 United States</button>
+      </div>
       <div id="pol-list"></div>
     </div>
     <div data-pc="tcg">
@@ -810,6 +817,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
     <div class="seti" onclick="openEditProf()"><i class="ti ti-user-edit"></i><div class="setin"><div class="setit" data-i18n="editProfile">Edit Profile</div><div class="setis" data-i18n="editProfileSub">Name, bio and photo</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
     <div class="seti" onclick="showInstPage();closeSet()"><i class="ti ti-download"></i><div class="setin"><div class="setit" data-i18n="installApp">Install App</div><div class="setis" data-i18n="installAppSub">Add to home screen</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
     <div class="seti" onclick="openChSettings()"><i class="ti ti-hash"></i><div class="setin"><div class="setit" data-i18n="manageChannels">Manage Channels</div><div class="setis" data-i18n="manageChannelsSub">Add or remove your channels</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
+    <div class="seti" style="cursor:default"><i class="ti ti-newspaper" style="color:var(--mu2)"></i><div class="setin"><div class="setit">News Channel</div><div class="setis">Zeige News-Tab im Feed</div></div><label style="cursor:pointer;flex-shrink:0" onclick="toggleNewsChSetting()"><div id="news-ch-rail" style="width:44px;height:26px;background:var(--sf3);border:1px solid var(--bd);border-radius:13px;position:relative;transition:background .2s"><div id="news-ch-knob" style="width:20px;height:20px;border-radius:50%;background:var(--mu2);position:absolute;top:2px;left:2px;transition:left .2s,background .2s"></div></div></label></div>
     <div class="seti" style="cursor:default"><i class="ti ti-shield" style="color:var(--mu2)"></i><div class="setin"><div class="setit">Private Profile</div><div class="setis" id="priv-sub">Only followers can see your posts</div></div><label style="cursor:pointer;flex-shrink:0" onclick="toggleProfilePrivacy()"><div id="priv-rail" style="width:44px;height:26px;background:var(--sf3);border:1px solid var(--bd);border-radius:13px;position:relative;transition:background .2s"><div id="priv-knob" style="width:20px;height:20px;border-radius:50%;background:var(--mu2);position:absolute;top:2px;left:2px;transition:left .2s,background .2s"></div></div></label></div>
     <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px" data-i18n="languageLbl">Language</div>
     <div style="display:flex;gap:6px;padding:8px 16px">
@@ -908,6 +916,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
     <div style="font-size:10px;color:var(--mu);margin-top:8px;margin-bottom:3px">Choose channel:</div>
     <div class="mcats" id="mcats">
       <button class="pcat ak" data-cat="all" onclick="sCat(this)">All</button>
+      <button class="pcat" data-cat="news" onclick="sCat(this)">News</button>
       <button class="pcat" data-cat="bitcoin" onclick="sCat(this)">Bitcoin</button>
       <button class="pcat" data-cat="stocks" onclick="sCat(this)">Stocks</button>
       <button class="pcat" data-cat="ETF" onclick="sCat(this)">ETF</button>
@@ -1076,11 +1085,12 @@ let followingIds=new Set();
 let repostIds=new Set();
 let deferredPrompt=null;
 
-const DCH=['bitcoin','stocks','ETF','economy','politics','forecasts'];
+const DCH=['bitcoin','stocks','ETF','economy','politics','forecasts','news'];
 const CID={btc:'bitcoin',eth:'ethereum',sol:'solana',bnb:'binancecoin',xrp:'ripple',ada:'cardano',doge:'dogecoin',dot:'polkadot',avax:'avalanche-2',link:'chainlink'};
 const CNM={btc:'Bitcoin (BTC)',eth:'Ethereum (ETH)',sol:'Solana (SOL)',bnb:'BNB',xrp:'XRP',ada:'Cardano (ADA)',doge:'Dogecoin (DOGE)',dot:'Polkadot (DOT)',avax:'Avalanche (AVAX)',link:'Chainlink (LINK)'};
 
 const _openParties=new Set();
+let polCountry='de';
 const PARTIES=[
   {id:'cdu',name:'CDU/CSU',color:'#555',pols:[
     {i:'FM',n:'Friedrich Merz',r:'Federal Chancellor (CDU)'},
@@ -1121,6 +1131,30 @@ const PARTIES=[
     {i:'JV',n:'Jan van Aken',r:'Die Linke Co-Chair'},
     {i:'HR',n:'Heidi Reichinnek',r:'Die Linke Co-Chair'},
     {i:'GG',n:'Gregor Gysi',r:'Die Linke Honorary Chair'},
+  ]},
+];
+
+const PARTIES_USA=[
+  {id:'dem',name:'Democrats',color:'#1469b9',pols:[
+    {i:'KH',n:'Kamala Harris',r:'Vice President'},
+    {i:'JB',n:'Joe Biden',r:'Former President'},
+    {i:'BO',n:'Barack Obama',r:'Former President'},
+    {i:'BS',n:'Bernie Sanders',r:'Senator Vermont'},
+    {i:'AO',n:'Alexandria Ocasio-Cortez',r:'Representative NY-14'},
+    {i:'GN',n:'Gavin Newsom',r:'Governor California'},
+  ]},
+  {id:'rep',name:'Republicans',color:'#c13030',pols:[
+    {i:'DT',n:'Donald Trump',r:'President'},
+    {i:'JV',n:'JD Vance',r:'Vice President'},
+    {i:'MM',n:'Mitch McConnell',r:'Former Senate Majority Leader'},
+    {i:'RS',n:'Ron DeSantis',r:'Governor Florida'},
+    {i:'NH',n:'Nikki Haley',r:'Former UN Ambassador'},
+    {i:'MR',n:'Marco Rubio',r:'Secretary of State'},
+  ]},
+  {id:'ind',name:'Independents',color:'#7c3aed',pols:[
+    {i:'RK',n:'Robert F. Kennedy Jr.',r:'Former Independent Candidate 2024'},
+    {i:'AK',n:'Angus King',r:'Senator Maine'},
+    {i:'ES',n:'Elon Musk',r:'DOGE / Tech Entrepreneur'},
   ]},
 ];
 
@@ -1261,6 +1295,10 @@ async function removeCh(ch){
 function openSet(){
   document.getElementById('setov').classList.add('on');
   _syncPrivToggle();
+  // Sync News channel toggle
+  const savedFeedChs=localStorage.getItem('jl_feed_chs');
+  const activeNow=savedFeedChs?JSON.parse(savedFeedChs):[...DCH,...customChs];
+  _syncNewsToggle(activeNow.includes('news'));
   // Show admin section for developer
   const adminSec=document.getElementById('admin-section');
   if(adminSec)adminSec.style.display=(CU?.email==='claude250k@gmail.com')?'block':'none';
@@ -1489,6 +1527,10 @@ function updateUI(){
   const pav=document.getElementById('pd-myav');
   if(pav){pav.className='cmtav';pav.innerHTML=UP.avatarUrl?`<img src="${UP.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(UP.name||'?').substring(0,2).toUpperCase()}
   renderMyChs();renderCCats();
+  // Apply saved feed channel preferences
+  const _sfc=localStorage.getItem('jl_feed_chs');
+  if(_sfc){try{updateFeedKacheln(JSON.parse(_sfc));}catch(e){}}
+  else{updateFeedKacheln([...DCH,...customChs]);}
 }
 
 function renderMyChs(){
@@ -1503,7 +1545,7 @@ function renderCCats(){
   c.innerHTML='<div class="mcats">'+customChs.map(ch=>`<button class="pcat" data-cat="${ch}" onclick="sCat(this)">${chLbl(ch)}</button>`).join('')+'</div>';
 }
 function chLbl(ch){
-  const map={all:'All',bitcoin:'Bitcoin',aktien:'Stocks',etf:'ETF',wirtschaft:'Economy',politik:'Politics',prognosen:'Forecasts'};
+  const map={all:'All',bitcoin:'Bitcoin',aktien:'Stocks',etf:'ETF',wirtschaft:'Economy',politik:'Politics',prognosen:'Forecasts',news:'News'};
   return map[ch]||(ch?ch.charAt(0).toUpperCase()+ch.slice(1).replace(/_/g,' '):'');
 }
 
@@ -1591,8 +1633,25 @@ function toggleFeedCh(ch,cb){
   if(cb.checked){if(!active.includes(ch))active.push(ch)}
   else{active=active.filter(c=>c!==ch)}
   localStorage.setItem('jl_feed_chs',JSON.stringify(active));
-  // Update feed kacheln live
   updateFeedKacheln(active);
+}
+function toggleNewsChSetting(){
+  const all=[...DCH,...customChs];
+  const savedStr=localStorage.getItem('jl_feed_chs');
+  let active=savedStr?JSON.parse(savedStr):[...all];
+  const on=active.includes('news');
+  if(on)active=active.filter(c=>c!=='news');
+  else if(!active.includes('news'))active.push('news');
+  localStorage.setItem('jl_feed_chs',JSON.stringify(active));
+  _syncNewsToggle(!on);
+  updateFeedKacheln(active);
+}
+function _syncNewsToggle(on){
+  const rail=document.getElementById('news-ch-rail');const knob=document.getElementById('news-ch-knob');
+  if(!rail||!knob)return;
+  rail.style.background=on?'var(--gn)':'var(--sf3)';
+  knob.style.left=on?'22px':'2px';
+  knob.style.background=on?'#fff':'var(--mu2)';
 }
 function updateFeedKacheln(active){
   const fk=document.getElementById('fk');if(!fk)return;
@@ -2206,7 +2265,7 @@ async function loadUsers(){
 }
 
 // ── TRENDING HASHTAGS ────────────────────────────────────────────────────────
-const TREND_EXCLUDE=new Set(['bitcoin','btc','ethereum','eth','solana','sol','bnb','xrp','ripple','ada','cardano','doge','dogecoin','dot','polkadot','avax','avalanche','link','chainlink','nvidia','nvda','apple','aapl','microsoft','msft','amazon','amzn','google','alphabet','goog','meta','tesla','tsla','sap','spy','sp500','qqq','voo','iwda','vwrl','stocks','etf','economy','politics','forecasts','analysis','aktien','wirtschaft','politik','prognosen','crypto','bitcoin','all','general']);
+const TREND_EXCLUDE=new Set(['bitcoin','btc','ethereum','eth','solana','sol','bnb','xrp','ripple','ada','cardano','doge','dogecoin','dot','polkadot','avax','avalanche','link','chainlink','nvidia','nvda','apple','aapl','microsoft','msft','amazon','amzn','google','alphabet','goog','meta','tesla','tsla','sap','spy','sp500','qqq','voo','iwda','vwrl','stocks','etf','economy','politics','forecasts','analysis','aktien','wirtschaft','politik','prognosen','crypto','bitcoin','all','general','news']);
 let _trendCache=null,_trendTs=0,_trendIntv=null;
 
 async function loadTrending(force=false){
@@ -2643,13 +2702,15 @@ async function msgUser(){
 }
 
 function _hrgb(h){const s=h.replace('#','');const x=s.length===3?s.split('').map(c=>c+c).join(''):s;return[parseInt(x.slice(0,2),16),parseInt(x.slice(2,4),16),parseInt(x.slice(4,6),16)]}
+function _activeParties(){return polCountry==='us'?PARTIES_USA:PARTIES;}
 async function renderParties(){
   const{db,collection,getDocs}=window._fb;let votes={},polVotes={};
   try{const s=await getDocs(collection(db,'votes'));s.docs.forEach(d=>votes[d.id]=d.data().count||0);const pv=await getDocs(collection(db,'polVotes'));pv.docs.forEach(d=>polVotes[d.id]=d.data());}catch(e){}
   const total=Object.values(votes).reduce((a,b)=>a+b,0)||1;
   let myPV={};
   if(CU){try{const pvs=await getDocs(collection(db,`upv_${CU.uid}`));pvs.docs.forEach(d=>myPV[d.id]=d.data().dir)}catch(e){}}
-  document.getElementById('pol-list').innerHTML=PARTIES.map(p=>{
+  const ap=_activeParties();
+  document.getElementById('pol-list').innerHTML=ap.map(p=>{
     const pct=votes[p.id]?Math.round(votes[p.id]/total*100):0;
     const isV=myVote===p.id;
     const[_pr,_pg,_pb]=_hrgb(p.color);const avBg=`rgba(${_pr},${_pg},${_pb},.18)`;
@@ -2657,7 +2718,14 @@ async function renderParties(){
     return`<div class="poc"><div class="potop"><div class="podot" style="background:${p.color}"></div><div class="pon">${p.name}</div><div class="popct">${pct}%</div></div><div class="bt"><div class="bf" style="width:${pct}%;background:${p.color}"></div></div><div class="pbs"><button class="pb2${isV?' voted':''}" id="vb-${p.id}" onclick="voteP('${p.id}')">${isV?'Voted':'Vote'}</button>${isV?`<button class="pb2" onclick="abstainP('${p.id}')">Abstain</button>`:''}<button class="pb2 det" onclick="togPD('${p.id}')">Politicians</button></div><div id="pd-${p.id}" style="display:none;margin-top:8px;border-top:1px solid var(--bd);padding-top:8px">${polsH}</div></div>`;
   }).join('');
 }
-function togPD(id){const el=document.getElementById('pd-'+id);if(!el)return;const open=el.style.display!=='none';PARTIES.forEach(p=>{if(p.id!==id){const o=document.getElementById('pd-'+p.id);if(o)o.style.display='none';_openParties.delete(p.id);}});el.style.display=open?'none':'block';if(open)_openParties.delete(id);else _openParties.add(id);}
+function setPolCountry(c){
+  polCountry=c;
+  document.getElementById('pol-de-btn').classList.toggle('ak',c==='de');
+  document.getElementById('pol-us-btn').classList.toggle('ak',c==='us');
+  _openParties.clear();
+  renderParties();
+}
+function togPD(id){const el=document.getElementById('pd-'+id);if(!el)return;const open=el.style.display!=='none';_activeParties().forEach(p=>{if(p.id!==id){const o=document.getElementById('pd-'+p.id);if(o)o.style.display='none';_openParties.delete(p.id);}});el.style.display=open?'none':'block';if(open)_openParties.delete(id);else _openParties.add(id);}
 async function voteP(id){
   if(!CU)return;if(myVote===id){showToast('Already voted for this party');return}
   const{db,doc,setDoc,updateDoc,increment,getDoc}=window._fb;
@@ -3091,7 +3159,7 @@ async function openByName(name){
   const{db,collection,query,where,getDocs}=window._fb;
   try{const snap=await getDocs(query(collection(db,'users'),where('name','==',name)));if(!snap.empty)openOP(snap.docs[0].data().uid||snap.docs[0].id);}catch(e){}
 }
-function chBadgeStyle(ch){const known=['bitcoin','aktien','stocks','etf','ETF','politik','politics','wirtschaft','economy','prognosen','forecasts','analysis','all','custom'];if(!ch||known.includes(ch))return'';let h=0;for(let i=0;i<ch.length;i++)h=(h*31+ch.charCodeAt(i))%360;return`background:hsla(${h},60%,62%,.18);color:hsl(${h},70%,70%)`;}
+function chBadgeStyle(ch){const known=['bitcoin','aktien','stocks','etf','ETF','politik','politics','wirtschaft','economy','prognosen','forecasts','analysis','all','custom','news'];if(!ch||known.includes(ch))return'';let h=0;for(let i=0;i<ch.length;i++)h=(h*31+ch.charCodeAt(i))%360;return`background:hsla(${h},60%,62%,.18);color:hsl(${h},70%,70%)`;}
 function goToPuls(asset){goTo('puls');setTimeout(()=>openCD(asset),120);}
 function togTCG(id){const body=document.getElementById('tcg-'+id);const icon=document.getElementById('tcgi-'+id);if(!body)return;const open=body.style.display!=='none';body.style.display=open?'none':'block';if(icon)icon.style.transform=open?'':'rotate(180deg)';}
 function togWatch(id){const body=document.getElementById('watch-'+id);const icon=document.getElementById('watchi-'+id);if(!body)return;const open=body.style.display!=='none';document.querySelectorAll('.watch-models').forEach(el=>{if(el.id!=='watch-'+id){el.style.display='none';const ic=document.getElementById('watchi-'+el.id.slice(6));if(ic)ic.style.transform='';}});body.style.display=open?'none':'block';if(icon)icon.style.transform=open?'':'rotate(180deg)';}
