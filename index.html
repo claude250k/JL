@@ -431,6 +431,13 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       <input class="ainp" id="re-p2" type="password" placeholder="Repeat password" style="margin-bottom:0;padding-right:40px">
       <button type="button" onclick="togglePw('re-p2',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--mu2);cursor:pointer;padding:0;line-height:1;font-size:16px"><i class="ti ti-eye"></i></button>
     </div>
+    <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:11px;padding:11px 13px;margin-bottom:8px">
+      <div style="font-size:10px;color:var(--mu2);font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:5px"><i class="ti ti-shield-check" style="font-size:12px;color:var(--gold)"></i> Sicherheitsprüfung</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="font-size:13px;font-weight:600;color:var(--tx);white-space:nowrap" id="captcha-q">–</div>
+        <input class="ainp" id="re-captcha" type="number" placeholder="Antwort" style="flex:1;margin-bottom:0" onkeydown="if(event.key==='Enter')doReg()">
+      </div>
+    </div>
     <button class="abtn" onclick="doReg()">Create Account</button>
   </div>
   <div class="adiv">or</div>
@@ -800,6 +807,8 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       <div class="setin"><div class="setit" id="verif-lbl">Request Verification</div><div class="setis" id="verif-sub">Get a verified badge on your profile</div></div>
       <i class="ti ti-chevron-right" id="verif-ico" style="color:var(--mu);font-size:14px"></i>
     </div>
+    <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px">Legal</div>
+    <div class="seti" onclick="document.getElementById('impressum-ov').classList.add('on')"><i class="ti ti-file-description"></i><div class="setin"><div class="setit">Impressum</div><div class="setis">Angaben gemäß § 5 TMG</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
     <div id="admin-section" style="display:none">
       <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px">Admin</div>
       <div class="seti" onclick="openAdminVerif()"><i class="ti ti-shield-check" style="color:var(--gold)"></i><div class="setin"><div class="setit">Verification Requests</div><div class="setis" id="admin-pending-lbl">Loading…</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
@@ -824,6 +833,31 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
   </div>
 </div>
 
+<div class="setov" id="impressum-ov" style="z-index:160">
+  <div class="ovh"><button class="ovb" onclick="document.getElementById('impressum-ov').classList.remove('on')"><i class="ti ti-arrow-left"></i></button><div class="ovt">Impressum</div></div>
+  <div class="scroll" style="padding:20px 16px">
+    <div style="font-size:12px;color:var(--mu2);margin-bottom:16px;padding:10px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;line-height:1.6">Angaben gemäß <strong style="color:var(--tx)">§ 5 TMG</strong> (Telemediengesetz)</div>
+    <div style="font-size:11px;font-weight:700;color:var(--mu);letter-spacing:.7px;text-transform:uppercase;margin-bottom:8px">Verantwortlicher</div>
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:11px;overflow:hidden;margin-bottom:16px">
+      <div style="padding:11px 14px;border-bottom:1px solid var(--bd)"><div style="font-size:10px;color:var(--mu2);margin-bottom:2px">Name</div><div style="font-size:13px;font-weight:600;color:var(--tx)">[Dein Name]</div></div>
+      <div style="padding:11px 14px;border-bottom:1px solid var(--bd)"><div style="font-size:10px;color:var(--mu2);margin-bottom:2px">Adresse</div><div style="font-size:13px;font-weight:600;color:var(--tx)">[Deine Adresse]</div><div style="font-size:12px;color:var(--mu2)">[PLZ Ort]</div></div>
+      <div style="padding:11px 14px"><div style="font-size:10px;color:var(--mu2);margin-bottom:2px">E-Mail</div><div style="font-size:13px;font-weight:600;color:var(--tx)">[Deine Email]</div></div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--mu);letter-spacing:.7px;text-transform:uppercase;margin-bottom:8px">Inhaltlich Verantwortlicher</div>
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:11px;padding:11px 14px;margin-bottom:16px">
+      <div style="font-size:13px;color:var(--tx);line-height:1.6">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:<br><strong>[Dein Name]</strong><br>[Deine Adresse]<br>[PLZ Ort]</div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--mu);letter-spacing:.7px;text-transform:uppercase;margin-bottom:8px">Haftungsausschluss</div>
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:11px;padding:11px 14px;margin-bottom:16px">
+      <div style="font-size:12px;color:var(--mu2);line-height:1.7"><strong style="color:var(--tx2)">Haftung für Inhalte</strong><br>Die Inhalte dieser App wurden mit größtmöglicher Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen. Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene Inhalte nach den allgemeinen Gesetzen verantwortlich.</div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--mu);letter-spacing:.7px;text-transform:uppercase;margin-bottom:8px">Urheberrecht</div>
+    <div style="background:var(--sf);border:1px solid var(--bd);border-radius:11px;padding:11px 14px;margin-bottom:8px">
+      <div style="font-size:12px;color:var(--mu2);line-height:1.7">Die durch den Seitenbetreiber erstellten Inhalte und Werke unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechts bedürfen der schriftlichen Zustimmung des jeweiligen Autors.</div>
+    </div>
+    <div style="height:16px"></div>
+  </div>
+</div>
 <div class="setov" id="adminov" style="z-index:160">
   <div class="ovh"><button class="ovb" onclick="closeAdminVerif()"><i class="ti ti-arrow-left"></i></button><div class="ovt">Verification Requests</div></div>
   <div class="scroll" id="admin-verif-list"><div class="spin"></div></div>
@@ -984,7 +1018,7 @@ function pinKey(d){if(_pinEntry.length>=4)return;_pinEntry+=d;_updPinDots();if(_
 function pinDel(){_pinEntry=_pinEntry.slice(0,-1);_updPinDots();const e=document.getElementById('pin-err');if(e)e.textContent=''}
 function _updPinDots(){for(let i=0;i<4;i++){const d=document.getElementById('pd-'+i);if(d)d.classList.toggle('filled',i<_pinEntry.length)}}
 function _chkPin(){
-  if(_pinEntry==='0000'){sessionStorage.setItem('jl_unlocked','1');const ps=document.getElementById('pin-sc');if(ps)ps.style.display='none';}
+  if(_pinEntry==='2121'){sessionStorage.setItem('jl_unlocked','1');const ps=document.getElementById('pin-sc');if(ps)ps.style.display='none';}
   else{const e=document.getElementById('pin-err');if(e)e.textContent='Incorrect PIN. Try again.';_pinEntry='';_updPinDots();}
 }
 
@@ -1077,12 +1111,22 @@ wFB(()=>{
   });
 });
 
+let _captchaAns=0;
+function genCaptcha(){
+  const a=Math.floor(Math.random()*9)+1,b=Math.floor(Math.random()*9)+1;
+  _captchaAns=a+b;
+  const q=document.getElementById('captcha-q');
+  if(q)q.textContent=`Wieviel ist ${a} + ${b}?`;
+  const inp=document.getElementById('re-captcha');
+  if(inp)inp.value='';
+}
 function atab(t){
   document.getElementById('at-li').classList.toggle('ak',t==='li');
   document.getElementById('at-re').classList.toggle('ak',t==='re');
   document.getElementById('fl').style.display=t==='li'?'block':'none';
   document.getElementById('fr').style.display=t==='re'?'block':'none';
   document.getElementById('aerr').textContent='';
+  if(t==='re')genCaptcha();
 }
 function setAErr(m){document.getElementById('aerr').textContent=m}
 
@@ -1106,6 +1150,8 @@ async function doReg(){
   if(p!==p2){setAErr('Passwords do not match');return}
   if(name.length<2||name.length>30){setAErr('Name must be 2–30 characters');return}
   if(!/^[a-zA-Z0-9_\-]+$/.test(name)){setAErr('Name may only contain letters, numbers, _ and -');return}
+  const captchaVal=parseInt(document.getElementById('re-captcha').value,10);
+  if(isNaN(captchaVal)||captchaVal!==_captchaAns){setAErr('Sicherheitsprüfung falsch – bitte erneut versuchen.');genCaptcha();return}
   const ni=await getDoc(doc(db,'nameIndex',name.toLowerCase()));
   if(ni.exists()){setAErr('This name is already taken. Please choose another.');return}
   try{
