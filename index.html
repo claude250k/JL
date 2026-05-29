@@ -356,6 +356,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .watch-model-name{font-size:12px;font-weight:500;color:var(--tx)}.watch-model-price{font-size:12px;font-weight:600;color:var(--tx2)}
 .htag{color:var(--gold);cursor:pointer;font-weight:500}.htag:hover{opacity:.8}
 .cb-news{background:rgba(20,184,166,.12);color:#2dd4bf}
+.shell.no-nav .bnav{display:none!important}
 .pol-country-btn{flex:1;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--bd);color:var(--mu2);background:transparent;font-family:var(--fb)}.pol-country-btn.ak{background:var(--gold);color:#000;border-color:var(--gold)}
 .trend-pill{display:inline-flex;align-items:center;gap:5px;background:var(--sf2);border:1px solid var(--bd);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:500;color:var(--tx2);cursor:pointer;white-space:nowrap;transition:border-color .15s,color .15s}.trend-pill:hover,.trend-pill:active{border-color:var(--gold);color:var(--gold)}.trend-pill .tc{font-size:10px;font-weight:600;color:var(--mu2);background:var(--sf3);border-radius:8px;padding:1px 5px}
 .trend-hd{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;color:var(--mu2);letter-spacing:.7px;text-transform:uppercase;padding:12px 16px 8px}
@@ -830,7 +831,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
     <div class="seti" onclick="openEditProf()"><i class="ti ti-user-edit"></i><div class="setin"><div class="setit" data-i18n="editProfile">Edit Profile</div><div class="setis" data-i18n="editProfileSub">Name, bio and photo</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
     <div class="seti" onclick="showInstPage();closeSet()"><i class="ti ti-download"></i><div class="setin"><div class="setit" data-i18n="installApp">Install App</div><div class="setis" data-i18n="installAppSub">Add to home screen</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
     <div class="seti" onclick="openChSettings()"><i class="ti ti-hash"></i><div class="setin"><div class="setit" data-i18n="manageChannels">Manage Channels</div><div class="setis" data-i18n="manageChannelsSub">Add or remove your channels</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
-    <div class="seti" style="cursor:default"><i class="ti ti-newspaper" style="color:var(--mu2)"></i><div class="setin"><div class="setit">News Channel</div><div class="setis">Zeige News-Tab im Feed</div></div><label style="cursor:pointer;flex-shrink:0" onclick="toggleNewsChSetting()"><div id="news-ch-rail" style="width:44px;height:26px;background:var(--sf3);border:1px solid var(--bd);border-radius:13px;position:relative;transition:background .2s"><div id="news-ch-knob" style="width:20px;height:20px;border-radius:50%;background:var(--mu2);position:absolute;top:2px;left:2px;transition:left .2s,background .2s"></div></div></label></div>
     <div class="seti" style="cursor:default"><i class="ti ti-shield" style="color:var(--mu2)"></i><div class="setin"><div class="setit">Private Profile</div><div class="setis" id="priv-sub">Only followers can see your posts</div></div><label style="cursor:pointer;flex-shrink:0" onclick="toggleProfilePrivacy()"><div id="priv-rail" style="width:44px;height:26px;background:var(--sf3);border:1px solid var(--bd);border-radius:13px;position:relative;transition:background .2s"><div id="priv-knob" style="width:20px;height:20px;border-radius:50%;background:var(--mu2);position:absolute;top:2px;left:2px;transition:left .2s,background .2s"></div></div></label></div>
     <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px" data-i18n="languageLbl">Language</div>
     <div style="display:flex;gap:6px;padding:8px 16px">
@@ -1299,6 +1299,7 @@ function openChSettings(){
   ov.className='ov on';ov.style.zIndex='200';
   ov.innerHTML=`<div class="ovh"><button class="ovb" onclick="this.closest('.ov').remove();openSet()"><i class="ti ti-arrow-left"></i></button><div class="ovt">Manage Channels</div></div><div class="scroll">${html}</div>`;
   document.getElementById('app').appendChild(ov);
+  _navHide();
 }
 async function removeCh(ch){
   if(!CU)return;
@@ -1314,15 +1315,17 @@ async function removeCh(ch){
   }catch(e){}
   customChs=customChs.filter(c=>c!==ch);
   await updateDoc(doc(db,'users',CU.uid),{customChannels:customChs});
-  renderMyChs();renderCCats();showToast('Channel entfernt · Posts verschoben');
+  // Remove deleted channel from saved feed channel state
+  const _rfc=_getFeedChs().filter(c=>c.id!==ch);_saveFeedChs(_rfc);
+  // Remove posts with this channel from feed DOM immediately
+  document.querySelectorAll(`.pi[data-ch="${ch}"]`).forEach(el=>el.remove());
+  renderMyChs();renderCCats();updateFeedKacheln();showToast('Channel entfernt · Posts verschoben');
   document.querySelector('.ov[style*="200"]')?.remove();openSet();
 }
 function openSet(){
+  _navHide();
   document.getElementById('setov').classList.add('on');
   _syncPrivToggle();
-  const savedFeedChs=localStorage.getItem('jl_feed_chs');
-  const activeNow=savedFeedChs?JSON.parse(savedFeedChs):[...DCH,...customChs];
-  _syncNewsToggle(activeNow.includes('news'));
   // Verification (Human) state
   const verifLbl=document.getElementById('verif-lbl');
   const verifSub=document.getElementById('verif-sub');
@@ -1356,7 +1359,7 @@ function openSet(){
     }
   }
 }
-function closeSet(){document.getElementById('setov').classList.remove('on')}
+function closeSet(){document.getElementById('setov').classList.remove('on');_navShow();}
 
 // ── VERIFICATION ──────────────────────────────────────────────────────────────
 async function requestVerification(){
@@ -1743,10 +1746,7 @@ function updateUI(){
   const pav=document.getElementById('pd-myav');
   if(pav){pav.className='cmtav';pav.innerHTML=UP.avatarUrl?`<img src="${UP.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(UP.name||'?').substring(0,2).toUpperCase()}
   renderMyChs();renderCCats();
-  // Apply saved feed channel preferences
-  const _sfc=localStorage.getItem('jl_feed_chs');
-  if(_sfc){try{updateFeedKacheln(JSON.parse(_sfc));}catch(e){}}
-  else{updateFeedKacheln([...DCH,...customChs]);}
+  updateFeedKacheln();
 }
 
 function renderMyChs(){
@@ -1781,9 +1781,8 @@ async function chModalOk(){
   customChs.push(id);
   const{db,doc,updateDoc}=window._fb;
   await updateDoc(doc(db,'users',CU.uid),{customChannels:customChs});
-  const fk=document.getElementById('fk');
-  const btn=document.createElement('button');btn.className='kachel';btn.textContent=chLbl(id);btn.onclick=()=>filterFeed(btn,id);fk.appendChild(btn);
-  renderMyChs();renderCCats();showToast(`Channel "${n.trim()}" created`);
+  const _nfc=_getFeedChs();if(!_nfc.some(c=>c.id===id))_nfc.push({id,on:true});_saveFeedChs(_nfc);
+  renderMyChs();renderCCats();updateFeedKacheln();showToast(`Channel "${n.trim()}" created`);
   if(document.getElementById('pm').classList.contains('on'))setTimeout(()=>{const b=document.querySelector(`#ccats .pcat[data-cat="${id}"]`);if(b)b.click();},60);
 }
 async function upAv(inp){
@@ -1811,10 +1810,33 @@ function startFeed(){
     renderPosts(posts,'fposts','all');
   },err=>{document.getElementById('fspin').style.display='none';document.getElementById('fposts').innerHTML=`<div class="empty"><i class="ti ti-alert-circle"></i><p>${esc(err.message)}</p></div>`});
 }
-function manageFeedChannels(){
+function _navHide(){document.getElementById('app')?.classList.add('no-nav')}
+function _navShow(){document.getElementById('app')?.classList.remove('no-nav')}
+
+function _getFeedChs(){
   const all=[...DCH,...customChs];
   const savedStr=localStorage.getItem('jl_feed_chs');
-  const active=savedStr?JSON.parse(savedStr):all;
+  if(!savedStr)return all.map(id=>({id,on:true}));
+  try{
+    const parsed=JSON.parse(savedStr);
+    if(Array.isArray(parsed)&&(parsed.length===0||typeof parsed[0]==='string')){
+      // Old format: array of active channel IDs
+      return all.map(id=>({id,on:parsed.includes(id)}));
+    }
+    // New format: {id, on}[]
+    const savedOrder=parsed.filter(c=>all.includes(c.id));
+    const savedIds=savedOrder.map(c=>c.id);
+    all.forEach(id=>{if(!savedIds.includes(id))savedOrder.push({id,on:true});});
+    return savedOrder;
+  }catch{return all.map(id=>({id,on:true}));}
+}
+function _saveFeedChs(chs){localStorage.setItem('jl_feed_chs',JSON.stringify(chs));}
+
+let _fchChs=[],_fchDragIdx=null;
+
+function manageFeedChannels(){
+  _fchChs=_getFeedChs();
+  _fchDragIdx=null;
   _fchDiscCache=null;
   const ov=document.createElement('div');
   ov.className='ch-modal on';
@@ -1825,11 +1847,8 @@ function manageFeedChannels(){
       <button id="fch-tab-disc" onclick="fchTab('disc')" style="flex:1;padding:6px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--mu2)">Discover</button>
     </div>
     <div id="fch-my">
-      <div style="font-size:11px;color:var(--mu2);margin-bottom:8px">Toggle channels in your feed</div>
-      ${all.map(ch=>`<label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd);cursor:pointer">
-        <input type="checkbox" ${active.includes(ch)?'checked':''} onchange="toggleFeedCh('${ch}',this)" style="accent-color:var(--gold);width:16px;height:16px">
-        <span style="font-size:13px;color:var(--tx)">${chLbl(ch)}</span>
-      </label>`).join('')}
+      <div style="font-size:11px;color:var(--mu2);margin-bottom:8px">Drag <strong style="color:var(--tx)">⠿</strong> to reorder · toggle to show/hide</div>
+      <div id="fch-list"></div>
     </div>
     <div id="fch-disc" style="display:none">
       <div style="font-size:11px;color:var(--mu2);margin-bottom:8px">Search channels created by other users</div>
@@ -1837,47 +1856,62 @@ function manageFeedChannels(){
       <div id="fch-results" style="min-height:60px"><div style="text-align:center;padding:20px;color:var(--mu2);font-size:12px">Type to search, or leave blank to browse all</div></div>
     </div>
     <div class="ch-modal-foot" style="margin-top:12px">
-      <button class="ch-modal-cancel" onclick="this.closest('.ch-modal').remove()">Done</button>
+      <button class="ch-modal-cancel" onclick="this.closest('.ch-modal').remove()">Cancel</button>
+      <button class="ch-modal-ok" onclick="_saveFchAndClose()">Save</button>
     </div>
   </div>`;
   document.getElementById('app').appendChild(ov);
+  _renderFchList();
 }
+
+function _renderFchList(){
+  const list=document.getElementById('fch-list');if(!list)return;
+  list.innerHTML='';
+  _fchChs.forEach((c,i)=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--bd)';
+    row.dataset.idx=String(i);
+    row.draggable=true;
+    row.addEventListener('dragstart',e=>{_fchDragIdx=i;setTimeout(()=>row.style.opacity='.4',0);e.dataTransfer.effectAllowed='move';});
+    row.addEventListener('dragend',()=>{row.style.opacity='';list.querySelectorAll('[data-idx]').forEach(r=>r.style.borderTop='');_fchDragIdx=null;});
+    row.addEventListener('dragover',e=>{e.preventDefault();if(_fchDragIdx!==null&&_fchDragIdx!==i){list.querySelectorAll('[data-idx]').forEach(r=>r.style.borderTop='');row.style.borderTop='2px solid var(--gold)';}});
+    row.addEventListener('drop',e=>{
+      e.preventDefault();
+      if(_fchDragIdx!==null&&_fchDragIdx!==i){const arr=[..._fchChs];const[mv]=arr.splice(_fchDragIdx,1);arr.splice(i,0,mv);_fchChs=arr;_renderFchList();}
+      list.querySelectorAll('[data-idx]').forEach(r=>r.style.borderTop='');_fchDragIdx=null;
+    });
+    const drag=document.createElement('span');
+    drag.textContent='⠿';drag.style.cssText='font-size:16px;color:var(--mu2);flex-shrink:0;cursor:grab';
+    const lbl=document.createElement('span');lbl.style.cssText='flex:1;font-size:13px;color:var(--tx)';lbl.textContent=chLbl(c.id);
+    const idx=i;
+    const cb=document.createElement('input');cb.type='checkbox';cb.checked=c.on!==false;
+    cb.style.cssText='accent-color:var(--gold);width:16px;height:16px;cursor:pointer;flex-shrink:0';
+    cb.addEventListener('change',()=>{_fchChs[idx].on=cb.checked;});
+    row.appendChild(drag);row.appendChild(lbl);row.appendChild(cb);
+    list.appendChild(row);
+  });
+}
+
+function _saveFchAndClose(){
+  _saveFeedChs(_fchChs);
+  document.querySelector('.ch-modal.on')?.remove();
+  updateFeedKacheln();
+  showToast('Channels saved');
+}
+
 function toggleFeedCh(ch,cb){
-  const all=[...DCH,...customChs];
-  const savedStr=localStorage.getItem('jl_feed_chs');
-  let active=savedStr?JSON.parse(savedStr):[...all];
-  if(cb.checked){if(!active.includes(ch))active.push(ch)}
-  else{active=active.filter(c=>c!==ch)}
-  localStorage.setItem('jl_feed_chs',JSON.stringify(active));
-  updateFeedKacheln(active);
+  const chs=_getFeedChs();
+  const c=chs.find(x=>x.id===ch);
+  if(c)c.on=cb.checked;else if(cb.checked)chs.push({id:ch,on:true});
+  _saveFeedChs(chs);updateFeedKacheln();
 }
-function toggleNewsChSetting(){
-  const all=[...DCH,...customChs];
-  const savedStr=localStorage.getItem('jl_feed_chs');
-  let active=savedStr?JSON.parse(savedStr):[...all];
-  const on=active.includes('news');
-  if(on)active=active.filter(c=>c!=='news');
-  else if(!active.includes('news'))active.push('news');
-  localStorage.setItem('jl_feed_chs',JSON.stringify(active));
-  _syncNewsToggle(!on);
-  updateFeedKacheln(active);
-}
-function _syncNewsToggle(on){
-  const rail=document.getElementById('news-ch-rail');const knob=document.getElementById('news-ch-knob');
-  if(!rail||!knob)return;
-  rail.style.background=on?'var(--gn)':'var(--sf3)';
-  knob.style.left=on?'22px':'2px';
-  knob.style.background=on?'#fff':'var(--mu2)';
-}
-function updateFeedKacheln(active){
+function updateFeedKacheln(){
   const fk=document.getElementById('fk');if(!fk)return;
-  const all=[...DCH,...customChs];
-  // Rebuild kacheln (keep Following + Discover always)
+  const chs=_getFeedChs();
   let h=`<button class="kachel ak" onclick="filterFeed(this,'all')">Following</button>`;
   h+=`<button class="kachel" onclick="filterFeed(this,'discover')">Discover ✦</button>`;
-  all.forEach(ch=>{
-    if(!active||active.includes(ch))
-      h+=`<button class="kachel" onclick="filterFeed(this,'${ch}')">${chLbl(ch)}</button>`;
+  chs.forEach(c=>{
+    if(c.on!==false)h+=`<button class="kachel" onclick="filterFeed(this,'${c.id}')">${chLbl(c.id)}</button>`;
   });
   h+='<button class="kachel" onclick="manageFeedChannels()" style="border-color:var(--gold);color:var(--gold)">+ Channels</button>';
   fk.innerHTML=h;
@@ -1929,7 +1963,7 @@ function pH(p){
   const svd=isSaved(p.id);
   const myAvH=UP?.avatarUrl?`<img src="${UP.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(UP?.name||'?').substring(0,2).toUpperCase();
   const isOwn=CU&&p.authorId===CU.uid;
-  return`<div class="pi" data-id="${p.id}" data-txt="${esc(p.text||'')}">
+  return`<div class="pi" data-id="${p.id}" data-ch="${esc(p.channel||'all')}" data-txt="${esc(p.text||'')}">
     <div class="pr">
       <div class="av" onclick="openOP('${p.authorId}')">${avH}</div>
       <div class="pb">
@@ -4208,10 +4242,9 @@ async function fchSearch(q){
   const lq=(q||'').toLowerCase();
   const hits=lq?_fchDiscCache.filter(x=>x.ch.toLowerCase().includes(lq)||x.user.toLowerCase().includes(lq)):_fchDiscCache;
   if(!hits.length){res.innerHTML='<div style="text-align:center;padding:16px;color:var(--mu2);font-size:12px">No channels found</div>';return}
-  const savedStr=localStorage.getItem('jl_feed_chs');
-  const active=savedStr?JSON.parse(savedStr):[...DCH,...customChs];
+  const feedChs=_getFeedChs();
   res.innerHTML=hits.slice(0,30).map(x=>{
-    const inFeed=active.includes(x.ch)||DCH.includes(x.ch);
+    const inFeed=(feedChs.find(c=>c.id===x.ch)?.on!==false)||DCH.includes(x.ch);
     return`<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--bd)">
       <div style="flex:1;min-width:0"><div style="font-size:13px;color:var(--tx)">${esc(chLbl(x.ch))}</div><div style="font-size:10px;color:var(--mu2)">by ${esc(x.user)}</div></div>
       ${inFeed?'<span style="font-size:10px;color:var(--gold);font-weight:600">In feed</span>':
@@ -4227,11 +4260,11 @@ async function addDiscCh(ch){
     await updateDoc(doc(db,'users',CU.uid),{customChannels:customChs});
     renderMyChs();renderCCats();
   }
-  const savedStr=localStorage.getItem('jl_feed_chs');
-  let active=savedStr?JSON.parse(savedStr):[...DCH,...customChs];
-  if(!active.includes(ch))active.push(ch);
-  localStorage.setItem('jl_feed_chs',JSON.stringify(active));
-  updateFeedKacheln(active);
+  const feedChs=_getFeedChs();
+  const existing=feedChs.find(c=>c.id===ch);
+  if(existing)existing.on=true;else feedChs.push({id:ch,on:true});
+  _saveFeedChs(feedChs);
+  updateFeedKacheln();
   showToast(`#${chLbl(ch)} added to feed`);
   _fchDiscCache=null;
   fchSearch(document.getElementById('fch-sinp')?.value||'');
