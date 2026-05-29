@@ -308,6 +308,9 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .ptog input:checked~.ptog-sl{background:#4ade80}
 .ptog input:checked~.ptog-sl::after{left:15px}
 .ptog-lbl{font-size:11px;font-weight:600;color:var(--mu2);white-space:nowrap}
+.dmtog{display:flex;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:2px;gap:2px}
+.dmtog-btn{padding:4px 10px;border-radius:6px;border:none;background:transparent;color:var(--mu2);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;font-family:var(--fb)}
+.dmtog-btn.ak{background:var(--sf3);color:var(--tx);box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .op-port-btn{width:100%;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;border:1px solid var(--bd);background:var(--sf2);color:var(--tx);display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer}
 .op-port-btn:disabled{opacity:.45;cursor:default}
 .cfdlg{position:absolute;inset:0;background:rgba(0,0,0,.72);z-index:600;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
@@ -651,10 +654,16 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 
 <div class="sc" id="sc-portfolio">
   <div class="sh" style="justify-content:center;position:relative">
+    <div style="position:absolute;left:16px;display:flex;align-items:center">
+      <div class="dmtog">
+        <button class="dmtog-btn ak" id="port-mode-real" onclick="switchPortMode('real')">Real</button>
+        <button class="dmtog-btn" id="port-mode-demo" onclick="switchPortMode('demo')">Demo</button>
+      </div>
+    </div>
     <div class="stitle">Portfolio<em style="color:var(--gold);font-style:normal">.</em></div>
-    <div style="position:absolute;right:16px"><button class="ib2" onclick="refreshPortPrices().then(renderPortfolio);showToast('Refreshing...')" title="Refresh"><i class="ti ti-refresh"></i></button></div>
+    <div style="position:absolute;right:16px"><button class="ib2" onclick="if(portMode==='demo'){fetchBtcEurPrice().then(renderDemoPortfolio);}else{refreshPortPrices().then(renderPortfolio);}showToast('Refreshing...')" title="Refresh"><i class="ti ti-refresh"></i></button></div>
   </div>
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid var(--bd);flex-shrink:0">
+  <div id="port-real-sub" style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid var(--bd);flex-shrink:0">
     <span style="font-size:11px;color:var(--mu2);display:flex;align-items:center;gap:5px"><i class="ti ti-eye" style="font-size:13px"></i> Portfolio öffentlich</span>
     <label class="ptog" title="Portfolio öffentlich/privat schalten">
       <span class="ptog-lbl" id="ptog-lbl">Privat</span>
@@ -869,6 +878,29 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
     <button onclick="removeHolding()" style="flex:1;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;padding:11px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-trash"></i> Remove Position</button>
   </div>
 </div>
+<div class="mbg" id="demo-trade-pm" onclick="if(event.target===this)closeDemoTrade()">
+  <div class="msh">
+    <div class="mtitle">Bitcoin handeln</div>
+    <div style="display:flex;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:2px;gap:2px;margin-bottom:12px">
+      <button id="demo-trade-type-buy" class="pcat-btn ak" style="flex:1;text-align:center" onclick="switchDemoTradeType('buy')">Kaufen</button>
+      <button id="demo-trade-type-sell" class="pcat-btn" style="flex:1;text-align:center" onclick="switchDemoTradeType('sell')">Verkaufen</button>
+    </div>
+    <div id="demo-trade-info" style="font-size:11px;color:var(--mu2);margin-bottom:10px;text-align:center;line-height:1.5"></div>
+    <div style="font-size:12px;color:var(--mu2);margin-bottom:4px">Euro-Betrag (€)</div>
+    <input class="ainp" id="demo-trade-eur" type="number" step="any" min="0" placeholder="z.B. 500" oninput="if(demoTradeType==='buy')updateDemoTradeCalc()">
+    <div style="text-align:center;font-size:12px;color:var(--mu2);margin:-4px 0 4px">⇅</div>
+    <div style="font-size:12px;color:var(--mu2);margin-bottom:4px">BTC-Betrag</div>
+    <input class="ainp" id="demo-trade-btc" type="number" step="any" min="0" placeholder="z.B. 0.01" oninput="if(demoTradeType==='sell')updateDemoTradeCalc()">
+    <div id="demo-trade-result" style="font-size:12px;color:var(--gold);text-align:center;margin-top:4px;min-height:16px;font-weight:600"></div>
+    <div class="mft" style="margin-top:12px">
+      <div></div>
+      <div style="display:flex;gap:7px">
+        <button class="mcancel" onclick="closeDemoTrade()">Abbrechen</button>
+        <button class="mpost" onclick="executeDemoTrade()">Ausführen</button>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="ov" id="create-pulse-ov">
   <div class="ovh">
     <button class="ovb" onclick="closeCreatePulse()"><i class="ti ti-arrow-left"></i></button>
@@ -1007,7 +1039,7 @@ wFB(()=>{
   const{auth,onAuthStateChanged}=window._fb;
   onAuthStateChanged(auth,async u=>{
     if(u){CU=u;await loadUP(u.uid);document.getElementById('asc').style.display='none';updateUI();startFeed();loadUsers();loadConvs();loadNotifs();renderParties();loadMyVote();loadFollowing();loadPortfolio();loadReposts();}
-    else{CU=null;UP=null;followingIds=new Set();portHoldings=[];_msgUnread=0;_notifUnread=0;if(msgUnsub){msgUnsub();msgUnsub=null;}if(notifUnsub){notifUnsub();notifUnsub=null;}if(feedUnsub){feedUnsub();feedUnsub=null;}if(portUnsub2){portUnsub2();portUnsub2=null;}updateNavBadge();document.getElementById('asc').style.display='flex';}
+    else{CU=null;UP=null;followingIds=new Set();portHoldings=[];demoState=null;portMode='real';_msgUnread=0;_notifUnread=0;if(msgUnsub){msgUnsub();msgUnsub=null;}if(notifUnsub){notifUnsub();notifUnsub=null;}if(feedUnsub){feedUnsub();feedUnsub=null;}if(portUnsub2){portUnsub2();portUnsub2=null;}if(demoUnsub){demoUnsub();demoUnsub=null;}const pdr=document.getElementById('port-mode-real');if(pdr)pdr.classList.add('ak');const pdd=document.getElementById('port-mode-demo');if(pdd)pdd.classList.remove('ak');const prs=document.getElementById('port-real-sub');if(prs)prs.style.display='flex';updateNavBadge();document.getElementById('asc').style.display='flex';}
   });
 });
 
@@ -2660,7 +2692,7 @@ function goTo(s){
   if(s==='profile'&&CU){document.querySelectorAll('#sc-profile .ptabs .ptab').forEach((t,i)=>t.classList.toggle('ak',i===0));myTab='posts';myPFilt='all';updateUI();loadMyPosts('all');if(CU.email==='claude250k@gmail.com'&&!sessionStorage.getItem('jl_recounted'))recountFollowers();}
   if(s==='search'){loadUsers();_trendIntv=setInterval(()=>loadTrending(true),60000);setTimeout(renderSearchHistory,80);}
   if(s==='messages'){loadConvs();switchMT('msgs');}
-  if(s==='portfolio'){const ptog=document.getElementById('ptog');if(ptog)ptog.checked=UP?.portfolioPublic===true;const ptogLbl=document.getElementById('ptog-lbl');if(ptogLbl)ptogLbl.textContent=t(UP?.portfolioPublic?'portfolio_public':'portfolio_private');renderPortfolio();refreshPortPrices().then(renderPortfolio)}
+  if(s==='portfolio'){const ptog=document.getElementById('ptog');if(ptog)ptog.checked=UP?.portfolioPublic===true;const ptogLbl=document.getElementById('ptog-lbl');if(ptogLbl)ptogLbl.textContent=t(UP?.portfolioPublic?'portfolio_public':'portfolio_private');if(portMode==='demo'){loadDemoPortfolio();}else{renderPortfolio();refreshPortPrices().then(renderPortfolio);}}
 }
 
 
@@ -2766,6 +2798,7 @@ function shareP(id){const url='https://claude250k.github.io/JL/#post?id='+id;nav
 
 // ── PORTFOLIO ──────────────────────────────────────────────────────────────
 let portCat='crypto',portHoldings=[],portUnsub2=null,curHoldId=null;
+let portMode='real',demoState=null,demoUnsub=null,btcPriceEur=null,demoTradeType='buy';
 const PHCID={btc:'bitcoin',eth:'ethereum',sol:'solana',bnb:'binancecoin',xrp:'ripple',ada:'cardano',doge:'dogecoin',dot:'polkadot',avax:'avalanche-2',link:'chainlink'};
 const PHDEMO={nvda:876,aapl:218,msft:415,amzn:186,goog:174,meta:512,tsla:248,sap:182,asml:820,novo:780,iwda:98,vwrl:105,acwi:108,spy:524,qqq:448,voo:481,stoxx:52,veur:68,exsa:77,ewj:68,mchi:48,aaxj:72};
 
@@ -2944,6 +2977,177 @@ async function removeHolding(){
   const h=portHoldings.find(x=>x.id===curHoldId);if(!h)return;
   if(!await appConfirm(`${h.name||h.symbol||'Position'} entfernen?`))return;
   const id=curHoldId;closeHoldOv();await delHolding(id);
+}
+
+// ── Demo Portfolio ──────────────────────────────────────────────────────────
+function switchPortMode(mode){
+  portMode=mode;
+  document.getElementById('port-mode-real').classList.toggle('ak',mode==='real');
+  document.getElementById('port-mode-demo').classList.toggle('ak',mode==='demo');
+  const realSub=document.getElementById('port-real-sub');
+  if(realSub)realSub.style.display=mode==='real'?'flex':'none';
+  if(mode==='demo'){
+    if(!CU){showToast('Bitte einloggen');switchPortMode('real');return;}
+    loadDemoPortfolio();
+  }else{
+    if(demoUnsub){demoUnsub();demoUnsub=null;}
+    renderPortfolio();refreshPortPrices().then(renderPortfolio);
+  }
+}
+
+async function loadDemoPortfolio(){
+  if(!CU)return;
+  const{db,doc,setDoc,onSnapshot}=window._fb;
+  const stateRef=doc(db,'users',CU.uid,'demoPortfolio','state');
+  if(demoUnsub)demoUnsub();
+  demoUnsub=onSnapshot(stateRef,async snap=>{
+    if(!snap.exists()){
+      await setDoc(stateRef,{cashEur:100000,btcAmount:0,avgBuyEur:0});
+      return;
+    }
+    demoState=snap.data();
+    await fetchBtcEurPrice();
+    renderDemoPortfolio();
+  });
+}
+
+async function fetchBtcEurPrice(){
+  try{
+    const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=eur');
+    if(r.ok){const d=await r.json();btcPriceEur=d.bitcoin?.eur||btcPriceEur||50000;}
+  }catch(e){if(!btcPriceEur)btcPriceEur=50000;}
+}
+
+function renderDemoPortfolio(){
+  if(portMode!=='demo'||!demoState)return;
+  const fmtEur=n=>Number(n).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmtBtc=n=>Number(n).toLocaleString('de-DE',{minimumFractionDigits:6,maximumFractionDigits:6});
+  const{cashEur=100000,btcAmount=0,avgBuyEur=0}=demoState;
+  const price=btcPriceEur||50000;
+  const btcVal=btcAmount*price;
+  const totalVal=cashEur+btcVal;
+  const pnl=totalVal-100000;
+  const pct=pnl/1000;
+  const pnlCol=pnl>=0?'#4ade80':'#f87171',sg=pnl>=0?'+':'';
+  const tb=document.getElementById('port-total-box');
+  if(tb)tb.innerHTML=`<div class="ptot" style="background:linear-gradient(135deg,rgba(247,147,26,.07),rgba(247,147,26,.02));border:1px solid rgba(247,147,26,.2);position:relative">
+    <div style="position:absolute;top:12px;right:14px;font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.5px;background:rgba(247,147,26,.1);padding:2px 8px;border-radius:6px;border:1px solid rgba(247,147,26,.2)">DEMO</div>
+    <div style="font-size:10px;color:var(--mu2);letter-spacing:.7px;text-transform:uppercase;margin-bottom:5px">Virtuelles Portfolio</div>
+    <div class="ptot-v">€${fmtEur(totalVal)}</div>
+    <div class="ptot-chg" style="color:${pnlCol}">${sg}€${fmtEur(Math.abs(pnl))} (${sg}${pct.toFixed(2)}%) gesamt</div>
+    <div style="font-size:11px;color:var(--mu2);margin-top:8px">Start: €100.000 virtuell</div>
+  </div>`;
+  const pl2=document.getElementById('port-list');
+  let html='<div class="sl">Cash</div>';
+  html+=`<div class="phold">
+    <div class="phold-icon" style="background:rgba(74,222,128,.15);color:#4ade80;font-size:15px;font-weight:700">€</div>
+    <div class="phold-info"><div class="phold-name">Euro Cash</div><div class="phold-amt">Verfügbares Guthaben</div></div>
+    <div class="phold-val"><div class="phold-cur">€${fmtEur(cashEur)}</div><div class="phold-pnl" style="color:var(--mu2)">Fiat</div></div>
+  </div>`;
+  if(btcAmount>0.000001){
+    const cost=btcAmount*(avgBuyEur||price);
+    const pl=btcVal-cost,pp=cost>0?(pl/cost*100):0;
+    const pc=pl>=0?'#4ade80':'#f87171',s2=pl>=0?'+':'';
+    html+='<div class="sl">Bitcoin</div>';
+    html+=`<div class="phold">
+      <div class="phold-icon" style="background:rgba(247,147,26,.15);color:var(--gold);font-size:15px;font-weight:700">₿</div>
+      <div class="phold-info"><div class="phold-name">Bitcoin</div><div class="phold-amt">${fmtBtc(btcAmount)} BTC &middot; avg €${fmtEur(avgBuyEur||price)}</div></div>
+      <div class="phold-val"><div class="phold-cur">€${fmtEur(btcVal)}</div><div class="phold-pnl" style="color:${pc}">${s2}€${fmtEur(Math.abs(pl))} (${s2}${pp.toFixed(1)}%)</div></div>
+    </div>`;
+  }
+  if(pl2)pl2.innerHTML=html;
+  const aw=document.getElementById('port-add-wrap');
+  if(aw)aw.innerHTML=`
+    <div style="display:flex;gap:8px;margin:14px 14px 0">
+      <button onclick="openDemoTrade('buy')" style="flex:1;padding:12px;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);color:#4ade80;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-trending-up"></i> BTC kaufen</button>
+      <button onclick="openDemoTrade('sell')" ${btcAmount<=0.000001?'disabled':''} style="flex:1;padding:12px;background:${btcAmount<=0.000001?'var(--sf2)':'rgba(248,113,113,.12)'};border:1px solid ${btcAmount<=0.000001?'var(--bd)':'rgba(248,113,113,.3)'};color:${btcAmount<=0.000001?'var(--mu)':'#f87171'};border-radius:11px;font-size:13px;font-weight:700;cursor:${btcAmount<=0.000001?'default':'pointer'};display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-trending-down"></i> BTC verkaufen</button>
+    </div>
+    <div style="margin:8px 14px 0;padding:9px 12px;background:var(--sf);border:1px solid var(--bd);border-radius:9px;font-size:11px;color:var(--mu2);display:flex;align-items:center;gap:7px"><i class="ti ti-info-circle" style="font-size:13px;flex-shrink:0"></i> Live-Preis: 1 BTC = €${Number(price).toLocaleString('de-DE')}</div>`;
+}
+
+function openDemoTrade(type){
+  if(!CU||!demoState){showToast('Bitte einloggen');return;}
+  demoTradeType=type;
+  const fmtEur=n=>Number(n).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const price=btcPriceEur||50000;
+  document.getElementById('demo-trade-type-buy').classList.toggle('ak',type==='buy');
+  document.getElementById('demo-trade-type-sell').classList.toggle('ak',type==='sell');
+  document.getElementById('demo-trade-eur').value='';
+  document.getElementById('demo-trade-btc').value='';
+  document.getElementById('demo-trade-result').textContent='';
+  document.getElementById('demo-trade-info').innerHTML=`1 BTC = €${Number(price).toLocaleString('de-DE')}<br>Verfügbar: ${type==='buy'?'€'+fmtEur(demoState.cashEur||0):((demoState.btcAmount||0).toFixed(6)+' BTC')}`;
+  document.getElementById('demo-trade-pm').classList.add('on');
+  setTimeout(()=>document.getElementById(type==='buy'?'demo-trade-eur':'demo-trade-btc').focus(),120);
+}
+function closeDemoTrade(){document.getElementById('demo-trade-pm').classList.remove('on');}
+function switchDemoTradeType(type){
+  demoTradeType=type;
+  document.getElementById('demo-trade-type-buy').classList.toggle('ak',type==='buy');
+  document.getElementById('demo-trade-type-sell').classList.toggle('ak',type==='sell');
+  document.getElementById('demo-trade-eur').value='';
+  document.getElementById('demo-trade-btc').value='';
+  document.getElementById('demo-trade-result').textContent='';
+  const fmtEur=n=>Number(n).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const price=btcPriceEur||50000;
+  document.getElementById('demo-trade-info').innerHTML=`1 BTC = €${Number(price).toLocaleString('de-DE')}<br>Verfügbar: ${type==='buy'?'€'+fmtEur(demoState?.cashEur||0):((demoState?.btcAmount||0).toFixed(6)+' BTC')}`;
+  setTimeout(()=>document.getElementById(type==='buy'?'demo-trade-eur':'demo-trade-btc').focus(),80);
+}
+function updateDemoTradeCalc(){
+  const price=btcPriceEur||50000;
+  const fmtEur=n=>Number(n).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
+  if(demoTradeType==='buy'){
+    const eur=parseFloat(document.getElementById('demo-trade-eur').value)||0;
+    const btc=eur>0?(eur/price):0;
+    document.getElementById('demo-trade-btc').value=btc>0?btc.toFixed(8):'';
+    document.getElementById('demo-trade-result').textContent=eur>0?`≈ ${btc.toFixed(8)} BTC`:'';
+  }else{
+    const btc=parseFloat(document.getElementById('demo-trade-btc').value)||0;
+    const eur=btc*price;
+    document.getElementById('demo-trade-eur').value=btc>0?eur.toFixed(2):'';
+    document.getElementById('demo-trade-result').textContent=btc>0?`≈ €${fmtEur(eur)}`:'';
+  }
+}
+async function executeDemoTrade(){
+  if(!CU||!demoState)return;
+  const price=btcPriceEur||50000;
+  const{db,doc,runTransaction,collection,addDoc,serverTimestamp}=window._fb;
+  const stateRef=doc(db,'users',CU.uid,'demoPortfolio','state');
+  if(demoTradeType==='buy'){
+    const eurAmount=parseFloat(document.getElementById('demo-trade-eur').value);
+    if(isNaN(eurAmount)||eurAmount<=0){showToast('Betrag eingeben');return;}
+    if(eurAmount>demoState.cashEur){showToast('Nicht genug Cash');return;}
+    const btcAmt=eurAmount/price;
+    try{
+      await runTransaction(db,async txn=>{
+        const snap=await txn.get(stateRef);
+        if(!snap.exists())throw new Error('no state');
+        const s=snap.data();
+        if(eurAmount>s.cashEur)throw new Error('insufficient');
+        const newBtc=(s.btcAmount||0)+btcAmt;
+        const newAvg=s.btcAmount>0?((s.avgBuyEur||price)*(s.btcAmount)+eurAmount)/newBtc:price;
+        txn.update(stateRef,{cashEur:s.cashEur-eurAmount,btcAmount:newBtc,avgBuyEur:newAvg});
+      });
+      await addDoc(collection(db,'users',CU.uid,'demoTrades'),{type:'buy',eurAmount,btcAmount:btcAmt,priceEur:price,createdAt:serverTimestamp()});
+      closeDemoTrade();showToast(`Gekauft: ${btcAmt.toFixed(6)} BTC`);
+    }catch(e){showToast(e.message==='insufficient'?'Nicht genug Cash':'Fehler beim Kauf');}
+  }else{
+    const btcAmt=parseFloat(document.getElementById('demo-trade-btc').value);
+    if(isNaN(btcAmt)||btcAmt<=0){showToast('BTC-Betrag eingeben');return;}
+    if(btcAmt>(demoState.btcAmount||0)){showToast('Nicht genug BTC');return;}
+    const eurAmount=btcAmt*price;
+    try{
+      await runTransaction(db,async txn=>{
+        const snap=await txn.get(stateRef);
+        if(!snap.exists())throw new Error('no state');
+        const s=snap.data();
+        if(btcAmt>(s.btcAmount||0))throw new Error('insufficient');
+        const newBtc=s.btcAmount-btcAmt;
+        txn.update(stateRef,{cashEur:s.cashEur+eurAmount,btcAmount:newBtc,avgBuyEur:newBtc>0.000001?s.avgBuyEur:0});
+      });
+      await addDoc(collection(db,'users',CU.uid,'demoTrades'),{type:'sell',eurAmount,btcAmount:btcAmt,priceEur:price,createdAt:serverTimestamp()});
+      closeDemoTrade();showToast(`Verkauft: ${btcAmt.toFixed(6)} BTC`);
+    }catch(e){showToast(e.message==='insufficient'?'Nicht genug BTC':'Fehler beim Verkauf');}
+  }
 }
 
 // ── i18n ───────────────────────────────────────────────────────────────────
@@ -3196,6 +3400,7 @@ function swipeBack(){
     ['pov',()=>document.getElementById('pov').classList.remove('on')],
     ['inst-ov',()=>closeInstPage()],
     ['hold-ov',()=>closeHoldOv()],
+    ['demo-trade-pm',()=>closeDemoTrade()],
   ];
   for(const[id,fn]of checks){const el=document.getElementById(id);if(el&&el.classList.contains('on')){fn();return;}}
 }
