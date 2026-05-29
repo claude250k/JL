@@ -311,6 +311,9 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .dmtog{display:flex;background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:2px;gap:2px}
 .dmtog-btn{padding:4px 10px;border-radius:6px;border:none;background:transparent;color:var(--mu2);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;font-family:var(--fb)}
 .dmtog-btn.ak{background:var(--sf3);color:var(--tx);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.stats-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--bd)}
+.stats-bar{height:3px;background:var(--sf3);border-radius:2px;margin-top:5px;overflow:hidden}
+.stats-bar-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .5s ease}
 .op-port-btn{width:100%;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;border:1px solid var(--bd);background:var(--sf2);color:var(--tx);display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer}
 .op-port-btn:disabled{opacity:.45;cursor:default}
 .cfdlg{position:absolute;inset:0;background:rgba(0,0,0,.72);z-index:600;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
@@ -487,6 +490,7 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
     <button class="kachel" onclick="fpulse(this,'crypto')">Crypto</button>
     <button class="kachel" onclick="fpulse(this,'stocks')">Stocks</button>
     <button class="kachel" onclick="fpulse(this,'ETF')">ETF</button>
+    <button class="kachel" onclick="fpulse(this,'stats')">Statistics</button>
     <button class="kachel" onclick="fpulse(this,'pol')">Politics</button>
     <button class="kachel" onclick="fpulse(this,'tcg')">TCG</button>
     <button class="kachel" onclick="fpulse(this,'watches')">Watches</button>
@@ -534,6 +538,25 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
       <div class="cc" onclick="openCD('ewj')"><div class="cct"><div><div class="ccn">iShares MSCI Japan (EWJ)</div><div class="ccs">NYSE Demo</div></div><div style="text-align:right"><div class="ccp">$68</div><div class="ccc dn">-0.4%</div></div></div><div class="cw"><canvas id="ch-ewj"></canvas></div></div>
       <div class="cc" onclick="openCD('mchi')"><div class="cct"><div><div class="ccn">iShares MSCI China (MCHI)</div><div class="ccs">NASDAQ Demo</div></div><div style="text-align:right"><div class="ccp">$48</div><div class="ccc up">+1.2%</div></div></div><div class="cw"><canvas id="ch-mchi"></canvas></div></div>
       <div class="cc" onclick="openCD('aaxj')"><div class="cct"><div><div class="ccn">iShares Asia ex Japan</div><div class="ccs">NYSE Demo</div></div><div style="text-align:right"><div class="ccp">$72</div><div class="ccc up">+0.8%</div></div></div><div class="cw"><canvas id="ch-aaxj"></canvas></div></div>
+    </div>
+    <div data-pc="stats">
+      <div style="padding:10px 14px 6px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--tx)">Statistiken · Europa</div>
+          <div style="font-size:11px;color:var(--mu2);margin-top:2px" id="stats-source-lbl">Lade Daten...</div>
+        </div>
+        <div style="font-size:10px;color:var(--gold);font-weight:700;background:rgba(247,147,26,.1);padding:3px 8px;border-radius:6px;border:1px solid rgba(247,147,26,.2)">Eurostat</div>
+      </div>
+      <div class="cc" onclick="openStatsOv()" style="cursor:pointer">
+        <div class="cct">
+          <div><div class="ccn">🇪🇺 Medianeinkommen Europa</div><div class="ccs" id="stats-eu-sub">Netto-Äquivalenzeinkommen · EU-SILC</div></div>
+          <div style="text-align:right"><div class="ccp" id="stats-eu-value">–</div><div class="ccc" id="stats-eu-monthly" style="color:var(--mu2)">–</div></div>
+        </div>
+      </div>
+      <div id="stats-preview-list"><div class="spin" style="padding:20px 0"></div></div>
+      <div onclick="openStatsOv()" style="display:flex;align-items:center;justify-content:center;gap:5px;padding:10px;font-size:12px;color:var(--gold);font-weight:600;cursor:pointer;border-top:1px solid var(--bd)">
+        Alle Länder &amp; Suche <i class="ti ti-arrow-right" style="font-size:13px"></i>
+      </div>
     </div>
     <div data-pc="pol">
       <div style="padding:10px 14px 2px"><div style="font-size:13px;font-weight:700;color:var(--tx)">Sunday Poll - Bundestag</div><div style="font-size:11px;color:var(--mu2);margin-top:2px">Anonymous vote - abstain or rate politicians</div></div>
@@ -901,6 +924,16 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
     </div>
   </div>
 </div>
+<div class="ov" id="stats-ov">
+  <div class="ovh">
+    <button class="ovb" onclick="closeStatsOv()"><i class="ti ti-arrow-left"></i></button>
+    <div class="ovt">Medianeinkommen Europa</div>
+  </div>
+  <div style="padding:10px 14px 0;flex-shrink:0">
+    <input class="ainp" id="stats-search-inp" placeholder="Land suchen, z.B. Deutschland, Polen..." oninput="filterStatsCountries(this.value)" style="margin-bottom:0">
+  </div>
+  <div class="scroll" id="stats-ov-list"></div>
+</div>
 <div class="ov" id="create-pulse-ov">
   <div class="ovh">
     <button class="ovb" onclick="closeCreatePulse()"><i class="ti ti-arrow-left"></i></button>
@@ -963,6 +996,7 @@ setInterval(tick,10000);tick();
 let CU=null,UP=null,selCat='all';
 let feedUnsub=null,chatUnsub=null,msgUnsub=null,notifUnsub=null,opUnsub=null;
 let pulseInited=false,chartI={},cdChart=null,curCDCoin=null;
+let statsData=null,_statsAll=[];
 let _curPulseId=null;
 let allUsers=[],myVote=null,curOP=null,curConv=null,curChatOid=null;
 let customChs=[],myPFilt='all',myTab='posts',curPD=null;
@@ -2666,9 +2700,9 @@ async function triggerAlert(coin,price,alertId){
   showToast(msg);
   if(curCDCoin===coin)renderAlertPanel();
 }
-function fpulse(btn,cat){document.querySelectorAll('#pk .kachel').forEach(b=>b.classList.remove('ak'));btn.classList.add('ak');document.querySelectorAll('#puls-scroll [data-pc]').forEach(el=>el.style.display=(cat==='all'||el.dataset.pc===cat)?'':'none');document.getElementById('puls-scroll').scrollTop=0;if(cat==='pulse')loadPulses();}
+function fpulse(btn,cat){document.querySelectorAll('#pk .kachel').forEach(b=>b.classList.remove('ak'));btn.classList.add('ak');document.querySelectorAll('#puls-scroll [data-pc]').forEach(el=>el.style.display=(cat==='all'||el.dataset.pc===cat)?'':'none');document.getElementById('puls-scroll').scrollTop=0;if(cat==='pulse')loadPulses();if(cat==='stats'||cat==='all')loadStatistics();}
 function rfPulse(){pulseInited=false;initPulse()}
-function initPulse(){if(pulseInited)return;pulseInited=true;fetchPulse();setInterval(fetchPulse,60000)}
+function initPulse(){if(pulseInited)return;pulseInited=true;fetchPulse();loadStatistics();setInterval(fetchPulse,60000)}
 
 function openPM(){if(!CU){showToast('Please sign in');return}document.getElementById('pm').classList.add('on');renderQuotePreview();}
 function closePM(){document.getElementById('pm').classList.remove('on');clearQuote();}
@@ -2977,6 +3011,146 @@ async function removeHolding(){
   const h=portHoldings.find(x=>x.id===curHoldId);if(!h)return;
   if(!await appConfirm(`${h.name||h.symbol||'Position'} entfernen?`))return;
   const id=curHoldId;closeHoldOv();await delHolding(id);
+}
+
+// ── Statistics / Eurostat ───────────────────────────────────────────────────
+const STATS_FALLBACK={year:2022,source:'Eurostat (EU-SILC 2022)',countries:[
+  {code:'EU27',name:'EU27 (Ø)',flag:'🇪🇺',annual:18600},
+  {code:'CH',name:'Schweiz',flag:'🇨🇭',annual:40100},
+  {code:'NO',name:'Norwegen',flag:'🇳🇴',annual:38900},
+  {code:'LU',name:'Luxemburg',flag:'🇱🇺',annual:34900},
+  {code:'DK',name:'Dänemark',flag:'🇩🇰',annual:28400},
+  {code:'AT',name:'Österreich',flag:'🇦🇹',annual:27900},
+  {code:'NL',name:'Niederlande',flag:'🇳🇱',annual:27400},
+  {code:'IE',name:'Irland',flag:'🇮🇪',annual:25300},
+  {code:'SE',name:'Schweden',flag:'🇸🇪',annual:25200},
+  {code:'DE',name:'Deutschland',flag:'🇩🇪',annual:24900},
+  {code:'FI',name:'Finnland',flag:'🇫🇮',annual:23800},
+  {code:'BE',name:'Belgien',flag:'🇧🇪',annual:23500},
+  {code:'FR',name:'Frankreich',flag:'🇫🇷',annual:22800},
+  {code:'IT',name:'Italien',flag:'🇮🇹',annual:17600},
+  {code:'MT',name:'Malta',flag:'🇲🇹',annual:17200},
+  {code:'CY',name:'Zypern',flag:'🇨🇾',annual:16200},
+  {code:'ES',name:'Spanien',flag:'🇪🇸',annual:15900},
+  {code:'SI',name:'Slowenien',flag:'🇸🇮',annual:15400},
+  {code:'EE',name:'Estland',flag:'🇪🇪',annual:14100},
+  {code:'CZ',name:'Tschechien',flag:'🇨🇿',annual:13600},
+  {code:'PT',name:'Portugal',flag:'🇵🇹',annual:13200},
+  {code:'LT',name:'Litauen',flag:'🇱🇹',annual:11400},
+  {code:'SK',name:'Slowakei',flag:'🇸🇰',annual:11200},
+  {code:'HR',name:'Kroatien',flag:'🇭🇷',annual:10500},
+  {code:'PL',name:'Polen',flag:'🇵🇱',annual:10300},
+  {code:'LV',name:'Lettland',flag:'🇱🇻',annual:10100},
+  {code:'GR',name:'Griechenland',flag:'🇬🇷',annual:9700},
+  {code:'HU',name:'Ungarn',flag:'🇭🇺',annual:9200},
+  {code:'RO',name:'Rumänien',flag:'🇷🇴',annual:6100},
+  {code:'BG',name:'Bulgarien',flag:'🇧🇬',annual:5900},
+]};
+
+async function loadStatistics(){
+  if(statsData){renderStatistics();return;}
+  const{db,doc,getDoc}=window._fb;
+  try{
+    const snap=await getDoc(doc(db,'statistics','medianIncome'));
+    statsData=snap.exists()?snap.data():STATS_FALLBACK;
+  }catch(e){statsData=STATS_FALLBACK;}
+  renderStatistics();
+}
+
+function renderStatistics(){
+  const d=statsData;if(!d)return;
+  const eu=d.countries.find(c=>c.code==='EU27'||c.code==='EU27_2020')||{annual:18600};
+  const euAnnual=eu.annual||18600;
+  const el=id=>document.getElementById(id);
+  if(el('stats-eu-value'))el('stats-eu-value').textContent='€'+Number(euAnnual).toLocaleString('de-DE');
+  if(el('stats-eu-monthly'))el('stats-eu-monthly').textContent='~€'+Math.round(euAnnual/12).toLocaleString('de-DE')+'/Monat';
+  if(el('stats-source-lbl'))el('stats-source-lbl').textContent=(d.source||'Eurostat')+' · Jahr '+(d.year||2022);
+  if(el('stats-eu-sub'))el('stats-eu-sub').textContent='Netto-Äquivalenzeinkommen · '+(d.year||2022);
+  const ranked=d.countries.filter(c=>c.code!=='EU27'&&c.code!=='EU27_2020').sort((a,b)=>b.annual-a.annual);
+  const maxVal=ranked[0]?.annual||40000;
+  const top5=ranked.slice(0,5);
+  const pl=el('stats-preview-list');if(!pl)return;
+  let html='<div style="padding:4px 0 0">';
+  top5.forEach(c=>{
+    const pct=Math.round(c.annual/maxVal*100);
+    const vsEu=Math.round((c.annual-euAnnual)/euAnnual*100);
+    const vc=vsEu>=0?'#4ade80':'#f87171',vs=vsEu>=0?'+':'';
+    html+=`<div class="stats-row">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:2px">
+          <span style="font-size:16px;line-height:1">${c.flag}</span>
+          <span style="font-size:13px;font-weight:600;color:var(--tx)">${c.name}</span>
+          <span style="font-size:10px;color:${vc};font-weight:700">${vs}${vsEu}% vs EU</span>
+        </div>
+        <div class="stats-bar"><div class="stats-bar-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div style="text-align:right;margin-left:12px;flex-shrink:0">
+        <div style="font-size:13px;font-weight:700;color:var(--tx)">€${Number(c.annual).toLocaleString('de-DE')}</div>
+        <div style="font-size:10px;color:var(--mu2)">~€${Math.round(c.annual/12).toLocaleString('de-DE')}/Mo</div>
+      </div>
+    </div>`;
+  });
+  html+='</div>';
+  pl.innerHTML=html;
+}
+
+function openStatsOv(){
+  const d=statsData||STATS_FALLBACK;
+  _statsAll=d.countries.filter(c=>c.code!=='EU27'&&c.code!=='EU27_2020').sort((a,b)=>b.annual-a.annual);
+  const inp=document.getElementById('stats-search-inp');if(inp)inp.value='';
+  renderStatsCountryList(_statsAll);
+  document.getElementById('stats-ov').classList.add('on');
+}
+function closeStatsOv(){document.getElementById('stats-ov').classList.remove('on');}
+function filterStatsCountries(q){
+  const s=q.toLowerCase().trim();
+  const filtered=s?_statsAll.filter(c=>c.name.toLowerCase().includes(s)||c.code.toLowerCase().includes(s)):_statsAll;
+  renderStatsCountryList(filtered);
+}
+function renderStatsCountryList(countries){
+  const d=statsData||STATS_FALLBACK;
+  const eu=d.countries.find(c=>c.code==='EU27'||c.code==='EU27_2020')||{annual:18600};
+  const euAnnual=eu.annual||18600;
+  const maxVal=_statsAll[0]?.annual||40000;
+  const el=document.getElementById('stats-ov-list');if(!el)return;
+  if(!countries.length){el.innerHTML='<div class="empty"><i class="ti ti-search-off"></i><p>Kein Land gefunden</p></div>';return;}
+  const euRow=`<div style="padding:12px 14px;background:rgba(247,147,26,.05);border-bottom:1px solid rgba(247,147,26,.2)">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px;line-height:1">🇪🇺</span>
+        <div><div style="font-size:13px;font-weight:700;color:var(--gold)">EU27 Durchschnitt</div><div style="font-size:10px;color:var(--mu2)">Referenzwert · ${d.year||2022}</div></div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:15px;font-weight:800;color:var(--gold)">€${Number(euAnnual).toLocaleString('de-DE')}</div>
+        <div style="font-size:11px;color:var(--mu2)">~€${Math.round(euAnnual/12).toLocaleString('de-DE')}/Monat</div>
+      </div>
+    </div>
+  </div>`;
+  let rows='';
+  countries.forEach(c=>{
+    const pct=Math.round(c.annual/maxVal*100);
+    const vsEu=Math.round((c.annual-euAnnual)/euAnnual*100);
+    const vc=vsEu>=0?'#4ade80':'#f87171',vs=vsEu>=0?'+':'';
+    const rank=_statsAll.findIndex(x=>x.code===c.code)+1;
+    rows+=`<div style="padding:12px 14px;border-bottom:1px solid var(--bd)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--mu2);min-width:18px;text-align:right">#${rank}</span>
+          <span style="font-size:20px;line-height:1">${c.flag}</span>
+          <div><div style="font-size:13px;font-weight:700;color:var(--tx)">${c.name}</div><div style="font-size:10px;color:var(--mu2)">${c.code} · ${c.year||d.year||2022}</div></div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:15px;font-weight:800;color:var(--tx)">€${Number(c.annual).toLocaleString('de-DE')}</div>
+          <div style="font-size:11px;color:var(--mu2)">~€${Math.round(c.annual/12).toLocaleString('de-DE')}/Mo</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="stats-bar" style="flex:1"><div class="stats-bar-fill" style="width:${pct}%"></div></div>
+        <span style="font-size:11px;color:${vc};font-weight:700;flex-shrink:0">${vs}${vsEu}% vs EU Ø</span>
+      </div>
+    </div>`;
+  });
+  el.innerHTML=euRow+rows+'<div style="padding:10px 14px;font-size:10px;color:var(--mu2);text-align:center">Quelle: Eurostat – EU-SILC (ilc_di03) · Jährliches Netto-Äquivalenzeinkommen</div>';
 }
 
 // ── Demo Portfolio ──────────────────────────────────────────────────────────
@@ -3401,6 +3575,7 @@ function swipeBack(){
     ['inst-ov',()=>closeInstPage()],
     ['hold-ov',()=>closeHoldOv()],
     ['demo-trade-pm',()=>closeDemoTrade()],
+    ['stats-ov',()=>closeStatsOv()],
   ];
   for(const[id,fn]of checks){const el=document.getElementById(id);if(el&&el.classList.contains('on')){fn();return;}}
 }
