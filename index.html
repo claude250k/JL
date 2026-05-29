@@ -127,6 +127,8 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 .ni{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px}
 .ni-l{background:rgba(247,147,26,.15);color:var(--gold)}.ni-c{background:rgba(96,165,250,.12);color:#7cb9ff}.ni-f{background:rgba(34,197,94,.12);color:#4ade80}.ni-m{background:rgba(192,132,252,.12);color:#d8b4fe}.ni-a{background:rgba(251,191,36,.15);color:#fbbf24}
 .vbadge{color:#60a5fa;font-size:13px;vertical-align:middle;margin-left:3px;flex-shrink:0}
+.hbadge{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--gold);color:#000;font-size:9px;font-weight:900;vertical-align:middle;margin-left:3px;flex-shrink:0}
+.abadge{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-size:9px;font-weight:900;vertical-align:middle;margin-left:3px;flex-shrink:0}
 .ntx{flex:1}.nmain{font-size:12px;color:var(--tx);line-height:1.5}.nmain strong{color:var(--gold)}.ntm{font-size:10px;color:var(--mu);margin-top:2px}
 .ndot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:4px}
 .sbar2{padding:9px 14px;flex-shrink:0}
@@ -841,18 +843,22 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
         </div>
       </label>
     </div>
-    <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px">Verification</div>
+    <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px">Verification (Human)</div>
     <div class="seti" id="verif-row" onclick="requestVerification()">
-      <i class="ti ti-rosette-discount-check" style="color:#60a5fa"></i>
-      <div class="setin"><div class="setit" id="verif-lbl">Request Verification</div><div class="setis" id="verif-sub">Get a verified badge on your profile</div></div>
+      <span class="hbadge" style="font-size:11px;width:22px;height:22px;flex-shrink:0">H</span>
+      <div class="setin"><div class="setit" id="verif-lbl">Send Verification Request</div><div class="setis" id="verif-sub">H = Real Human · Get verified on your profile</div></div>
       <i class="ti ti-chevron-right" id="verif-ico" style="color:var(--mu);font-size:14px"></i>
     </div>
+    <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px">Membership</div>
+    <div class="seti" id="member-row" onclick="requestMembership()">
+      <i class="ti ti-badge" style="color:var(--mu2)"></i>
+      <div class="setin"><div class="setit" id="member-lbl">Send Member Request</div><div class="setis" id="member-sub">Available after 1 month of registration</div></div>
+      <i class="ti ti-chevron-right" id="member-ico" style="color:var(--mu);font-size:14px"></i>
+    </div>
+    <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px">Admin</div>
+    <div id="admin-section"><div id="admin-content"></div></div>
     <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px">Legal</div>
     <div class="seti" onclick="document.getElementById('impressum-ov').classList.add('on')"><i class="ti ti-file-description"></i><div class="setin"><div class="setit">Impressum</div><div class="setis">Angaben gemäß § 5 TMG</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
-    <div id="admin-section" style="display:none">
-      <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px">Admin</div>
-      <div class="seti" onclick="openAdminVerif()"><i class="ti ti-shield-check" style="color:var(--gold)"></i><div class="setin"><div class="setit">Verification Requests</div><div class="setis" id="admin-pending-lbl">Loading…</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
-    </div>
     <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px" data-i18n="session">Session</div>
     <div class="seti" onclick="confirmOut()"><i class="ti ti-logout" style="color:#f87171"></i><div class="setin"><div class="setit" style="color:#f87171" data-i18n="signOut">Sign Out</div><div class="setis" data-i18n="signOutSub">Log out of your account</div></div></div>
   </div>
@@ -902,7 +908,12 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
   </div>
 </div>
 <div class="setov" id="adminov" style="z-index:160">
-  <div class="ovh"><button class="ovb" onclick="closeAdminVerif()"><i class="ti ti-arrow-left"></i></button><div class="ovt">Verification Requests</div></div>
+  <div class="ovh"><button class="ovb" onclick="closeAdminVerif()"><i class="ti ti-arrow-left"></i></button><div class="ovt">Admin Panel</div></div>
+  <div style="display:flex;border-bottom:1px solid var(--bd);flex-shrink:0">
+    <button id="adm-tab-v" onclick="admTab('v')" style="flex:1;padding:10px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--gold);border-bottom:2px solid var(--gold)">Verification</button>
+    <button id="adm-tab-m" onclick="admTab('m')" style="flex:1;padding:10px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--mu2);border-bottom:2px solid transparent">Members</button>
+    <button id="adm-tab-r" onclick="admTab('r')" style="flex:1;padding:10px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--mu2);border-bottom:2px solid transparent">Reports</button>
+  </div>
   <div class="scroll" id="admin-verif-list"><div class="spin"></div></div>
 </div>
 
@@ -1232,7 +1243,8 @@ async function doReg(){
     let userNum=1;
     await runTransaction(db,async tx=>{const snap=await tx.get(counterRef);if(snap.exists())userNum=snap.data().count+1;tx.set(counterRef,{count:userNum})});
     const num='#'+String(userNum);
-    await setDoc(doc(db,'users',uc.user.uid),{uid:uc.user.uid,name,num,userNumber:userNum,bio:'',avatarUrl:'',coverUrl:'',followers:0,following:0,posts:0,customChannels:[],createdAt:serverTimestamp()});
+    const _ud={uid:uc.user.uid,name,num,userNumber:userNum,bio:'',avatarUrl:'',coverUrl:'',followers:0,following:0,posts:0,customChannels:[],createdAt:serverTimestamp()};if(userNum<=2)_ud.isAdmin=true;
+    await setDoc(doc(db,'users',uc.user.uid),_ud);
     await setDoc(doc(db,'nameIndex',name.toLowerCase()),{uid:uc.user.uid});
   }catch(err){setAErr(am(err.code))}
 }
@@ -1248,7 +1260,8 @@ async function doGoogle(){
       const cr=doc(db,'meta','userCount');let n=1;
       await runTransaction(db,async tx=>{const sn=await tx.get(cr);if(sn.exists())n=sn.data().count+1;tx.set(cr,{count:n})});
       const num='#'+String(n);
-      await setDoc(ref,{uid:u.uid,name,num,userNumber:n,bio:'',avatarUrl:u.photoURL||'',coverUrl:'',followers:0,following:0,posts:0,customChannels:[],createdAt:serverTimestamp()});
+      const _gd={uid:u.uid,name,num,userNumber:n,bio:'',avatarUrl:u.photoURL||'',coverUrl:'',followers:0,following:0,posts:0,customChannels:[],createdAt:serverTimestamp()};if(n<=2)_gd.isAdmin=true;
+      await setDoc(ref,_gd);
       await setDoc(doc(db,'nameIndex',name.toLowerCase()),{uid:u.uid});
     }
   }catch(err){setAErr(am(err.code))}
@@ -1295,30 +1308,41 @@ async function removeCh(ch){
 function openSet(){
   document.getElementById('setov').classList.add('on');
   _syncPrivToggle();
-  // Sync News channel toggle
   const savedFeedChs=localStorage.getItem('jl_feed_chs');
   const activeNow=savedFeedChs?JSON.parse(savedFeedChs):[...DCH,...customChs];
   _syncNewsToggle(activeNow.includes('news'));
-  // Show admin section for developer
-  const adminSec=document.getElementById('admin-section');
-  if(adminSec)adminSec.style.display=(CU?.email==='claude250k@gmail.com')?'block':'none';
-  // Sync verification row state
+  // Verification (Human) state
   const verifLbl=document.getElementById('verif-lbl');
   const verifSub=document.getElementById('verif-sub');
   const verifIco=document.getElementById('verif-ico');
+  const verifRow=document.getElementById('verif-row');
   if(UP?.verified){
     if(verifLbl)verifLbl.textContent='Verified ✓';
-    if(verifSub)verifSub.textContent='Your account is verified';
+    if(verifSub)verifSub.textContent='H = Real Human · Your account is verified';
     if(verifIco)verifIco.style.display='none';
-    document.getElementById('verif-row').style.cursor='default';
-    document.getElementById('verif-row').onclick=null;
+    if(verifRow){verifRow.style.cursor='default';verifRow.onclick=null;}
   } else if(UP?.verifStatus==='pending'){
-    if(verifLbl)verifLbl.textContent='Request Pending';
-    if(verifSub)verifSub.textContent='Your request is under review';
+    if(verifLbl)verifLbl.textContent='Pending Review';
+    if(verifSub)verifSub.textContent='H = Real Human · Under review';
     if(verifIco)verifIco.className='ti ti-clock';
+  } else {
+    if(verifLbl)verifLbl.textContent='Send Verification Request';
+    if(verifSub)verifSub.textContent='H = Real Human · Get verified on your profile';
+    if(verifIco){verifIco.className='ti ti-chevron-right';verifIco.style.display='';}
+    if(verifRow){verifRow.style.cursor='';verifRow.onclick=requestVerification;}
   }
-  // Load pending count for admin
-  if(CU?.email==='claude250k@gmail.com')loadVerifCount();
+  // Membership state
+  _syncMemberRow();
+  // Admin content (always shown, content depends on role)
+  const admCont=document.getElementById('admin-content');
+  if(admCont){
+    if(UP?.isAdmin){
+      admCont.innerHTML=`<div class="seti" onclick="openAdminVerif('v')"><i class="ti ti-shield-check" style="color:var(--gold)"></i><div class="setin"><div class="setit">Verification Requests</div><div class="setis" id="admin-pending-lbl">Loading…</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div><div class="seti" onclick="openAdminVerif('m')"><i class="ti ti-badge" style="color:var(--gold)"></i><div class="setin"><div class="setit">Member Requests</div><div class="setis" id="admin-member-lbl">Loading…</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div><div class="seti" onclick="openAdminVerif('r')"><i class="ti ti-flag" style="color:#f87171"></i><div class="setin"><div class="setit">Content Reports</div><div class="setis" id="admin-reports-lbl">Loading…</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>`;
+      loadVerifCount();loadMemberReqCount();loadReportCount();
+    } else {
+      admCont.innerHTML=`<div class="seti" style="cursor:default;opacity:.5"><i class="ti ti-lock" style="color:var(--mu2)"></i><div class="setin"><div class="setit">No Access</div><div class="setis">Admin area — restricted</div></div></div>`;
+    }
+  }
 }
 function closeSet(){document.getElementById('setov').classList.remove('on')}
 
@@ -1348,9 +1372,9 @@ async function loadVerifCount(){
     if(lbl)lbl.textContent=`${snap.size} pending request${snap.size===1?'':'s'}`;
   }catch(e){}
 }
-function openAdminVerif(){
+function openAdminVerif(tab){
   document.getElementById('adminov').classList.add('on');
-  loadVerifRequests();
+  admTab(tab||'v');
 }
 function closeAdminVerif(){document.getElementById('adminov').classList.remove('on');}
 async function loadVerifRequests(){
@@ -1390,6 +1414,168 @@ async function rejectVerif(uid,reqId){
   }catch(e){showToast('Error rejecting');}
 }
 function confirmOut(){if(confirm(t('signout_confirm'))){const{auth,signOut}=window._fb;signOut(auth);closeSet();}}
+
+// ── MEMBERSHIP ────────────────────────────────────────────────────────────────
+function _syncMemberRow(){
+  const lbl=document.getElementById('member-lbl');
+  const sub=document.getElementById('member-sub');
+  const ico=document.getElementById('member-ico');
+  const row=document.getElementById('member-row');
+  if(!lbl||!row)return;
+  if(UP?.isMember){
+    lbl.textContent='Member ✓';sub.textContent='Active · 2500 char posts unlocked';
+    if(ico)ico.style.display='none';row.style.cursor='default';row.onclick=null;return;
+  }
+  if(UP?.memberStatus==='pending'){
+    lbl.textContent='Request Pending';sub.textContent='Under review — tap to cancel';
+    if(ico)ico.className='ti ti-clock';row.onclick=cancelMembership;return;
+  }
+  const ca=UP?.createdAt?.toDate?.()||new Date((UP?.createdAt?.seconds||0)*1000);
+  const monthAgo=new Date();monthAgo.setMonth(monthAgo.getMonth()-1);
+  if(ca>monthAgo){
+    const av=new Date(ca);av.setMonth(av.getMonth()+1);
+    const dd=String(av.getDate()).padStart(2,'0'),mm=String(av.getMonth()+1).padStart(2,'0'),yy=av.getFullYear();
+    lbl.textContent='Send Member Request';sub.textContent=`Available from ${dd}.${mm}.${yy}`;
+    row.style.cursor='default';row.onclick=null;
+  } else {
+    lbl.textContent='Send Member Request';sub.textContent='Tap to apply for membership';
+    row.style.cursor='';if(ico){ico.className='ti ti-chevron-right';ico.style.display='';}
+    row.onclick=requestMembership;
+  }
+}
+async function requestMembership(){
+  if(!CU||!UP)return;
+  if(UP?.isMember){showToast('You are already a member');return;}
+  if(UP?.memberStatus==='pending'){cancelMembership();return;}
+  const ca=UP?.createdAt?.toDate?.()||new Date((UP?.createdAt?.seconds||0)*1000);
+  const monthAgo=new Date();monthAgo.setMonth(monthAgo.getMonth()-1);
+  if(ca>monthAgo){showToast('Available after 1 month of registration');return;}
+  if(!await appConfirm('Send Member Request? Admins will review your application.'))return;
+  const{db,doc,setDoc,updateDoc,serverTimestamp}=window._fb;
+  try{
+    await setDoc(doc(db,'memberRequests',CU.uid),{uid:CU.uid,name:UP.name||'',num:UP.num||'',email:CU.email||'',status:'pending',requestedAt:serverTimestamp()});
+    await updateDoc(doc(db,'users',CU.uid),{memberStatus:'pending'});
+    UP.memberStatus='pending';showToast('Request sent!');_syncMemberRow();
+  }catch(e){showToast('Error sending request');}
+}
+async function cancelMembership(){
+  if(!CU||!UP)return;
+  if(!await appConfirm('Cancel your member request?'))return;
+  const{db,doc,deleteDoc,updateDoc}=window._fb;
+  try{
+    await deleteDoc(doc(db,'memberRequests',CU.uid));
+    await updateDoc(doc(db,'users',CU.uid),{memberStatus:'cancelled'});
+    UP.memberStatus='cancelled';showToast('Request cancelled');_syncMemberRow();
+  }catch(e){showToast('Error');}
+}
+async function loadMemberReqCount(){
+  const{db,collection,query,where,getDocs}=window._fb;
+  try{
+    const snap=await getDocs(query(collection(db,'memberRequests'),where('status','==','pending')));
+    const lbl=document.getElementById('admin-member-lbl');
+    if(lbl)lbl.textContent=`${snap.size} pending request${snap.size===1?'':'s'}`;
+  }catch(e){}
+}
+
+// ── REPORT SYSTEM ─────────────────────────────────────────────────────────────
+async function reportContent(type,targetId,e){
+  if(e&&e.stopPropagation)e.stopPropagation();
+  if(!CU||!UP){showToast('Please sign in');return;}
+  const canVote=!!(UP?.isMember||UP?.isAdmin);
+  const vLabel=canVote?'Vote to Remove':'Report';
+  const note=canVote?'Your vote counts toward removal (5 member votes needed).':'Only members can vote for removal. Your report will be logged.';
+  if(!await appConfirm(`${vLabel} this ${type}?\n${note}`))return;
+  const{db,doc,getDoc,setDoc,updateDoc,deleteDoc,serverTimestamp}=window._fb;
+  try{
+    const rRef=doc(db,'reports',targetId);
+    const rSnap=await getDoc(rRef);
+    if(rSnap.exists()){
+      const rd=rSnap.data();
+      if((rd.voters||[]).includes(CU.uid)){showToast('Already reported');return;}
+      const newVoters=[...(rd.voters||[]),CU.uid];
+      const newCount=newVoters.length;
+      await updateDoc(rRef,{voters:newVoters,voteCount:newCount,lastAt:serverTimestamp()});
+      if(canVote&&newCount>=5){await _autoDeleteReport(type,targetId,rRef);showToast('Removed — 5 member votes');return;}
+    } else {
+      const el=document.querySelector(`.pi[data-id="${targetId}"]`)||document.querySelector(`.cmt[data-id="${targetId.split('_cmt_')[1]}"]`);
+      const excerpt=(el?.querySelector('.ptxt')?.textContent||el?.querySelector('.cmttx')?.textContent||'').substring(0,120);
+      await setDoc(rRef,{type,targetId,excerpt,voters:[CU.uid],voteCount:1,status:'open',createdAt:serverTimestamp(),lastAt:serverTimestamp()});
+    }
+    showToast(canVote?'Vote registered':'Reported');
+  }catch(err){showToast('Error: '+err.message);}
+}
+async function _autoDeleteReport(type,targetId,rRef){
+  const{db,doc,deleteDoc,updateDoc,serverTimestamp}=window._fb;
+  try{
+    if(type==='post'){await deleteDoc(doc(db,'posts',targetId));document.querySelector(`.pi[data-id="${targetId}"]`)?.remove();}
+    else if(type==='comment'){const p=targetId.split('_cmt_');if(p.length===2)await deleteDoc(doc(db,`posts/${p[0]}/comments`,p[1]));}
+    else if(type==='pulse')await deleteDoc(doc(db,'pulses',targetId));
+    await updateDoc(rRef,{status:'resolved',resolvedAt:serverTimestamp()});
+  }catch(e){}
+}
+async function loadReportCount(){
+  const{db,collection,query,where,getDocs}=window._fb;
+  try{
+    const snap=await getDocs(query(collection(db,'reports'),where('status','==','open')));
+    const lbl=document.getElementById('admin-reports-lbl');
+    if(lbl)lbl.textContent=`${snap.size} open report${snap.size===1?'':'s'}`;
+  }catch(e){}
+}
+
+// ── ADMIN TABS ─────────────────────────────────────────────────────────────────
+function admTab(tab){
+  ['v','m','r'].forEach(t=>{
+    const btn=document.getElementById('adm-tab-'+t);
+    if(btn){btn.style.color=t===tab?'var(--gold)':'var(--mu2)';btn.style.borderBottomColor=t===tab?'var(--gold)':'transparent';}
+  });
+  if(tab==='v')loadVerifRequests();
+  else if(tab==='m')loadMemberRequests();
+  else if(tab==='r')loadAdminReports();
+}
+async function loadMemberRequests(){
+  const c=document.getElementById('admin-verif-list');if(!c)return;
+  c.innerHTML='<div class="spin"></div>';
+  const{db,collection,query,where,getDocs}=window._fb;
+  try{
+    const snap=await getDocs(query(collection(db,'memberRequests'),where('status','==','pending')));
+    if(!snap.docs.length){c.innerHTML='<div class="empty"><i class="ti ti-badge"></i><p>No pending member requests</p></div>';return;}
+    c.innerHTML=snap.docs.map(d=>{const r=d.data();return`<div class="crow" style="flex-direction:column;align-items:flex-start;gap:6px;padding:14px 16px">
+      <div style="display:flex;align-items:center;gap:10px;width:100%"><div class="av" style="width:38px;height:38px;flex-shrink:0">${(r.name||'?').substring(0,2).toUpperCase()}</div><div style="flex:1"><div class="crnm">${esc(r.name||'')} <span style="color:var(--mu2)">${esc(r.num||'')}</span></div><div class="crds">${esc(r.email||'')}</div></div></div>
+      <div style="display:flex;gap:8px;width:100%"><button onclick="rejectMember('${r.uid}')" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--bd);background:var(--sf2);color:#f87171;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--fb)">Decline</button><button onclick="approveMember('${r.uid}')" style="flex:1;padding:8px;border-radius:8px;border:none;background:var(--gold);color:#000;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--fb)">Approve ✓</button></div>
+    </div>`}).join('');
+  }catch(e){c.innerHTML='<div class="empty"><i class="ti ti-alert-circle"></i><p>Error loading</p></div>';}
+}
+async function approveMember(uid){
+  const{db,doc,updateDoc,deleteDoc}=window._fb;
+  try{
+    await updateDoc(doc(db,'users',uid),{isMember:true,memberStatus:'approved'});
+    await deleteDoc(doc(db,'memberRequests',uid));
+    await addNotif(uid,'follow','🏅 You are now a Member! 2500 char posts unlocked.','');
+    showToast('Member approved!');loadMemberRequests();loadMemberReqCount();
+  }catch(e){showToast('Error approving');}
+}
+async function rejectMember(uid){
+  const{db,doc,updateDoc,deleteDoc}=window._fb;
+  try{
+    await updateDoc(doc(db,'users',uid),{memberStatus:'rejected'});
+    await deleteDoc(doc(db,'memberRequests',uid));
+    showToast('Request declined');loadMemberRequests();loadMemberReqCount();
+  }catch(e){showToast('Error declining');}
+}
+async function loadAdminReports(){
+  const c=document.getElementById('admin-verif-list');if(!c)return;
+  c.innerHTML='<div class="spin"></div>';
+  const{db,collection,query,orderBy,getDocs}=window._fb;
+  try{
+    const snap=await getDocs(query(collection(db,'reports'),orderBy('lastAt','desc')));
+    if(!snap.docs.length){c.innerHTML='<div class="empty"><i class="ti ti-flag"></i><p>No reports</p></div>';return;}
+    c.innerHTML=snap.docs.map(d=>{const r=d.data();const sc=r.status==='resolved'?'#4ade80':'#f87171';return`<div class="crow" style="flex-direction:column;align-items:flex-start;gap:4px;padding:12px 16px;cursor:default">
+      <div style="display:flex;align-items:center;gap:8px;width:100%"><span style="font-size:10px;font-weight:700;color:${sc};background:${sc}18;padding:2px 6px;border-radius:5px;text-transform:uppercase">${r.status||'open'}</span><span style="font-size:11px;font-weight:600;color:var(--mu2)">${esc(r.type||'')}</span><span style="font-size:11px;color:var(--mu2);margin-left:auto">${r.voteCount||0} vote${r.voteCount!==1?'s':''}</span></div>
+      <div style="font-size:12px;color:var(--tx2);line-height:1.4">${esc((r.excerpt||'').substring(0,100))}</div>
+      <div style="font-size:10px;color:var(--mu)">Voters: ${(r.voters||[]).length} · ID: ${esc((r.targetId||'').substring(0,16))}…</div>
+    </div>`}).join('');
+  }catch(e){c.innerHTML='<div class="empty"><i class="ti ti-alert-circle"></i><p>Error loading</p></div>';}
+}
 function openEditProf(){
   document.getElementById('ep-name').value=UP?.name||'';
   document.getElementById('ep-bio').value=UP?.bio||'';
@@ -1466,7 +1652,7 @@ async function toggleTheme(light){
 async function loadUP(uid){
   const{db,doc,getDoc}=window._fb;
   const s=await getDoc(doc(db,'users',uid));
-  if(s.exists()){UP=s.data();customChs=UP.customChannels||[];if(!UP.userNumber)await assignUserNumber(uid);applyTheme(UP.theme==='light');}
+  if(s.exists()){UP=s.data();customChs=UP.customChannels||[];if(!UP.userNumber)await assignUserNumber(uid);applyTheme(UP.theme==='light');if((UP.userNumber===1||UP.userNumber===2)&&!UP.isAdmin){const{db:_adb,doc:_adoc,updateDoc:_aupd}=window._fb;await _aupd(_adoc(_adb,'users',uid),{isAdmin:true});UP.isAdmin=true;}}
 }
 async function assignUserNumber(uid){
   const{db,doc,updateDoc,getDocs,collection,query,orderBy,runTransaction}=window._fb;
@@ -1509,7 +1695,7 @@ function updateUI(){
   if(!UP)return;
   const avH=UP.avatarUrl?`<img src="${UP.avatarUrl}">`:(UP.name||'?').substring(0,2).toUpperCase();
   document.getElementById('myav').innerHTML=avH;
-  document.getElementById('myname').innerHTML=esc(UP.name||'')+(UP.verified?'<i class="ti ti-rosette-discount-check vbadge" title="Verified"></i>':'');
+  document.getElementById('myname').innerHTML=esc(UP.name||'')+(UP.verified?'<span class="hbadge" title="Verified Human">H</span>':'')+(UP.isAdmin?'<span class="abadge" title="Admin">A</span>':'');
   document.getElementById('mynum').textContent=UP.num||'#1';
   document.getElementById('mybio').textContent=UP.bio||'Add bio';
   const bioLinkEl=document.getElementById('my-biolink');
@@ -1736,6 +1922,7 @@ function pH(p){
           <button class="pa rp-btn${rpd?' reposted':''}" id="rp-${p.id}" onclick="rpMenu('${p.id}',this)" style="${rpd?'color:var(--gold)':''}"><i class="ti ti-repeat" style="${rpd?'color:var(--gold)':''}"></i> <span>${p.reposts||0}</span></button>
           <button class="pa${svd?' liked':''}" id="sv-${p.id}" onclick="toggleSave('${p.id}',this)"><i class="ti ${svd?'ti-bookmark-filled':'ti-bookmark'}"></i></button>
           <button class="pa" onclick="shareP('${p.id}',this)"><i class="ti ti-share"></i></button>
+          ${!isOwn?`<button class="pa" onclick="event.stopPropagation();reportContent('post','${p.id}',event)" title="Report" style="margin-left:auto"><i class="ti ti-flag" style="font-size:13px"></i></button>`:''}
         </div>
       </div>
     </div>
@@ -1893,12 +2080,12 @@ async function loadCmts(pid,cid){
   const snap=await getDocs(query(collection(db,`posts/${pid}/comments`),orderBy('createdAt','asc')));
   const cmts=snap.docs.map(d=>({id:d.id,...d.data()}));
   if(!cmts.length){c.innerHTML='<div class="empty" style="padding:18px 20px 10px"><p>No comments yet. Be the first!</p></div>';return}
-  c.innerHTML=cmts.map(cm=>{const cav=cm.authorAvatar?`<img src="${cm.authorAvatar}">`:(cm.authorName||'?').substring(0,2).toUpperCase();const ownCmt=CU&&cm.authorId===CU.uid;const cmLiked=CU&&(cm.likedBy||[]).includes(CU.uid);return`<div class="cmt" data-id="${cm.id}" data-txt="${esc(cm.text||'')}" ontouchend="dtap(this,event)"><div class="cmtav">${cav}</div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:4px"><div class="cmtnm">${esc(cm.authorName||'')}</div>${ownCmt?`<button onclick="delCmt('${pid}','${cm.id}')" style="background:none;border:none;color:var(--mu);cursor:pointer;margin-left:auto;padding:2px 3px;line-height:1" title="Delete comment"><i class="ti ti-trash" style="font-size:12px"></i></button>`:''}</div><div class="cmttx">${linkText(cm.text||'')}</div><div style="display:flex;align-items:center;gap:10px;margin-top:2px"><div class="cmttm">${cm.createdAt?tAgo(cm.createdAt.toDate()):''}</div><button class="pa${cmLiked?' liked':''}" id="clb-${cm.id}" onclick="likeCmt('${pid}','${cm.id}',this)"><i class="ti ${cmLiked?'ti-heart-filled':'ti-heart'}"></i><span>${cm.likes||0}</span></button></div></div></div>`}).join('');
+  c.innerHTML=cmts.map(cm=>{const cav=cm.authorAvatar?`<img src="${cm.authorAvatar}">`:(cm.authorName||'?').substring(0,2).toUpperCase();const ownCmt=CU&&cm.authorId===CU.uid;const cmLiked=CU&&(cm.likedBy||[]).includes(CU.uid);const cmtRid=`${pid}_cmt_${cm.id}`;return`<div class="cmt" data-id="${cm.id}" data-txt="${esc(cm.text||'')}" ontouchend="dtap(this,event)"><div class="cmtav">${cav}</div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:4px"><div class="cmtnm">${esc(cm.authorName||'')}</div>${ownCmt?`<button onclick="delCmt('${pid}','${cm.id}')" style="background:none;border:none;color:var(--mu);cursor:pointer;margin-left:auto;padding:2px 3px;line-height:1" title="Delete comment"><i class="ti ti-trash" style="font-size:12px"></i></button>`:''}</div><div class="cmttx">${linkText(cm.text||'')}</div><div style="display:flex;align-items:center;gap:10px;margin-top:2px"><div class="cmttm">${cm.createdAt?tAgo(cm.createdAt.toDate()):''}</div><button class="pa${cmLiked?' liked':''}" id="clb-${cm.id}" onclick="likeCmt('${pid}','${cm.id}',this)"><i class="ti ${cmLiked?'ti-heart-filled':'ti-heart'}"></i><span>${cm.likes||0}</span></button>${!ownCmt?`<button class="pa" onclick="event.stopPropagation();reportContent('comment','${cmtRid}',event)" title="Report comment" style="margin-left:auto"><i class="ti ti-flag" style="font-size:12px"></i></button>`:''}</div></div></div>`}).join('');
 }
 async function submitCmt(){
   if(!CU||!UP||!curPD)return;
   const inp=document.getElementById('pd-inp');const text=inp.value.trim();if(!text)return;
-  const maxC=UP?.verified?2500:500;
+  const maxC=(UP?.isMember||UP?.verified)?2500:500;
   if(text.length>maxC){showToast(`Max ${maxC} Zeichen`);return}
   inp.value='';const cnt=document.getElementById('cmt-cnt');if(cnt)cnt.style.display='none';
   const{db,collection,addDoc,doc,updateDoc,increment,serverTimestamp,getDoc}=window._fb;
@@ -1935,7 +2122,7 @@ async function delCmt(pid,cmtId){
   showToast('Comment deleted');
 }
 function ptaCount(el){
-  const max=UP?.verified?2500:500;
+  const max=(UP?.isMember||UP?.verified)?2500:500;
   el.maxLength=max;
   const rem=max-el.value.length;
   const cnt=document.getElementById('pta-cnt');
@@ -1945,7 +2132,7 @@ function ptaCount(el){
   cnt.textContent=rem+' Zeichen übrig';
 }
 function cmtCount(el){
-  const max=UP?.verified?2500:500;
+  const max=(UP?.isMember||UP?.verified)?2500:500;
   el.maxLength=max;
   const rem=max-el.value.length;
   const cnt=document.getElementById('cmt-cnt');
@@ -1957,7 +2144,7 @@ function cmtCount(el){
 async function submitPost(){
   if(!CU||!UP){showToast('Please sign in');return}
   const text=document.getElementById('pta').value.trim();if(!text){showToast('Please enter text');return}
-  const maxC=UP?.verified?2500:500;
+  const maxC=(UP?.isMember||UP?.verified)?2500:500;
   if(text.length>maxC){showToast(`Max ${maxC} Zeichen (${text.length} eingegeben)`);return}
   if(!checkRateLimit()){showToast('Too many posts. Please wait a moment.');return}
   const btn=document.getElementById('pbtn');btn.textContent='...';btn.disabled=true;
@@ -2064,7 +2251,7 @@ async function openOP(uid){
   const snap=await getDoc(doc(db,'users',uid));if(!snap.exists())return;
   const u=snap.data();
   document.getElementById('op-t').textContent=u.name||'Profile';
-  const opnm=document.getElementById('op-nm');opnm.innerHTML=esc(u.name||'')+(u.verified?'<i class="ti ti-rosette-discount-check vbadge" title="Verified"></i>':'');opnm.onclick=()=>{navigator.clipboard?.writeText(u.name||'').then(()=>showToast('📋 '+t('copied'))).catch(()=>{})};
+  const opnm=document.getElementById('op-nm');opnm.innerHTML=esc(u.name||'')+(u.verified?'<span class="hbadge" title="Verified Human">H</span>':'');opnm.onclick=()=>{navigator.clipboard?.writeText(u.name||'').then(()=>showToast('📋 '+t('copied'))).catch(()=>{})};
   document.getElementById('op-num').textContent=u.num||'#-';
   document.getElementById('op-bio').textContent=u.bio||'';
   const opBioLinkEl=document.getElementById('op-biolink');
@@ -2330,7 +2517,7 @@ async function renderHashPosts(tag){
 function renderUsers(users){
   const c=document.getElementById('clist');
   if(!users.length){c.innerHTML='<div class="empty"><i class="ti ti-users"></i><p>No creators found</p></div>';return}
-  c.innerHTML=users.map(u=>{const isF=followingIds.has(u.uid);const vb=u.verified?'<i class="ti ti-rosette-discount-check vbadge"></i>':'';return`<div class="crow" onclick="openOP('${u.uid}')"><div class="av" style="width:36px;height:36px">${u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase()}</div><div style="flex:1"><div class="crnm" style="display:flex;align-items:center;gap:3px">${esc(u.name||'')}${vb}</div><div class="crds">${esc(u.num||'')} · ${u.followers||0} followers</div></div><button class="fbtn${isF?' following':''}" onclick="event.stopPropagation();qFol('${u.uid}',this)">${isF?t('following_btn'):t('follow')}</button></div>`}).join('');
+  c.innerHTML=users.map(u=>{const isF=followingIds.has(u.uid);const vb=u.verified?'<span class="hbadge">H</span>':'';return`<div class="crow" onclick="openOP('${u.uid}')"><div class="av" style="width:36px;height:36px">${u.avatarUrl?`<img src="${u.avatarUrl}">`:(u.name||'?').substring(0,2).toUpperCase()}</div><div style="flex:1"><div class="crnm" style="display:flex;align-items:center;gap:3px">${esc(u.name||'')}${vb}</div><div class="crds">${esc(u.num||'')} · ${u.followers||0} followers</div></div><button class="fbtn${isF?' following':''}" onclick="event.stopPropagation();qFol('${u.uid}',this)">${isF?t('following_btn'):t('follow')}</button></div>`}).join('');
 }
 function doSearch(){
   const raw=document.getElementById('sinp').value;
@@ -4360,7 +4547,7 @@ function _pulseCardHTML(p,myVote,today){
         <div style="font-size:13px;font-weight:700;color:var(--tx);flex:1;line-height:1.3">${esc(p.title||'')}</div>
         ${closed?'<span class="pulse-closed-bdg">Closed</span>':p.endDate?`<span style="font-size:9px;color:var(--mu2);white-space:nowrap">${daysLeft(p.endDate)}</span>`:''}
       </div>
-      <div style="font-size:10px;color:var(--mu2)">by ${esc(p.creatorName||'')} · ${totalVotes} vote${totalVotes!==1?'s':''}</div>
+      <div style="display:flex;align-items:center"><div style="font-size:10px;color:var(--mu2);flex:1">by ${esc(p.creatorName||'')} · ${totalVotes} vote${totalVotes!==1?'s':''}</div>${CU&&p.creatorId!==CU.uid?`<button onclick="event.stopPropagation();reportContent('pulse','${p.id}',event)" style="background:none;border:none;color:var(--mu);cursor:pointer;padding:1px 2px;line-height:1" title="Report"><i class="ti ti-flag" style="font-size:11px"></i></button>`:''}</div>
     </div>
     <div class="pulse-ch" id="pulse-mc-${p.id}"><canvas id="pulse-cv-${p.id}" style="width:100%;height:100%"></canvas></div>
     ${optsHTML}
