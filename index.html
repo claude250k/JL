@@ -516,15 +516,16 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
     </div>
   </div>
   <div class="krow" id="pk">
-    <button class="kachel ak" onclick="fpulse(this,'all')">All</button>
-    <button class="kachel" onclick="fpulse(this,'pulse')">Pulse</button>
-    <button class="kachel" onclick="fpulse(this,'crypto')">Crypto</button>
-    <button class="kachel" onclick="fpulse(this,'stocks')">Stocks</button>
-    <button class="kachel" onclick="fpulse(this,'ETF')">ETF</button>
-    <button class="kachel" onclick="fpulse(this,'stats')">Statistics</button>
-    <button class="kachel" onclick="fpulse(this,'pol')">Politics</button>
-    <button class="kachel" onclick="fpulse(this,'tcg')">TCG</button>
-    <button class="kachel" onclick="fpulse(this,'watches')">Watches</button>
+    <button class="kachel ak" data-cat="all" onclick="fpulse(this,'all')">All</button>
+    <button class="kachel" data-cat="pulse" onclick="fpulse(this,'pulse')">Pulse</button>
+    <button class="kachel" data-cat="crypto" onclick="fpulse(this,'crypto')">Crypto</button>
+    <button class="kachel" data-cat="stocks" onclick="fpulse(this,'stocks')">Stocks</button>
+    <button class="kachel" data-cat="ETF" onclick="fpulse(this,'ETF')">ETF</button>
+    <button class="kachel" data-cat="stats" onclick="fpulse(this,'stats')">Statistics</button>
+    <button class="kachel" data-cat="pol" onclick="fpulse(this,'pol')">Politics</button>
+    <button class="kachel" data-cat="tcg" onclick="fpulse(this,'tcg')">TCG</button>
+    <button class="kachel" data-cat="watches" onclick="fpulse(this,'watches')">Watches</button>
+    <button class="ib2" onclick="managePulseChannels()" style="flex-shrink:0;margin-left:4px;padding:3px 7px;border-radius:8px;color:var(--mu2)" title="Manage channels"><i class="ti ti-pencil" style="font-size:15px"></i></button>
   </div>
   <div class="scroll" id="puls-scroll">
     <div data-pc="crypto">
@@ -573,24 +574,34 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
     <div data-pc="stats">
       <div style="padding:10px 14px 6px;display:flex;align-items:center;justify-content:space-between">
         <div>
-          <div style="font-size:13px;font-weight:700;color:var(--tx)">Statistiken · Europa</div>
-          <div style="font-size:11px;color:var(--mu2);margin-top:2px" id="stats-source-lbl">Lade Daten...</div>
+          <div style="font-size:13px;font-weight:700;color:var(--tx)">Statistics</div>
+          <div style="font-size:11px;color:var(--mu2);margin-top:2px" id="stats-source-lbl">Loading...</div>
         </div>
         <div style="font-size:10px;color:var(--gold);font-weight:700;background:rgba(247,147,26,.1);padding:3px 8px;border-radius:6px;border:1px solid rgba(247,147,26,.2)">Eurostat</div>
       </div>
+      <div style="display:flex;gap:6px;padding:0 14px 10px;overflow-x:auto;scrollbar-width:none">
+        <button class="pol-country-btn ak" id="stats-cont-eu">🌍 Europe</button>
+        <button class="pol-country-btn" onclick="showToast('Coming Soon')">🌎 Americas</button>
+        <button class="pol-country-btn" onclick="showToast('Coming Soon')">🌏 Asia</button>
+        <button class="pol-country-btn" onclick="showToast('Coming Soon')">🌍 Africa</button>
+      </div>
+      <div style="padding:0 12px 8px;position:relative">
+        <i class="ti ti-search" style="position:absolute;left:22px;top:50%;transform:translateY(-50%);color:var(--mu2);font-size:13px;pointer-events:none"></i>
+        <input class="ainp" id="stats-pulse-search" placeholder="Search country..." oninput="filterStatsPulse(this.value)" style="padding-left:32px;margin:0;font-size:12px">
+      </div>
       <div class="cc" onclick="openStatsOv()" style="cursor:pointer">
         <div class="cct">
-          <div><div class="ccn">🇪🇺 Medianeinkommen Europa</div><div class="ccs" id="stats-eu-sub">Netto-Äquivalenzeinkommen · EU-SILC</div></div>
+          <div><div class="ccn">🇪🇺 EU27 Net Income</div><div class="ccs" id="stats-eu-sub">Net Equivalised Income · EU-SILC</div></div>
           <div style="text-align:right"><div class="ccp" id="stats-eu-value">–</div><div class="ccc" id="stats-eu-monthly" style="color:var(--mu2)">–</div></div>
         </div>
       </div>
       <div id="stats-preview-list"><div class="spin" style="padding:20px 0"></div></div>
       <div onclick="openStatsOv()" style="display:flex;align-items:center;justify-content:center;gap:5px;padding:10px;font-size:12px;color:var(--gold);font-weight:600;cursor:pointer;border-top:1px solid var(--bd)">
-        Alle Länder &amp; Suche <i class="ti ti-arrow-right" style="font-size:13px"></i>
+        All Countries &amp; Search <i class="ti ti-arrow-right" style="font-size:13px"></i>
       </div>
     </div>
     <div data-pc="pol">
-      <div style="padding:10px 14px 4px"><div style="font-size:13px;font-weight:700;color:var(--tx)">Sunday Poll</div><div style="font-size:11px;color:var(--mu2);margin-top:2px">Anonymous vote · abstain or rate politicians</div></div>
+      <div style="padding:10px 14px 4px"><div style="font-size:11px;color:var(--mu2)">Anonymous weekly vote · resets every Sunday · abstain or rate politicians</div></div>
       <div style="display:flex;gap:6px;padding:4px 14px 10px">
         <button class="pol-country-btn ak" id="pol-de-btn" onclick="setPolCountry('de')">🇩🇪 Deutschland</button>
         <button class="pol-country-btn" id="pol-us-btn" onclick="setPolCountry('us')">🇺🇸 United States</button>
@@ -870,9 +881,10 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
     <div class="avpick" id="ep-av" onclick="document.getElementById('ep-avinp').click()"><div class="avpick-lbl"><i class="ti ti-camera"></i></div><input type="file" id="ep-avinp" accept="image/*" style="display:none" onchange="upAv(this)"></div>
     <div class="elabel">Display Name (unique - cannot be changed later easily)</div>
     <input class="einp" id="ep-name" type="text" placeholder="Your unique name" maxlength="15">
-    <div style="font-size:10px;color:var(--mu2);margin-top:-6px;margin-bottom:10px">Your # number never changes · max 15 characters</div>
+    <div id="ep-name-hint" style="font-size:10px;color:var(--mu2);margin-top:-6px;margin-bottom:10px">Your # number never changes · Max 15</div>
     <div class="elabel">Bio</div>
     <input class="einp" id="ep-bio" type="text" placeholder="Describe yourself" maxlength="160">
+    <div style="font-size:10px;color:var(--mu);margin-top:-6px;margin-bottom:10px">Max 160</div>
     <div class="elabel">Link (Instagram, YouTube, TikTok or Linktree only)</div>
     <input class="einp" id="ep-link" type="url" placeholder="https://instagram.com/yourname">
     <div style="font-size:10px;color:var(--mu2);margin-top:-6px;margin-bottom:10px">Allowed: instagram.com · youtube.com · tiktok.com · linktr.ee</div>
@@ -1017,10 +1029,10 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
 <div class="ov" id="stats-ov">
   <div class="ovh">
     <button class="ovb" onclick="closeStatsOv()"><i class="ti ti-arrow-left"></i></button>
-    <div class="ovt">Medianeinkommen Europa</div>
+    <div class="ovt">Net Income by Country</div>
   </div>
   <div style="padding:10px 14px 0;flex-shrink:0">
-    <input class="ainp" id="stats-search-inp" placeholder="Land suchen, z.B. Deutschland, Polen..." oninput="filterStatsCountries(this.value)" style="margin-bottom:0">
+    <input class="ainp" id="stats-search-inp" placeholder="Search country, e.g. Germany, Poland..." oninput="filterStatsCountries(this.value)" style="margin-bottom:0">
   </div>
   <div class="scroll" id="stats-ov-list"></div>
 </div>
@@ -1582,6 +1594,17 @@ function openEditProf(){
   document.getElementById('ep-link').value=UP?.bioLink||'';
   const ea=document.getElementById('ep-av');
   ea.innerHTML=UP?.avatarUrl?`<img src="${UP.avatarUrl}"><div class="avpick-lbl"><i class="ti ti-camera"></i></div>`:`<span>${(UP?.name||'?').substring(0,2).toUpperCase()}</span><div class="avpick-lbl"><i class="ti ti-camera"></i></div>`;
+  const hint=document.getElementById('ep-name-hint');
+  if(hint){
+    if(UP?.lastNameChange){
+      const lastChange=UP.lastNameChange.toDate?.()||new Date((UP.lastNameChange.seconds||0)*1000);
+      const daysSince=(Date.now()-lastChange)/86400000;
+      if(daysSince<7){
+        const dl=Math.ceil(7-daysSince);
+        hint.textContent=`Next name change in ${dl} day${dl===1?'':'s'}`;hint.style.color='#f87171';
+      } else {hint.textContent='Your # number never changes · Max 15';hint.style.color='';}
+    } else {hint.textContent='Your # number never changes · Max 15';hint.style.color='';}
+  }
   document.getElementById('editov').classList.add('on');
 }
 function closeEditProf(){document.getElementById('editov').classList.remove('on')}
@@ -1595,15 +1618,22 @@ async function saveProfile(){
     try{new URL(bioLink)}catch(e){showToast('Invalid URL');return;}
   }
   if(!nn){showToast('Name cannot be empty');return}
-  const{db,doc,updateDoc,getDocs,query,collection,where,setDoc,deleteDoc}=window._fb;
+  const{db,doc,updateDoc,getDocs,query,collection,where,setDoc,deleteDoc,serverTimestamp}=window._fb;
   const nameChanged=nn!==UP.name;
   if(nameChanged){
+    if(UP.lastNameChange){
+      const lastChange=UP.lastNameChange.toDate?.()||new Date((UP.lastNameChange.seconds||0)*1000);
+      const daysSince=(Date.now()-lastChange)/86400000;
+      if(daysSince<7){const dl=Math.ceil(7-daysSince);showToast(`Name change available in ${dl} day${dl===1?'':'s'}`);return;}
+    }
+    if(!await appConfirm(`Change name to "${nn}"? This will update all your posts and comments.`))return;
     const nc=await getDocs(query(collection(db,'users'),where('name','==',nn)));
     if(!nc.empty){showToast('Name already taken!');return}
     try{await deleteDoc(doc(db,'nameIndex',UP.name.toLowerCase()))}catch(e){}
     await setDoc(doc(db,'nameIndex',nn.toLowerCase()),{uid:CU.uid});
   }
-  await updateDoc(doc(db,'users',CU.uid),{name:nn,bio,bioLink:bioLink||''});
+  const upd={name:nn,bio,bioLink:bioLink||''};if(nameChanged)upd.lastNameChange=serverTimestamp();
+  await updateDoc(doc(db,'users',CU.uid),upd);
   UP.name=nn;UP.bio=bio;UP.bioLink=bioLink||'';updateUI();showToast('Profile saved!');closeEditProf();closeSet();
   if(nameChanged){
     showToast('Name saved · updating posts…');
@@ -1908,10 +1938,10 @@ function pH(p){
           <span class="cbadge ${cb}" onclick="goToCh('${p.channel||''}')" ${chBadgeStyle(rawCh)?`style="${chBadgeStyle(rawCh)}"`:''}>${cl}</span>
           <span class="ptm">${t}</span>
         </div>
-        <div class="ptxt" onclick="ptxtClick(event,'${p.id}','${esc(p.pulseId||'')}',this)" title="Klick: öffnen · Doppelklick: kopieren">${linkText(p.text||'')}</div>
+        <div class="ptxt" onclick="ptxtClick(event,'${p.id}','${esc(p.pulseId||'')}',this)">${linkText(p.text||'')}</div>
         ${qblockH(p.quoteOf)}
         ${img}
-        ${p.pulseId?`<div onclick="openPulseFromPost('${esc(p.pulseId)}')" style="display:inline-flex;align-items:center;gap:5px;background:rgba(247,147,26,.12);border:1px solid rgba(247,147,26,.28);color:var(--gold);padding:3px 11px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;margin-bottom:5px"><i class="ti ti-chart-bar" style="font-size:12px"></i>Pulse öffnen →</div>`:''}
+        ${p.pulseId?`<div onclick="event.stopPropagation();openPulseFromPost('${esc(p.pulseId)}')" style="display:inline-flex;align-items:center;gap:5px;background:rgba(247,147,26,.12);border:1px solid rgba(247,147,26,.28);color:var(--gold);padding:3px 11px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;margin-bottom:5px"><i class="ti ti-chart-bar" style="font-size:12px"></i>Open Pulse →</div>`:''}
         ${p.pulseId?'':assetButton(p.text||'')}
         <div class="pacts">
           <button class="pa${liked?' liked':''}" id="lb-${p.id}" onclick="likeP('${p.id}',this)">
@@ -2003,11 +2033,16 @@ async function addNotif(toUid,type,msg,refId=''){
 }
 async function parseMentions(text,postId){
   const ms=text.match(/@(\w+)/g);if(!ms)return;
-  const{db,collection,getDocs,query,where}=window._fb;
+  const{db,doc,getDoc}=window._fb;
   for(const m of ms){
     const name=m.slice(1).toLowerCase();
-    const snap=await getDocs(query(collection(db,'users'),where('name','==',name)));
-    if(!snap.empty&&snap.docs[0].id!==CU?.uid)await addNotif(snap.docs[0].id,'mention',`${UP?.name} mentioned you`,postId);
+    try{
+      const nSnap=await getDoc(doc(db,'nameIndex',name));
+      if(nSnap.exists()){
+        const uid=nSnap.data().uid;
+        if(uid&&uid!==CU?.uid)await addNotif(uid,'mention',`${UP?.name} mentioned you`,postId);
+      }
+    }catch(e){}
   }
 }
 function loadNotifs(){
@@ -2067,7 +2102,7 @@ async function openPD(pid){
   const avH=p.authorAvatar?`<img src="${p.authorAvatar}">`:(p.authorName||'?').substring(0,2).toUpperCase();
   const liked=CU&&(p.likedBy||[]).includes(CU.uid);
   const isOwnPD=CU&&p.authorId===CU.uid;
-  document.getElementById('pd-content').innerHTML=`<div class="pi" style="cursor:default"><div class="pr"><div class="av" onclick="openOP('${p.authorId}')">${avH}</div><div class="pb"><div class="ptop"><span class="pan" onclick="openOP('${p.authorId}')">${esc(p.authorName||'')}</span><span class="cbadge ${cb}" ${chBadgeStyle(rawChPD)?`style="${chBadgeStyle(rawChPD)}"`:''}>${cl}</span><span class="ptm">${t}</span>${isOwnPD?`<button class="pa" onclick="delPost('${p.id}')" style="margin-left:auto;color:var(--mu)" title="Delete post"><i class="ti ti-trash" style="font-size:13px"></i></button>`:''}</div><div class="ptxt" style="cursor:default">${linkText(p.text||'')}</div>${img}${assetButton(p.text||'')}<div class="pacts"><button class="pa${liked?' liked':''}" id="lb-${p.id}" onclick="likeP('${p.id}',this)"><i class="ti ${liked?'ti-heart-filled':'ti-heart'}"></i><span id="lc-${p.id}">${p.likes||0}</span></button></div></div></div></div>`;
+  document.getElementById('pd-content').innerHTML=`<div class="pi" style="cursor:default"><div class="pr"><div class="av" onclick="openOP('${p.authorId}')">${avH}</div><div class="pb"><div class="ptop"><span class="pan" onclick="openOP('${p.authorId}')">${esc(p.authorName||'')}</span><span class="cbadge ${cb}" ${chBadgeStyle(rawChPD)?`style="${chBadgeStyle(rawChPD)}"`:''}>${cl}</span><span class="ptm">${t}</span>${isOwnPD?`<button class="pa" onclick="delPost('${p.id}')" style="margin-left:auto;color:var(--mu)" title="Delete post"><i class="ti ti-trash" style="font-size:13px"></i></button>`:''}</div><div class="ptxt" style="cursor:default">${linkText(p.text||'')}</div>${img}${p.pulseId?`<button onclick="openPulseFromPost('${esc(p.pulseId)}')" style="display:flex;align-items:center;gap:6px;background:rgba(247,147,26,.12);border:1px solid rgba(247,147,26,.28);color:var(--gold);padding:7px 14px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:8px;font-family:var(--fb)"><i class="ti ti-chart-bar" style="font-size:14px"></i> Open Pulse</button>`:assetButton(p.text||'')}<div class="pacts"><button class="pa${liked?' liked':''}" id="lb-${p.id}" onclick="likeP('${p.id}',this)"><i class="ti ${liked?'ti-heart-filled':'ti-heart'}"></i><span id="lc-${p.id}">${p.likes||0}</span></button></div></div></div></div>`;
   await loadCmts(pid,'pd-cmts');
   document.getElementById('pdov').classList.add('on');
   document.getElementById('pd-inp').focus();
@@ -2110,6 +2145,7 @@ async function delPost(pid){
   try{await updateDoc(doc(db,'users',CU.uid),{posts:increment(-1)})}catch(e){}
   UP.posts=Math.max(0,(UP.posts||1)-1);
   document.querySelector(`.pi[data-id="${pid}"]`)?.remove();
+  if(curPD===pid)closePD();
   showToast('Post deleted');
 }
 async function delCmt(pid,cmtId){
@@ -2127,9 +2163,9 @@ function ptaCount(el){
   const rem=max-el.value.length;
   const cnt=document.getElementById('pta-cnt');
   if(!cnt)return;
-  if(el.value.length===0){cnt.textContent='';return}
+  if(el.value.length===0){cnt.textContent=`Max ${max}`;cnt.style.color='var(--mu)';return}
   cnt.style.color=rem<50?'#f87171':rem<100?'#fb923c':'var(--mu2)';
-  cnt.textContent=rem+' Zeichen übrig';
+  cnt.textContent=rem+' left';
 }
 function cmtCount(el){
   const max=(UP?.isMember||UP?.verified)?2500:500;
@@ -2137,9 +2173,10 @@ function cmtCount(el){
   const rem=max-el.value.length;
   const cnt=document.getElementById('cmt-cnt');
   if(!cnt)return;
-  cnt.style.display=el.value.length>0?'block':'none';
+  cnt.style.display='block';
+  if(el.value.length===0){cnt.textContent=`Max ${max}`;cnt.style.color='var(--mu)';return}
   cnt.style.color=rem<50?'#f87171':rem<100?'#fb923c':'var(--mu2)';
-  cnt.textContent=rem+' Zeichen übrig';
+  cnt.textContent=rem+' left';
 }
 async function submitPost(){
   if(!CU||!UP){showToast('Please sign in');return}
@@ -2764,6 +2801,12 @@ async function sendMsg(){
   if(curConvIsGroup)msgData.senderName=UP?.name||'';
   await addDoc(collection(db,`conversations/${curConv}/messages`),msgData);
   await updateDoc(doc(db,'conversations',curConv),{lastMsg:text,lastAt:serverTimestamp(),lastSenderId:CU.uid});
+  // Notify other group members — never self
+  if(curConvIsGroup&&curConvData?.members){
+    for(const uid of curConvData.members){
+      if(uid!==CU.uid)await addNotif(uid,'message',`${UP?.name||'Someone'}: ${text.substring(0,60)}`,curConv);
+    }
+  }
 }
 function closeChat(){
   document.getElementById('chov').classList.remove('on');
@@ -2891,9 +2934,10 @@ async function msgUser(){
 function _hrgb(h){const s=h.replace('#','');const x=s.length===3?s.split('').map(c=>c+c).join(''):s;return[parseInt(x.slice(0,2),16),parseInt(x.slice(2,4),16),parseInt(x.slice(4,6),16)]}
 function _activeParties(){return polCountry==='us'?PARTIES_USA:PARTIES;}
 async function renderParties(){
-  const{db,collection,getDocs}=window._fb;let votes={},polVotes={};
-  try{const s=await getDocs(collection(db,'votes'));s.docs.forEach(d=>votes[d.id]=d.data().count||0);const pv=await getDocs(collection(db,'polVotes'));pv.docs.forEach(d=>polVotes[d.id]=d.data());}catch(e){}
-  const total=Object.values(votes).reduce((a,b)=>a+b,0)||1;
+  const wk=_getPollWeekKey();
+  const{db,doc,getDoc,collection,getDocs}=window._fb;let votes={},polVotes={};
+  try{const wkSnap=await getDoc(doc(db,'partyVoteWeek',wk));if(wkSnap.exists())votes=wkSnap.data();const pv=await getDocs(collection(db,'polVotes'));pv.docs.forEach(d=>polVotes[d.id]=d.data());}catch(e){}
+  const total=Object.values(votes).reduce((a,b)=>a+(typeof b==='number'?b:0),0)||1;
   let myPV={};
   if(CU){try{const pvs=await getDocs(collection(db,`upv_${CU.uid}`));pvs.docs.forEach(d=>myPV[d.id]=d.data().dir)}catch(e){}}
   const ap=_activeParties();
@@ -2914,18 +2958,22 @@ function setPolCountry(c){
 }
 function togPD(id){const el=document.getElementById('pd-'+id);if(!el)return;const open=el.style.display!=='none';_activeParties().forEach(p=>{if(p.id!==id){const o=document.getElementById('pd-'+p.id);if(o)o.style.display='none';_openParties.delete(p.id);}});el.style.display=open?'none':'block';if(open)_openParties.delete(id);else _openParties.add(id);}
 async function voteP(id){
-  if(!CU)return;if(myVote===id){showToast('Already voted for this party');return}
+  if(!CU)return;
+  if(myVote===id){showToast('Already voted');return}
+  if(myVote){showToast('Once per week only · resets Sunday');return}
+  const wk=_getPollWeekKey();
   const{db,doc,setDoc,updateDoc,increment,getDoc}=window._fb;
-  if(myVote){try{await updateDoc(doc(db,'votes',myVote),{count:increment(-1)})}catch(e){}}
-  const vr=doc(db,'votes',id);const vs=await getDoc(vr);
-  if(vs.exists())await updateDoc(vr,{count:increment(1)});else await setDoc(vr,{count:1});
-  await setDoc(doc(db,'userVotes',CU.uid),{partyId:id});
+  const wkRef=doc(db,'partyVoteWeek',wk);
+  const wkSnap=await getDoc(wkRef);
+  if(wkSnap.exists())await updateDoc(wkRef,{[id]:increment(1)});else await setDoc(wkRef,{[id]:1});
+  await setDoc(doc(db,'userVotes',CU.uid),{partyId:id,weekKey:wk});
   myVote=id;showToast('Voted ✓');renderParties().then(()=>{_openParties.forEach(id=>{const el=document.getElementById('pd-'+id);if(el)el.style.display='block'});});
 }
 async function abstainP(id){
   if(!CU||myVote!==id)return;
-  const{db,doc,updateDoc,deleteDoc,increment}=window._fb;
-  try{await updateDoc(doc(db,'votes',id),{count:increment(-1)})}catch(e){}
+  const wk=_getPollWeekKey();
+  const{db,doc,updateDoc,deleteDoc,increment,getDoc}=window._fb;
+  try{const wkSnap=await getDoc(doc(db,'partyVoteWeek',wk));if(wkSnap.exists()&&(wkSnap.data()[id]||0)>0)await updateDoc(doc(db,'partyVoteWeek',wk),{[id]:increment(-1)});}catch(e){}
   try{await deleteDoc(doc(db,'userVotes',CU.uid))}catch(e){}
   myVote=null;showToast('Vote removed');renderParties().then(()=>{_openParties.forEach(id=>{const el=document.getElementById('pd-'+id);if(el)el.style.display='block'});});
 }
@@ -2942,7 +2990,18 @@ async function votePol(pId,polName,dir,btn){
   _openParties.add(pId);
   renderParties().then(()=>{_openParties.forEach(id=>{const el=document.getElementById('pd-'+id);if(el)el.style.display='block'});});
 }
-async function loadMyVote(){if(!CU)return;const{db,doc,getDoc}=window._fb;try{const s=await getDoc(doc(db,'userVotes',CU.uid));if(s.exists())myVote=s.data().partyId}catch(e){}}
+function _getPollWeekKey(){
+  const now=new Date();
+  const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Europe/Berlin',weekday:'short',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now);
+  const wd=parts.find(p=>p.type==='weekday').value;
+  const yr=parts.find(p=>p.type==='year').value;
+  const mo=parts.find(p=>p.type==='month').value;
+  const dy=parts.find(p=>p.type==='day').value;
+  const dayIdx=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(wd);
+  const d=new Date(`${yr}-${mo}-${dy}`);d.setDate(d.getDate()-dayIdx);
+  return d.toISOString().split('T')[0];
+}
+async function loadMyVote(){if(!CU)return;const{db,doc,getDoc}=window._fb;try{const s=await getDoc(doc(db,'userVotes',CU.uid));if(s.exists()){const d=s.data();if(d.weekKey===_getPollWeekKey())myVote=d.partyId;}}catch(e){}}
 
 const GC='#F7931A';
 function grd(ctx){const g=ctx.createLinearGradient(0,0,0,72);g.addColorStop(0,GC+'55');g.addColorStop(1,GC+'00');return g}
@@ -3123,7 +3182,7 @@ async function triggerAlert(coin,price,alertId){
 }
 function fpulse(btn,cat){document.querySelectorAll('#pk .kachel').forEach(b=>b.classList.remove('ak'));btn.classList.add('ak');document.querySelectorAll('#puls-scroll [data-pc]').forEach(el=>el.style.display=(cat==='all'||el.dataset.pc===cat)?'':'none');document.getElementById('puls-scroll').scrollTop=0;if(cat==='pulse')loadPulses();if(cat==='stats'||cat==='all')loadStatistics();}
 function rfPulse(){pulseInited=false;initPulse()}
-function initPulse(){if(pulseInited)return;pulseInited=true;fetchPulse();loadStatistics();setInterval(fetchPulse,60000);initAssetVoteRows();if(!_avdUnsub||_berlinDate()!==_avdDate)loadAssetVotes();}
+function initPulse(){if(pulseInited)return;pulseInited=true;initPulsKacheln();fetchPulse();loadStatistics();setInterval(fetchPulse,60000);initAssetVoteRows();if(!_avdUnsub||_berlinDate()!==_avdDate)loadAssetVotes();}
 
 // ── ASSET VOTING ──────────────────────────────────────────────────────────────
 function _berlinDate(){return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date());}
@@ -3201,7 +3260,18 @@ async function assetVote(key,voteType){
   }catch(e){showToast('Fehler beim Abstimmen');loadAssetVotes();}
 }
 
-function openPM(){if(!CU){showToast('Please sign in');return}document.getElementById('pm').classList.add('on');renderQuotePreview();}
+function openPM(){
+  if(!CU){showToast('Please sign in');return}
+  document.getElementById('pm').classList.add('on');
+  // Always reset channel to All
+  selCat='all';
+  document.querySelectorAll('#pm .pcat').forEach(b=>b.classList.remove('ak'));
+  const allBtn=document.querySelector('#pm .pcat[data-cat="all"]');if(allBtn)allBtn.classList.add('ak');
+  // Show initial char limit
+  const cnt=document.getElementById('pta-cnt');
+  if(cnt){const mx=(UP?.isMember||UP?.verified)?2500:500;cnt.textContent=`Max ${mx}`;cnt.style.color='var(--mu)';}
+  renderQuotePreview();
+}
 function closePM(){document.getElementById('pm').classList.remove('on');clearQuote();}
 function sCat(btn){document.querySelectorAll('#pm .pcat').forEach(b=>b.classList.remove('ak'));btn.classList.add('ak');selCat=btn.dataset.cat}
 function prevImg(inp){if(!inp.files[0])return;const p=document.getElementById('uprev');p.src=URL.createObjectURL(inp.files[0]);p.style.display='block'}
@@ -3318,7 +3388,7 @@ function ptxtClick(ev,pid,pulseId,el){
   }else{
     _ptxtLast[pid]=now;
     clearTimeout(_ptxtTimer[pid]);
-    _ptxtTimer[pid]=setTimeout(()=>{delete _ptxtLast[pid];if(pulseId)openPulseFromPost(pulseId);else openPD(pid);},380);
+    _ptxtTimer[pid]=setTimeout(()=>{delete _ptxtLast[pid];openPD(pid);},380);
   }
 }
 function tAgo(d){const s=Math.floor((new Date()-d)/1000);if(s<60)return'now';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';return Math.floor(s/86400)+'d'}
@@ -3683,19 +3753,21 @@ async function loadStatistics(){
   renderStatistics();
 }
 
-function renderStatistics(){
+function renderStatistics(filter=''){
   const d=statsData;if(!d)return;
   const eu=d.countries.find(c=>c.code==='EU27'||c.code==='EU27_2020')||{annual:18600};
   const euAnnual=eu.annual||18600;
   const el=id=>document.getElementById(id);
   if(el('stats-eu-value'))el('stats-eu-value').textContent='€'+Number(euAnnual).toLocaleString('de-DE');
-  if(el('stats-eu-monthly'))el('stats-eu-monthly').textContent='~€'+Math.round(euAnnual/12).toLocaleString('de-DE')+'/Monat';
-  if(el('stats-source-lbl'))el('stats-source-lbl').textContent=(d.source||'Eurostat')+' · Jahr '+(d.year||2022);
-  if(el('stats-eu-sub'))el('stats-eu-sub').textContent='Netto-Äquivalenzeinkommen · '+(d.year||2022);
-  const ranked=d.countries.filter(c=>c.code!=='EU27'&&c.code!=='EU27_2020').sort((a,b)=>b.annual-a.annual);
-  const maxVal=ranked[0]?.annual||40000;
+  if(el('stats-eu-monthly'))el('stats-eu-monthly').textContent='~€'+Math.round(euAnnual/12).toLocaleString('de-DE')+'/month';
+  if(el('stats-source-lbl'))el('stats-source-lbl').textContent=(d.source||'Eurostat')+' · Year '+(d.year||2022);
+  if(el('stats-eu-sub'))el('stats-eu-sub').textContent='Net Equivalised Income · '+(d.year||2022);
+  let ranked=d.countries.filter(c=>c.code!=='EU27'&&c.code!=='EU27_2020').sort((a,b)=>b.annual-a.annual);
+  if(filter&&filter.trim())ranked=ranked.filter(c=>c.name.toLowerCase().includes(filter.toLowerCase())||c.code.toLowerCase().includes(filter.toLowerCase()));
+  const maxVal=(d.countries.filter(c=>c.code!=='EU27'&&c.code!=='EU27_2020').sort((a,b)=>b.annual-a.annual)[0])?.annual||40000;
   const top5=ranked.slice(0,5);
   const pl=el('stats-preview-list');if(!pl)return;
+  if(!top5.length){pl.innerHTML='<div class="empty" style="padding:16px 20px"><p>No results</p></div>';return;}
   let html='<div style="padding:4px 0 0">';
   top5.forEach(c=>{
     const pct=Math.round(c.annual/maxVal*100);
@@ -3712,13 +3784,14 @@ function renderStatistics(){
       </div>
       <div style="text-align:right;margin-left:12px;flex-shrink:0">
         <div style="font-size:13px;font-weight:700;color:var(--tx)">€${Number(c.annual).toLocaleString('de-DE')}</div>
-        <div style="font-size:10px;color:var(--mu2)">~€${Math.round(c.annual/12).toLocaleString('de-DE')}/Mo</div>
+        <div style="font-size:10px;color:var(--mu2)">~€${Math.round(c.annual/12).toLocaleString('de-DE')}/month</div>
       </div>
     </div>`;
   });
   html+='</div>';
   pl.innerHTML=html;
 }
+function filterStatsPulse(q){renderStatistics(q);}
 
 function openStatsOv(){
   const d=statsData||STATS_FALLBACK;
@@ -3733,22 +3806,28 @@ function filterStatsCountries(q){
   const filtered=s?_statsAll.filter(c=>c.name.toLowerCase().includes(s)||c.code.toLowerCase().includes(s)):_statsAll;
   renderStatsCountryList(filtered);
 }
+function togStatRow(code){
+  const body=document.getElementById('stat-d-'+code);const ico=document.getElementById('stati-'+code);if(!body)return;
+  const open=body.style.display!=='none';
+  document.querySelectorAll('[id^="stat-d-"]').forEach(el=>{el.style.display='none';const ic=document.getElementById('stati-'+el.id.slice(7));if(ic)ic.style.transform='';});
+  if(!open){body.style.display='block';if(ico)ico.style.transform='rotate(180deg)';}
+}
 function renderStatsCountryList(countries){
   const d=statsData||STATS_FALLBACK;
   const eu=d.countries.find(c=>c.code==='EU27'||c.code==='EU27_2020')||{annual:18600};
   const euAnnual=eu.annual||18600;
   const maxVal=_statsAll[0]?.annual||40000;
   const el=document.getElementById('stats-ov-list');if(!el)return;
-  if(!countries.length){el.innerHTML='<div class="empty"><i class="ti ti-search-off"></i><p>Kein Land gefunden</p></div>';return;}
+  if(!countries.length){el.innerHTML='<div class="empty"><i class="ti ti-search-off"></i><p>No countries found</p></div>';return;}
   const euRow=`<div style="padding:12px 14px;background:rgba(247,147,26,.05);border-bottom:1px solid rgba(247,147,26,.2)">
     <div style="display:flex;align-items:center;justify-content:space-between">
       <div style="display:flex;align-items:center;gap:8px">
         <span style="font-size:20px;line-height:1">🇪🇺</span>
-        <div><div style="font-size:13px;font-weight:700;color:var(--gold)">EU27 Durchschnitt</div><div style="font-size:10px;color:var(--mu2)">Referenzwert · ${d.year||2022}</div></div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--gold)">EU27 Average</div><div style="font-size:10px;color:var(--mu2)">Reference · ${d.year||2022}</div></div>
       </div>
       <div style="text-align:right">
         <div style="font-size:15px;font-weight:800;color:var(--gold)">€${Number(euAnnual).toLocaleString('de-DE')}</div>
-        <div style="font-size:11px;color:var(--mu2)">~€${Math.round(euAnnual/12).toLocaleString('de-DE')}/Monat</div>
+        <div style="font-size:11px;color:var(--mu2)">~€${Math.round(euAnnual/12).toLocaleString('de-DE')}/month</div>
       </div>
     </div>
   </div>`;
@@ -3758,25 +3837,35 @@ function renderStatsCountryList(countries){
     const vsEu=Math.round((c.annual-euAnnual)/euAnnual*100);
     const vc=vsEu>=0?'#4ade80':'#f87171',vs=vsEu>=0?'+':'';
     const rank=_statsAll.findIndex(x=>x.code===c.code)+1;
-    rows+=`<div style="padding:12px 14px;border-bottom:1px solid var(--bd)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:11px;color:var(--mu2);min-width:18px;text-align:right">#${rank}</span>
-          <span style="font-size:20px;line-height:1">${c.flag}</span>
-          <div><div style="font-size:13px;font-weight:700;color:var(--tx)">${c.name}</div><div style="font-size:10px;color:var(--mu2)">${c.code} · ${c.year||d.year||2022}</div></div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:15px;font-weight:800;color:var(--tx)">€${Number(c.annual).toLocaleString('de-DE')}</div>
-          <div style="font-size:11px;color:var(--mu2)">~€${Math.round(c.annual/12).toLocaleString('de-DE')}/Mo</div>
-        </div>
+    const monthly=Math.round(c.annual/12);
+    rows+=`<div class="poc" style="margin:0;border-radius:0;border-left:none;border-right:none;border-top:none">
+      <div class="potop" onclick="togStatRow('${c.code}')">
+        <span style="font-size:15px;line-height:1;flex-shrink:0">${c.flag}</span>
+        <div class="pon">${c.name} <span style="font-size:10px;color:var(--mu2);font-weight:400">#${rank}</span></div>
+        <div style="font-size:13px;font-weight:700;color:var(--tx)">€${Number(c.annual).toLocaleString('de-DE')}</div>
+        <i class="ti ti-chevron-down" id="stati-${c.code}" style="color:var(--mu2);font-size:14px;transition:transform .2s;flex-shrink:0"></i>
       </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <div class="stats-bar" style="flex:1"><div class="stats-bar-fill" style="width:${pct}%"></div></div>
-        <span style="font-size:11px;color:${vc};font-weight:700;flex-shrink:0">${vs}${vsEu}% vs EU Ø</span>
+      <div class="bt" style="margin-bottom:4px"><div class="bf" style="width:${pct}%;background:var(--gold)"></div></div>
+      <div id="stat-d-${c.code}" style="display:none;padding:8px 13px 12px;border-top:1px solid var(--bd)">
+        <div style="display:flex;flex-wrap:wrap;gap:7px">
+          <div style="background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:7px 12px;flex:1;min-width:90px">
+            <div style="font-size:10px;color:var(--mu2);margin-bottom:2px">Net Income / yr</div>
+            <div style="font-size:13px;font-weight:700;color:var(--tx)">€${Number(c.annual).toLocaleString('de-DE')}</div>
+          </div>
+          <div style="background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:7px 12px;flex:1;min-width:90px">
+            <div style="font-size:10px;color:var(--mu2);margin-bottom:2px">Monthly</div>
+            <div style="font-size:13px;font-weight:700;color:var(--tx)">€${Number(monthly).toLocaleString('de-DE')}</div>
+          </div>
+          <div style="background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:7px 12px;flex:1;min-width:90px">
+            <div style="font-size:10px;color:var(--mu2);margin-bottom:2px">vs EU Avg</div>
+            <div style="font-size:13px;font-weight:700;color:${vc}">${vs}${vsEu}%</div>
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--mu2);margin-top:6px">${c.code} · ${c.year||d.year||2022} · Eurostat EU-SILC</div>
       </div>
     </div>`;
   });
-  el.innerHTML=euRow+rows+'<div style="padding:10px 14px;font-size:10px;color:var(--mu2);text-align:center">Quelle: Eurostat – EU-SILC (ilc_di03) · Jährliches Netto-Äquivalenzeinkommen</div>';
+  el.innerHTML=euRow+rows+'<div style="padding:10px 14px;font-size:10px;color:var(--mu2);text-align:center">Source: Eurostat – EU-SILC (ilc_di03) · Annual Net Equivalised Income</div>';
 }
 
 // ── Demo Portfolio ──────────────────────────────────────────────────────────
@@ -4627,19 +4716,21 @@ function _renderPulseDetail(p,myVote,today,closed){
         ${!hasVoted&&!closed&&CU?'<span style="color:var(--mu2)">· Einmalige Abstimmung</span>':''}
       </div>
     </div>
-    ${hasHistory?`<div style="height:160px;padding:8px 12px 0"><canvas id="pulse-detail-cv"></canvas></div>`:''}
+    <div style="height:160px;padding:8px 12px 0"><canvas id="pulse-detail-cv"></canvas></div>
     ${optRows}
     ${isMyPulse?`<div style="padding:12px 16px;border-top:1px solid var(--bd)"><button onclick="deleteMyPulse('${p.id}','${p.postId||''}')" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;padding:8px 14px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="ti ti-trash"></i> Pulse löschen</button></div>`:''}
     <div style="height:20px"></div>`;
-  if(hasHistory){
-    setTimeout(()=>{
-      const cv=document.getElementById('pulse-detail-cv');if(!cv)return;
+  setTimeout(()=>{
+    const cv=document.getElementById('pulse-detail-cv');if(!cv)return;
+    if(chartI['pulse-detail-cv'])chartI['pulse-detail-cv'].destroy();
+    if(hasHistory){
       const labels=hist.map(h=>h.date);
       const datasets=opts.map((o,i)=>({label:o.text,data:hist.map(h=>h.counts?.[i]||0),borderColor:PULSE_COLORS[i%PULSE_COLORS.length],borderWidth:2.5,pointRadius:2,tension:.4,fill:false}));
-      if(chartI['pulse-detail-cv'])chartI['pulse-detail-cv'].destroy();
       chartI['pulse-detail-cv']=new Chart(cv,{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,animation:{duration:400},plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,backgroundColor:'#1a1a1a',borderColor:'#333',borderWidth:1,callbacks:{title:ts=>'Date: '+ts[0].label,label:c=>c.dataset.label+': '+c.parsed.y+' votes'}}},scales:{x:{display:false},y:{min:0,ticks:{color:'#666',font:{size:9},stepSize:1},grid:{color:'rgba(255,255,255,.05)'}}}}});
-    },50);
-  }
+    } else {
+      chartI['pulse-detail-cv']=new Chart(cv,{type:'bar',data:{labels:opts.map((o,i)=>i+1),datasets:[{data:opts.map(o=>o.votes||0),backgroundColor:opts.map((_,i)=>PULSE_COLORS[i%PULSE_COLORS.length]+'99'),borderColor:opts.map((_,i)=>PULSE_COLORS[i%PULSE_COLORS.length]),borderWidth:1.5,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:400},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>opts[c.dataIndex]?.text+': '+c.parsed.y+' votes'}}},scales:{x:{display:false},y:{min:0,display:false}}}});
+    }
+  },50);
 }
 
 async function voteOnPulse(pulseId,optionId,btn){
@@ -4694,6 +4785,99 @@ function openPulseFromPost(pulseId){
     if(pulseBtn)pulseBtn.click();
     setTimeout(()=>openPulseDetail(pulseId),300);
   },150);
+}
+
+// ── PULSE CHANNEL MANAGEMENT ─────────────────────────────────────────────────
+const PULSE_DEFAULT_CHS=[
+  {id:'all',label:'All',alwaysOn:true},
+  {id:'pulse',label:'Pulse'},
+  {id:'crypto',label:'Crypto'},
+  {id:'stocks',label:'Stocks'},
+  {id:'ETF',label:'ETF'},
+  {id:'stats',label:'Statistics'},
+  {id:'pol',label:'Politics'},
+  {id:'tcg',label:'TCG'},
+  {id:'watches',label:'Watches'},
+];
+let _pchChs=[],_pchDragIdx=null;
+function _getPulseChs(){try{const s=localStorage.getItem('jl_pulse_chs');return s?JSON.parse(s):null;}catch{return null;}}
+function _savePulseChs(chs){try{localStorage.setItem('jl_pulse_chs',JSON.stringify(chs));}catch{}}
+
+function initPulsKacheln(){
+  const pk=document.getElementById('pk');if(!pk)return;
+  const saved=_getPulseChs();
+  const chs=saved||PULSE_DEFAULT_CHS.map(c=>({...c,on:true}));
+  const activeCat=pk.querySelector('.kachel.ak')?.dataset?.cat||'all';
+  let h='';
+  chs.forEach(c=>{
+    if(!c.on&&!c.alwaysOn)return;
+    h+=`<button class="kachel${activeCat===c.id?' ak':''}" data-cat="${c.id}" onclick="fpulse(this,'${c.id}')">${c.label}</button>`;
+  });
+  h+=`<button class="ib2" onclick="managePulseChannels()" style="flex-shrink:0;margin-left:4px;padding:3px 7px;border-radius:8px;color:var(--mu2)" title="Manage channels"><i class="ti ti-pencil" style="font-size:15px"></i></button>`;
+  pk.innerHTML=h;
+}
+
+function managePulseChannels(){
+  const saved=_getPulseChs();
+  _pchChs=(saved||PULSE_DEFAULT_CHS.map(c=>({...c,on:true}))).map(c=>({...c}));
+  const ov=document.createElement('div');
+  ov.className='ch-modal on';ov.id='pch-ov';
+  ov.innerHTML=`<div class="ch-modal-box" style="max-height:82vh;overflow-y:auto">
+    <div class="ch-modal-title">Pulse Channels</div>
+    <div style="font-size:11px;color:var(--mu2);margin-bottom:10px">Drag <strong style="color:var(--tx)">⠿</strong> to reorder · toggle to show/hide</div>
+    <div id="pch-list"></div>
+    <div class="ch-modal-foot" style="margin-top:12px">
+      <button class="ch-modal-cancel" onclick="document.getElementById('pch-ov')?.remove()">Cancel</button>
+      <button class="ch-modal-ok" onclick="_savePchAndClose()">Save</button>
+    </div>
+  </div>`;
+  document.getElementById('app').appendChild(ov);
+  _renderPchList();
+}
+
+function _renderPchList(){
+  const list=document.getElementById('pch-list');if(!list)return;
+  list.innerHTML='';
+  _pchChs.forEach((c,i)=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--bd)';
+    row.dataset.idx=String(i);
+    if(!c.alwaysOn){
+      row.draggable=true;
+      row.addEventListener('dragstart',e=>{_pchDragIdx=i;setTimeout(()=>row.style.opacity='.4',0);e.dataTransfer.effectAllowed='move';});
+      row.addEventListener('dragend',()=>{row.style.opacity='';list.querySelectorAll('[data-idx]').forEach(r=>r.style.borderTop='');_pchDragIdx=null;});
+      row.addEventListener('dragover',e=>{e.preventDefault();if(_pchDragIdx!==null&&_pchDragIdx!==i){list.querySelectorAll('[data-idx]').forEach(r=>r.style.borderTop='');row.style.borderTop='2px solid var(--gold)';}});
+      row.addEventListener('drop',e=>{
+        e.preventDefault();
+        if(_pchDragIdx!==null&&_pchDragIdx!==i){
+          const arr=[..._pchChs];const[mv]=arr.splice(_pchDragIdx,1);arr.splice(i,0,mv);
+          _pchChs=arr;_renderPchList();
+        }
+        list.querySelectorAll('[data-idx]').forEach(r=>r.style.borderTop='');_pchDragIdx=null;
+      });
+    }
+    const drag=document.createElement('span');
+    drag.textContent='⠿';drag.style.cssText=`font-size:16px;color:var(--mu2);flex-shrink:0;${c.alwaysOn?'opacity:.3;cursor:default':'cursor:grab'}`;
+    const lbl=document.createElement('span');lbl.style.cssText='flex:1;font-size:13px;color:var(--tx)';lbl.textContent=c.label;
+    row.appendChild(drag);row.appendChild(lbl);
+    if(c.alwaysOn){
+      const sp=document.createElement('span');sp.style.cssText='font-size:11px;color:var(--mu2)';sp.textContent='Always';row.appendChild(sp);
+    } else {
+      const idx=i;
+      const cb=document.createElement('input');cb.type='checkbox';cb.checked=c.on!==false;
+      cb.style.cssText='accent-color:var(--gold);width:16px;height:16px;cursor:pointer;flex-shrink:0';
+      cb.addEventListener('change',()=>{_pchChs[idx].on=cb.checked;});
+      row.appendChild(cb);
+    }
+    list.appendChild(row);
+  });
+}
+
+function _savePchAndClose(){
+  _savePulseChs(_pchChs);
+  document.getElementById('pch-ov')?.remove();
+  initPulsKacheln();
+  showToast('Channels saved');
 }
 
 // ── PULL-TO-REFRESH ──────────────────────────────────────────────────────────
