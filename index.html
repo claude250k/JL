@@ -378,6 +378,10 @@ html,body{height:100%;width:100%;background:#000;display:flex;align-items:center
 input[type="date"]{color-scheme:dark;accent-color:#F7931A}
 input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.7) sepia(1) saturate(3) hue-rotate(5deg);cursor:pointer;opacity:.8}
 input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
+.ptr-wrap{height:0;overflow:hidden;display:flex;align-items:center;justify-content:center;transition:height .2s;flex-shrink:0;color:var(--mu2)}
+.ptr-wrap.ptr-visible{height:40px}
+.ptr-wrap i{transition:transform .2s}
+.ptr-wrap.ptr-loading i{animation:spin .7s linear infinite}
 </style>
 </head>
 <body>
@@ -723,6 +727,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
   <div class="sh" style="padding-bottom:0;justify-content:center;position:relative">
     <div class="stitle">My Profile<em style="color:var(--gold);font-style:normal">.</em></div>
     <div class="s-acts" style="position:absolute;right:16px">
+      <button class="gearbtn" onclick="refreshProfile();showToast('Refreshing...')" title="Refresh"><i class="ti ti-refresh"></i></button>
       <button class="gearbtn" onclick="openSet()"><i class="ti ti-settings"></i></button>
       <button class="plusbtn" onclick="openPM()"><i class="ti ti-plus" style="font-size:15px"></i></button>
     </div>
@@ -737,6 +742,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
       <div class="pname" id="myname">-</div>
       <div class="pnum"><em id="mynum">#0001</em></div>
       <div class="pbio" id="mybio">Add bio</div>
+      <div id="my-biolink" style="display:none;margin-bottom:5px"></div>
       <div class="pstats"><div class="pst" id="ps-p"><strong>0</strong> Posts</div><div class="pst" onclick="showFL('followers')" id="ps-f"><strong>0</strong> Followers</div><div class="pst" onclick="showFL('following')" id="ps-g"><strong>0</strong> Following</div></div>
     </div>
     <div style="padding:0 14px 3px;font-size:10px;color:var(--mu);letter-spacing:.7px;text-transform:uppercase;font-weight:700" data-i18n="channels_lbl">Channels</div>
@@ -758,6 +764,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
       </div>
       <div class="pnum"><em id="op-num">#-</em></div>
       <div class="pbio" id="op-bio" style="margin-top:3px"></div>
+      <div id="op-biolink" style="display:none;margin-bottom:5px"></div>
       <div class="pstats" style="margin-top:7px"><div class="pst"><strong id="op-pc">0</strong> Posts</div><div class="pst"><strong id="op-fc">0</strong> Followers</div><div class="pst"><strong id="op-gc">0</strong> Following</div></div>
       <button class="mbtn" style="margin-top:9px" onclick="msgUser()"><i class="ti ti-message-circle"></i> Send Message</button>
       <div style="margin-top:8px">
@@ -794,7 +801,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
     <div class="seti" onclick="openEditProf()"><i class="ti ti-user-edit"></i><div class="setin"><div class="setit" data-i18n="editProfile">Edit Profile</div><div class="setis" data-i18n="editProfileSub">Name, bio and photo</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
     <div class="seti" onclick="showInstPage();closeSet()"><i class="ti ti-download"></i><div class="setin"><div class="setit" data-i18n="installApp">Install App</div><div class="setis" data-i18n="installAppSub">Add to home screen</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
     <div class="seti" onclick="openChSettings()"><i class="ti ti-hash"></i><div class="setin"><div class="setit" data-i18n="manageChannels">Manage Channels</div><div class="setis" data-i18n="manageChannelsSub">Add or remove your channels</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
-    <div class="seti" onclick="showToast(t('privacySoon'))"><i class="ti ti-shield"></i><div class="setin"><div class="setit" data-i18n="privacy">Privacy</div><div class="setis" data-i18n="privacySub">Visibility and data</div></div><i class="ti ti-chevron-right" style="color:var(--mu);font-size:14px"></i></div>
+    <div class="seti" style="cursor:default"><i class="ti ti-shield" style="color:var(--mu2)"></i><div class="setin"><div class="setit">Private Profile</div><div class="setis" id="priv-sub">Only followers can see your posts</div></div><label style="cursor:pointer;flex-shrink:0" onclick="toggleProfilePrivacy()"><div id="priv-rail" style="width:44px;height:26px;background:var(--sf3);border:1px solid var(--bd);border-radius:13px;position:relative;transition:background .2s"><div id="priv-knob" style="width:20px;height:20px;border-radius:50%;background:var(--mu2);position:absolute;top:2px;left:2px;transition:left .2s,background .2s"></div></div></label></div>
     <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px" data-i18n="languageLbl">Language</div>
     <div style="display:flex;gap:6px;padding:8px 16px">
       <button id="lang-en" onclick="setLang('en')" style="flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:var(--sf2);color:var(--mu2)">🇬🇧 EN</button>
@@ -838,6 +845,9 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
     <div style="font-size:10px;color:var(--mu2);margin-top:-6px;margin-bottom:10px">Your # number never changes · max 15 characters</div>
     <div class="elabel">Bio</div>
     <input class="einp" id="ep-bio" type="text" placeholder="Describe yourself" maxlength="160">
+    <div class="elabel">Link (Instagram, YouTube, TikTok or Linktree only)</div>
+    <input class="einp" id="ep-link" type="url" placeholder="https://instagram.com/yourname">
+    <div style="font-size:10px;color:var(--mu2);margin-top:-6px;margin-bottom:10px">Allowed: instagram.com · youtube.com · tiktok.com · linktr.ee</div>
     <div class="elabel">Cover Photo</div>
     <div class="seti" style="background:var(--sf2);border-radius:10px;margin-bottom:10px;border:1px solid var(--bd)" onclick="document.getElementById('ep-covinp').click()"><i class="ti ti-photo"></i><div class="setin"><div class="setit">Upload Cover Photo</div></div><input type="file" id="ep-covinp" accept="image/*" style="display:none" onchange="upCov(this)"></div>
     <button class="savebtn" onclick="saveProfile()">Save Changes</button>
@@ -1010,12 +1020,12 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
 <div class="bnav">
   <div style="padding:8px 14px 20px;display:none" class="desk-logo"><svg width="72" height="32" viewBox="0 0 72 32" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="0,16 8,16 11,5 14,27 17,11 20,21 23,16 32,16" stroke="#F7931A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="36" y="23" font-family="Syne,sans-serif" font-weight="800" font-size="20" fill="#f0ede6">J<tspan fill="#F7931A">L</tspan></text></svg></div>
   <div class="cfdlg" id="cfdlg"><div class="cfdlg-box"><div class="cfdlg-ico"><i class="ti ti-trash"></i></div><div class="cfdlg-msg" id="cfdlg-msg">Löschen?</div><div class="cfdlg-btns"><button class="cfdlg-cancel" onclick="_cfCancel()" data-i18n="dlg_cancel">Cancel</button><button class="cfdlg-ok" onclick="_cfOk()" data-i18n="dlg_delete">Delete</button></div></div></div>
-  <button class="bn ak" id="bn-feed" onclick="goTo('feed')"><i class="ti ti-home"></i><span data-i18n="nav_feed">Feed</span></button>
-  <button class="bn" id="bn-puls" onclick="goTo('puls')"><i class="ti ti-activity"></i><span data-i18n="nav_puls">Pulse</span></button>
-  <button class="bn" id="bn-search" onclick="goTo('search')"><i class="ti ti-search"></i><span data-i18n="nav_search">Search</span></button>
-  <button class="bn" id="bn-messages" onclick="goTo('messages')"><i class="ti ti-message-circle"></i><span data-i18n="nav_messages">Messages</span><div class="nbadge" id="nbadge"></div></button>
-  <button class="bn" id="bn-portfolio" onclick="goTo('portfolio')"><i class="ti ti-briefcase"></i><span data-i18n="nav_portfolio">Portfolio</span></button>
-  <button class="bn" id="bn-profile" onclick="goTo('profile')"><i class="ti ti-user"></i><span data-i18n="nav_profile">Profile</span></button>
+  <button class="bn ak" id="bn-feed" onclick="navTap('feed')"><i class="ti ti-home"></i><span data-i18n="nav_feed">Feed</span></button>
+  <button class="bn" id="bn-puls" onclick="navTap('puls')"><i class="ti ti-activity"></i><span data-i18n="nav_puls">Pulse</span></button>
+  <button class="bn" id="bn-search" onclick="navTap('search')"><i class="ti ti-search"></i><span data-i18n="nav_search">Search</span></button>
+  <button class="bn" id="bn-messages" onclick="navTap('messages')"><i class="ti ti-message-circle"></i><span data-i18n="nav_messages">Messages</span><div class="nbadge" id="nbadge"></div></button>
+  <button class="bn" id="bn-portfolio" onclick="navTap('portfolio')"><i class="ti ti-briefcase"></i><span data-i18n="nav_portfolio">Portfolio</span></button>
+  <button class="bn" id="bn-profile" onclick="navTap('profile')"><i class="ti ti-user"></i><span data-i18n="nav_profile">Profile</span></button>
 </div>
 </div>
 
@@ -1235,6 +1245,7 @@ async function removeCh(ch){
 }
 function openSet(){
   document.getElementById('setov').classList.add('on');
+  _syncPrivToggle();
   // Show admin section for developer
   const adminSec=document.getElementById('admin-section');
   if(adminSec)adminSec.style.display=(CU?.email==='claude250k@gmail.com')?'block':'none';
@@ -1329,6 +1340,7 @@ function confirmOut(){if(confirm(t('signout_confirm'))){const{auth,signOut}=wind
 function openEditProf(){
   document.getElementById('ep-name').value=UP?.name||'';
   document.getElementById('ep-bio').value=UP?.bio||'';
+  document.getElementById('ep-link').value=UP?.bioLink||'';
   const ea=document.getElementById('ep-av');
   ea.innerHTML=UP?.avatarUrl?`<img src="${UP.avatarUrl}"><div class="avpick-lbl"><i class="ti ti-camera"></i></div>`:`<span>${(UP?.name||'?').substring(0,2).toUpperCase()}</span><div class="avpick-lbl"><i class="ti ti-camera"></i></div>`;
   document.getElementById('editov').classList.add('on');
@@ -1337,6 +1349,12 @@ function closeEditProf(){document.getElementById('editov').classList.remove('on'
 async function saveProfile(){
   const nn=document.getElementById('ep-name').value.trim().replace(/\s+/g,'');
   const bio=document.getElementById('ep-bio').value.trim();
+  let bioLink=document.getElementById('ep-link').value.trim();
+  if(bioLink){
+    const allowed=/^https?:\/\/(www\.)?(instagram\.com|youtube\.com|youtu\.be|tiktok\.com|linktr\.ee)\//i;
+    if(!allowed.test(bioLink)){showToast('Only Instagram, YouTube, TikTok or Linktree links allowed');return;}
+    try{new URL(bioLink)}catch(e){showToast('Invalid URL');return;}
+  }
   if(!nn){showToast('Name cannot be empty');return}
   const{db,doc,updateDoc,getDocs,query,collection,where,setDoc,deleteDoc}=window._fb;
   const nameChanged=nn!==UP.name;
@@ -1346,8 +1364,8 @@ async function saveProfile(){
     try{await deleteDoc(doc(db,'nameIndex',UP.name.toLowerCase()))}catch(e){}
     await setDoc(doc(db,'nameIndex',nn.toLowerCase()),{uid:CU.uid});
   }
-  await updateDoc(doc(db,'users',CU.uid),{name:nn,bio});
-  UP.name=nn;UP.bio=bio;updateUI();showToast('Profile saved!');closeEditProf();closeSet();
+  await updateDoc(doc(db,'users',CU.uid),{name:nn,bio,bioLink:bioLink||''});
+  UP.name=nn;UP.bio=bio;UP.bioLink=bioLink||'';updateUI();showToast('Profile saved!');closeEditProf();closeSet();
   if(nameChanged){
     showToast('Name saved · updating posts…');
     // Batch-update posts
@@ -1441,6 +1459,11 @@ function updateUI(){
   document.getElementById('myname').innerHTML=esc(UP.name||'')+(UP.verified?'<i class="ti ti-rosette-discount-check vbadge" title="Verified"></i>':'');
   document.getElementById('mynum').textContent=UP.num||'#1';
   document.getElementById('mybio').textContent=UP.bio||'Add bio';
+  const bioLinkEl=document.getElementById('my-biolink');
+  if(bioLinkEl){
+    if(UP.bioLink){const icon=_bioLinkIcon(UP.bioLink);bioLinkEl.innerHTML=`<a href="${esc(UP.bioLink)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:4px;color:var(--gold);font-size:12px;text-decoration:none"><i class="ti ${icon}" style="font-size:13px"></i>${esc(_bioLinkLabel(UP.bioLink))}</a>`;bioLinkEl.style.display='block';}
+    else{bioLinkEl.style.display='none';}
+  }
   if(UP.coverUrl){const c=document.getElementById('mycov');c.style.backgroundImage=`url(${UP.coverUrl})`;c.style.backgroundSize='cover';c.style.backgroundPosition='center'}
   document.getElementById('ps-p').innerHTML=`<strong>${UP.posts||0}</strong> Posts`;
   document.getElementById('ps-f').innerHTML=`<strong>${UP.followers||0}</strong> Followers`;
@@ -1638,7 +1661,7 @@ function pH(p){
           <button class="pa" onclick="toggleQC('${p.id}',this)"><i class="ti ti-message-circle"></i> <span id="cc-${p.id}">${p.comments||0}</span></button>
           <button class="pa rp-btn${rpd?' reposted':''}" id="rp-${p.id}" onclick="rpMenu('${p.id}',this)" style="${rpd?'color:var(--gold)':''}"><i class="ti ti-repeat" style="${rpd?'color:var(--gold)':''}"></i> <span>${p.reposts||0}</span></button>
           <button class="pa${svd?' liked':''}" id="sv-${p.id}" onclick="toggleSave('${p.id}',this)"><i class="ti ${svd?'ti-bookmark-filled':'ti-bookmark'}"></i></button>
-          <button class="pa" onclick="shareP('${p.id}')"><i class="ti ti-share"></i></button>
+          <button class="pa" onclick="shareP('${p.id}',this)"><i class="ti ti-share"></i></button>
         </div>
       </div>
     </div>
@@ -1970,6 +1993,11 @@ async function openOP(uid){
   const opnm=document.getElementById('op-nm');opnm.innerHTML=esc(u.name||'')+(u.verified?'<i class="ti ti-rosette-discount-check vbadge" title="Verified"></i>':'');opnm.onclick=()=>{navigator.clipboard?.writeText(u.name||'').then(()=>showToast('📋 '+t('copied'))).catch(()=>{})};
   document.getElementById('op-num').textContent=u.num||'#-';
   document.getElementById('op-bio').textContent=u.bio||'';
+  const opBioLinkEl=document.getElementById('op-biolink');
+  if(opBioLinkEl){
+    if(u.bioLink){const icon=_bioLinkIcon(u.bioLink);opBioLinkEl.innerHTML=`<a href="${esc(u.bioLink)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:4px;color:var(--gold);font-size:12px;text-decoration:none"><i class="ti ${icon}" style="font-size:13px"></i>${esc(_bioLinkLabel(u.bioLink))}</a>`;opBioLinkEl.style.display='block';}
+    else opBioLinkEl.style.display='none';
+  }
   document.getElementById('op-fc').textContent=u.followers||0;
   document.getElementById('op-gc').textContent=u.following||0;
   getDocs(query(collection(db,'follows'),where('followingId','==',uid))).then(s=>{const el=document.getElementById('op-fc');if(el&&curOP===uid)el.textContent=s.size;});
@@ -1992,10 +2020,14 @@ async function openOP(uid){
   document.getElementById('opchs').innerHTML=
     `<div class="ck ak" onclick="opAllCk(this,'${uid}')"><div class="ckn">All Posts</div></div>`+
     chs.map(ch=>`<div class="ck" onclick="opChFilt(this,'${uid}','${ch}')"><div class="ckn">${chLbl(ch)}</div></div>`).join('');
-  const ps=await getDocs(query(collection(db,'posts'),orderBy('createdAt','desc')));
-  const posts=ps.docs.map(d=>({id:d.id,...d.data()})).filter(p=>p.authorId===uid);
-  document.getElementById('op-pc').textContent=posts.length;
-  document.getElementById('opposts').innerHTML=posts.length?posts.map(p=>pH(p)).join(''):'<div class="empty"><i class="ti ti-pencil-off"></i><p>No posts yet</p></div>';
+  // Privacy gate: private profiles show posts only to followers
+  const isPrivate=u.profilePrivate===true&&!followingIds.has(uid);
+  const ps=isPrivate?null:await getDocs(query(collection(db,'posts'),orderBy('createdAt','desc')));
+  const posts=isPrivate?[]:(ps.docs.map(d=>({id:d.id,...d.data()})).filter(p=>p.authorId===uid));
+  document.getElementById('op-pc').textContent=isPrivate?'🔒':posts.length;
+  document.getElementById('opposts').innerHTML=isPrivate
+    ?'<div class="empty"><i class="ti ti-lock"></i><p>This account is private.<br>Follow to see their posts.</p></div>'
+    :(posts.length?posts.map(p=>pH(p)).join(''):'<div class="empty"><i class="ti ti-pencil-off"></i><p>No posts yet</p></div>');
   document.querySelectorAll('#opov .ptab').forEach(t=>t.classList.remove('ak'));document.querySelector('#opov .ptab').classList.add('ak');
   document.getElementById('opov').classList.add('on');
   opUnsub=onSnapshot(doc(db,'users',uid),sn=>{
@@ -2851,6 +2883,39 @@ function goTo(s){
 }
 
 
+// ── NAV TAP (refresh if already on screen) ───────────────────────────────────
+function navTap(s){
+  if(document.getElementById('sc-'+s)?.classList.contains('on')){refreshScreen(s);showToast('Refreshing...');}
+  else goTo(s);
+}
+function refreshScreen(s){
+  if(s==='feed')startFeed();
+  else if(s==='puls')rfPulse();
+  else if(s==='search'){loadUsers();loadTrending(true);}
+  else if(s==='messages')loadConvs();
+  else if(s==='portfolio'){if(portMode==='demo'){fetchBtcEurPrice().then(renderDemoPortfolio);}else{refreshPortPrices().then(renderPortfolio);}}
+  else if(s==='profile')refreshProfile();
+}
+function refreshProfile(){updateUI();loadMyPosts(myPFilt);}
+
+// ── PROFILE PRIVACY ──────────────────────────────────────────────────────────
+function _syncPrivToggle(){
+  const on=UP?.profilePrivate===true;
+  const rail=document.getElementById('priv-rail');const knob=document.getElementById('priv-knob');
+  if(rail)rail.style.background=on?'var(--gold)':'var(--sf3)';
+  if(knob){knob.style.left=on?'22px':'2px';knob.style.background=on?'#000':'var(--mu2)';}
+  const sub=document.getElementById('priv-sub');if(sub)sub.textContent=on?'Active — only followers can see your posts':'Off — anyone can see your posts';
+}
+async function toggleProfilePrivacy(){
+  if(!CU||!UP)return;
+  const nowPrivate=!(UP.profilePrivate===true);
+  UP.profilePrivate=nowPrivate;
+  _syncPrivToggle();
+  const{db,doc,updateDoc}=window._fb;
+  try{await updateDoc(doc(db,'users',CU.uid),{profilePrivate:nowPrivate});}catch(e){}
+  showToast(nowPrivate?'Profile set to private':'Profile set to public');
+}
+
 // Version check for PWA update notification
 const APP_VERSION = '2.0';
 if('serviceWorker' in navigator){
@@ -2970,7 +3035,70 @@ async function repostP(pid,btn){
 }
 // placeholder to avoid duplicate
 
-function shareP(id){const url='https://claude250k.github.io/JL/#post?id='+id;navigator.clipboard?.writeText(url).then(()=>showToast('Link copied!')).catch(()=>showToast('Link: '+url));}
+// ── SHARE MINI-MENU ──────────────────────────────────────────────────────────
+let _shareMenuEl=null,_sharePid=null;
+function _getShareMenu(){
+  if(!_shareMenuEl){_shareMenuEl=document.createElement('div');_shareMenuEl.style.cssText='position:fixed;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;z-index:500;min-width:160px;overflow:hidden;display:none;box-shadow:0 4px 20px rgba(0,0,0,.6)';document.body.appendChild(_shareMenuEl);}
+  return _shareMenuEl;
+}
+function closeShareMenu(){if(_shareMenuEl)_shareMenuEl.style.display='none';_sharePid=null;}
+document.addEventListener('click',e=>{if(_shareMenuEl&&_shareMenuEl.style.display!=='none'&&!_shareMenuEl.contains(e.target))closeShareMenu();},{capture:true,passive:true});
+function shareP(pid,btn){
+  _sharePid=pid;
+  const menu=_getShareMenu();
+  const rect=btn.getBoundingClientRect();
+  menu.style.left=Math.max(8,rect.left-80)+'px';
+  menu.style.top=(rect.bottom+4)+'px';
+  menu.style.display='block';
+  const mi=(icon,label,color,cb)=>`<div onclick="${cb}" style="display:flex;align-items:center;gap:9px;padding:10px 14px;cursor:pointer;font-size:12px;color:${color}" onmouseover="this.style.background='var(--sf3)'" onmouseout="this.style.background=''"><i class="ti ${icon}" style="font-size:14px"></i>${label}</div>`;
+  menu.innerHTML=
+    mi('ti-link','Copy Link','var(--tx)',`shareP_copyLink('${pid}')`)+
+    `<div style="height:1px;background:var(--bd)"></div>`+
+    mi('ti-send','Send via DM / Group','var(--tx)',`shareP_openDMPicker('${pid}')`);
+}
+function shareP_copyLink(pid){
+  const url='https://claude250k.github.io/JL/#post?id='+pid;
+  navigator.clipboard?.writeText(url).then(()=>showToast('Link copied!')).catch(()=>showToast('Link: '+url));
+  closeShareMenu();
+}
+let _sharePostCache={};
+async function shareP_openDMPicker(pid){
+  closeShareMenu();
+  if(!CU){showToast('Please sign in');return;}
+  const{db,doc,getDoc,collection,query,orderBy,getDocs}=window._fb;
+  const postSnap=await getDoc(doc(db,'posts',pid));
+  if(!postSnap.exists()){showToast('Post not found');return;}
+  _sharePostCache[pid]=postSnap.data();
+  // Show conversation picker overlay
+  const ov=document.createElement('div');
+  ov.className='ov on';ov.style.zIndex='260';
+  ov.id='share-dm-ov';
+  ov.innerHTML=`<div class="ovh"><button class="ovb" onclick="document.getElementById('share-dm-ov').remove()"><i class="ti ti-arrow-left"></i></button><div class="ovt">Send Post</div></div>
+  <div style="padding:10px 14px 4px;font-size:11px;color:var(--mu2)">Select a conversation</div>
+  <div class="scroll" id="share-dm-list"><div class="spin"></div></div>`;
+  document.getElementById('app').appendChild(ov);
+  try{
+    const snap=await getDocs(query(collection(db,'conversations'),orderBy('lastAt','desc')));
+    const myConvs=snap.docs.map(d=>({id:d.id,...d.data()})).filter(c=>c.members&&c.members.includes(CU.uid));
+    const lst=document.getElementById('share-dm-list');if(!lst)return;
+    if(!myConvs.length){lst.innerHTML='<div class="empty"><p>No conversations yet</p></div>';return;}
+    lst.innerHTML=myConvs.map(c=>{
+      const isGrp=c.isGroup;const nm=isGrp?(c.groupName||'Group'):Object.entries(c.memberNames||{}).filter(([k])=>k!==CU.uid).map(([,v])=>v).join(', ');
+      const av=isGrp?`<div class="av grp-av" style="width:36px;height:36px;font-size:11px">GR</div>`:`<div class="av" style="width:36px;height:36px;font-size:11px;font-weight:700">${(nm||'?').substring(0,2).toUpperCase()}</div>`;
+      return`<div class="crow" onclick="shareToConv('${c.id}','${pid}')">${av}<div style="flex:1"><div class="crnm">${esc(nm)}</div></div></div>`;
+    }).join('');
+  }catch(e){const lst=document.getElementById('share-dm-list');if(lst)lst.innerHTML='<div class="empty"><p>Error loading conversations</p></div>';}
+}
+async function shareToConv(cid,pid){
+  const ov=document.getElementById('share-dm-ov');if(ov)ov.remove();
+  if(!CU||!UP)return;
+  const post=_sharePostCache[pid]||{};
+  const{db,collection,addDoc,doc,updateDoc,serverTimestamp}=window._fb;
+  const msg=`📤 Post by ${post.authorName||''}:\n"${(post.text||'').substring(0,200)}"\nhttps://claude250k.github.io/JL/#post?id=${pid}`;
+  await addDoc(collection(db,`conversations/${cid}/messages`),{text:msg,senderId:CU.uid,createdAt:serverTimestamp()});
+  await updateDoc(doc(db,'conversations',cid),{lastMsg:msg.substring(0,80),lastAt:serverTimestamp()});
+  showToast('Post sent!');
+}
 
 // ── PORTFOLIO ──────────────────────────────────────────────────────────────
 let portCat='crypto',portHoldings=[],portUnsub2=null,curHoldId=null;
@@ -3573,6 +3701,15 @@ function shareOP(){
   const url='https://claude250k.github.io/JL/#profile?u='+(curOP||'');
   navigator.clipboard?.writeText(url).then(()=>showToast('Link copied!')).catch(()=>showToast('Link: '+url));
 }
+function _bioLinkIcon(url){
+  if(/instagram\.com/i.test(url))return'ti-brand-instagram';
+  if(/youtube\.com|youtu\.be/i.test(url))return'ti-brand-youtube';
+  if(/tiktok\.com/i.test(url))return'ti-brand-tiktok';
+  return'ti-link';
+}
+function _bioLinkLabel(url){
+  try{const h=new URL(url).hostname.replace('www.','');return h.split('.')[0].charAt(0).toUpperCase()+h.split('.')[0].slice(1);}catch{return'Link';}
+}
 // ── FEED CHANNEL DISCOVER ──────────────────────────────────────────────────
 function fchTab(tab){
   document.getElementById('fch-my').style.display=tab==='my'?'block':'none';
@@ -3703,7 +3840,10 @@ document.addEventListener('touchstart',e=>{
 document.addEventListener('touchend',e=>{
   if(!_swOk)return;
   const dx=e.changedTouches[0].clientX-_sx,dy=e.changedTouches[0].clientY-_sy;
-  if(dx>60&&Math.abs(dy)<80)swipeBack();
+  if(Math.abs(dy)<80){
+    if(dx>60)swipeBack();
+    else if(dx<-60)swipeForward();
+  }
 },{passive:true});
 function swipeBack(){
   const checks=[
@@ -3718,8 +3858,23 @@ function swipeBack(){
     ['hold-ov',()=>closeHoldOv()],
     ['demo-trade-pm',()=>closeDemoTrade()],
     ['stats-ov',()=>closeStatsOv()],
+    ['adminov',()=>closeAdminVerif()],
+    ['impressum-ov',()=>document.getElementById('impressum-ov').classList.remove('on')],
+    ['share-dm-ov',()=>document.getElementById('share-dm-ov')?.remove()],
   ];
   for(const[id,fn]of checks){const el=document.getElementById(id);if(el&&el.classList.contains('on')){fn();return;}}
+  // No overlay open — navigate to previous screen
+  const cur=_validScreens.find(s=>document.getElementById('sc-'+s)?.classList.contains('on'));
+  const idx=_validScreens.indexOf(cur);
+  if(idx>0)goTo(_validScreens[idx-1]);
+}
+function swipeForward(){
+  // Only navigate if no overlay is open
+  const overlayIds=['giov','grpov','pulse-detail-ov','create-pulse-ov','pdov','opportov','opov','chov','cd','setov','editov','nmov','fl-ov','pov','inst-ov','hold-ov','demo-trade-pm','stats-ov','adminov','impressum-ov','share-dm-ov'];
+  for(const id of overlayIds){const el=document.getElementById(id);if(el&&el.classList.contains('on'))return;}
+  const cur=_validScreens.find(s=>document.getElementById('sc-'+s)?.classList.contains('on'));
+  const idx=_validScreens.indexOf(cur);
+  if(idx>=0&&idx<_validScreens.length-1)goTo(_validScreens[idx+1]);
 }
 
 // ── QUOTE BLOCK ─────────────────────────────────────────────────────────────
@@ -4154,6 +4309,53 @@ function openPulseFromPost(pulseId){
     setTimeout(()=>openPulseDetail(pulseId),300);
   },150);
 }
+
+// ── PULL-TO-REFRESH ──────────────────────────────────────────────────────────
+function setupPTR(scrollEl,refreshFn){
+  if(!scrollEl)return;
+  const wrap=document.createElement('div');
+  wrap.className='ptr-wrap';
+  wrap.innerHTML='<i class="ti ti-arrow-down" style="transition:transform .2s"></i>';
+  scrollEl.insertBefore(wrap,scrollEl.firstChild);
+  let startY=0,pulling=false,pullDist=0;
+  scrollEl.addEventListener('touchstart',e=>{
+    if(scrollEl.scrollTop===0){startY=e.touches[0].clientY;pulling=true;pullDist=0;}
+  },{passive:true});
+  scrollEl.addEventListener('touchmove',e=>{
+    if(!pulling)return;
+    const dy=e.touches[0].clientY-startY;
+    if(dy>0){
+      pullDist=Math.min(dy,90);
+      const h=Math.min(pullDist*0.44,40);
+      wrap.style.height=h+'px';
+      const ico=wrap.querySelector('i');
+      if(ico)ico.style.transform=`rotate(${pullDist*2}deg)`;
+      if(!wrap.classList.contains('ptr-visible')&&pullDist>10)wrap.classList.add('ptr-visible');
+    }
+  },{passive:true});
+  scrollEl.addEventListener('touchend',()=>{
+    if(!pulling){return;}
+    pulling=false;
+    if(pullDist>55){
+      wrap.classList.add('ptr-loading');wrap.style.height='40px';
+      const ico=wrap.querySelector('i');if(ico){ico.className='ti ti-refresh';ico.style.transform='';}
+      Promise.resolve(refreshFn()).finally(()=>{
+        setTimeout(()=>{wrap.style.height='0';wrap.classList.remove('ptr-visible','ptr-loading');const i=wrap.querySelector('i');if(i){i.className='ti ti-arrow-down';i.style.transform='';}},400);
+      });
+    } else {
+      wrap.style.height='0';wrap.classList.remove('ptr-visible');
+    }
+    pullDist=0;
+  },{passive:true});
+}
+// Initialise PTR after DOM ready
+(function initPTR(){
+  setupPTR(document.querySelector('#sc-feed .scroll'),()=>new Promise(res=>{startFeed();setTimeout(res,800);}));
+  setupPTR(document.querySelector('#sc-puls .scroll'),()=>new Promise(res=>{rfPulse&&rfPulse();setTimeout(res,800);}));
+  setupPTR(document.querySelector('#sc-search .scroll'),()=>new Promise(res=>{loadUsers&&loadUsers();loadTrending&&loadTrending(true);setTimeout(res,800);}));
+  setupPTR(document.getElementById('msgs-panel'),()=>new Promise(res=>{loadConvs&&loadConvs();setTimeout(res,800);}));
+  setupPTR(document.querySelector('#sc-profile .scroll'),()=>new Promise(res=>{refreshProfile&&refreshProfile();setTimeout(res,800);}));
+})();
 </script>
 </body>
 </html>
