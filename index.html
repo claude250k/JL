@@ -808,6 +808,11 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
       <button id="lang-de" onclick="setLang('de')" style="flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:var(--sf2);color:var(--mu2)">🇩🇪 DE</button>
       <button id="lang-es" onclick="setLang('es')" style="flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:var(--sf2);color:var(--mu2)">🇪🇸 ES</button>
     </div>
+    <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px">Währung / Currency</div>
+    <div style="display:flex;gap:6px;padding:8px 16px">
+      <button id="cur-eur" onclick="setCurrency('EUR')" style="flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:var(--sf2);color:var(--mu2)">€ EUR</button>
+      <button id="cur-usd" onclick="setCurrency('USD')" style="flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:var(--sf2);color:var(--mu2)">$ USD</button>
+    </div>
     <div style="padding:8px 16px 3px;font-size:10px;color:var(--mu);letter-spacing:.8px;text-transform:uppercase;font-weight:700;margin-top:8px">Appearance</div>
     <div class="seti" style="cursor:default">
       <i class="ti ti-sun-moon" id="theme-ico"></i>
@@ -965,7 +970,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
       <button id="demo-trade-type-sell" class="pcat-btn" style="flex:1;text-align:center" onclick="switchDemoTradeType('sell')">Verkaufen</button>
     </div>
     <div id="demo-trade-info" style="font-size:11px;color:var(--mu2);margin-bottom:10px;text-align:center;line-height:1.5"></div>
-    <div style="font-size:12px;color:var(--mu2);margin-bottom:4px">Euro-Betrag (€)</div>
+    <div id="demo-trade-cur-lbl" style="font-size:12px;color:var(--mu2);margin-bottom:4px">Euro-Betrag (€)</div>
     <input class="ainp" id="demo-trade-eur" type="number" step="any" min="0" placeholder="z.B. 500" oninput="if(demoTradeType==='buy')updateDemoTradeCalc()">
     <div style="text-align:center;font-size:12px;color:var(--mu2);margin:-4px 0 4px">⇅</div>
     <div style="font-size:12px;color:var(--mu2);margin-bottom:4px">BTC-Betrag</div>
@@ -2133,23 +2138,24 @@ async function viewOpPortfolio(){
   const cgIds=[...new Set(holdings.filter(h=>h.category==='crypto').map(h=>PHCID[h.symbol?.toLowerCase()]).filter(Boolean))];
   if(cgIds.length){
     try{
-      const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cgIds.join(',')}&vs_currencies=usd`);
-      if(r.ok){const data=await r.json();holdings.forEach(h=>{if(h.category==='crypto'){const cid=PHCID[h.symbol?.toLowerCase()];if(cid&&data[cid])h.livePrice=data[cid].usd;}})}
+      const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cgIds.join(',')}&vs_currencies=${_currency.toLowerCase()}`);
+      if(r.ok){const data=await r.json();const vc=_currency.toLowerCase();holdings.forEach(h=>{if(h.category==='crypto'){const cid=PHCID[h.symbol?.toLowerCase()];if(cid&&data[cid])h.livePrice=data[cid][vc];}})}
     }catch(e){}
   }
   holdings.forEach(h=>{
     if((h.category==='stocks'||h.category==='etf')&&PHDEMO[h.symbol?.toLowerCase()])h.livePrice=PHDEMO[h.symbol.toLowerCase()];
     if(!h.livePrice)h.livePrice=h.buyPrice;
   });
-  const fmt=n=>Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const sym=fmtCurSym(),loc=_currency==='EUR'?'de-DE':'en-US';
+  const fmt=n=>Number(n).toLocaleString(loc,{minimumFractionDigits:2,maximumFractionDigits:2});
   let totalVal=0,totalCost=0;
   holdings.forEach(h=>{totalVal+=(h.livePrice||h.buyPrice||0)*h.amount;totalCost+=h.buyPrice*h.amount});
   const pnl=totalVal-totalCost,pct=totalCost>0?(pnl/totalCost*100):0;
   const pnlCol=pnl>=0?'#4ade80':'#f87171',sg=pnl>=0?'+':'';
   document.getElementById('opport-total').innerHTML=`<div class="ptot">
     <div style="font-size:10px;color:var(--mu2);letter-spacing:.7px;text-transform:uppercase;margin-bottom:5px">Gesamtwert</div>
-    <div class="ptot-v">$${fmt(totalVal)}</div>
-    ${totalCost>0?`<div class="ptot-chg" style="color:${pnlCol}">${sg}$${fmt(Math.abs(pnl))} (${sg}${pct.toFixed(2)}%) all time</div>`:''}
+    <div class="ptot-v">${sym}${fmt(totalVal)}</div>
+    ${totalCost>0?`<div class="ptot-chg" style="color:${pnlCol}">${sg}${sym}${fmt(Math.abs(pnl))} (${sg}${pct.toFixed(2)}%) all time</div>`:''}
   </div>`;
   if(!holdings.length){document.getElementById('opport-list').innerHTML='<div class="empty"><i class="ti ti-briefcase-off"></i><p>Keine Positionen</p></div>';return}
   const cats=[['crypto','Crypto'],['stocks','Stocks'],['etf','ETF'],['tcg','TCG Cards']];
@@ -2166,11 +2172,11 @@ async function viewOpPortfolio(){
         <div class="phold-icon">${ini}</div>
         <div class="phold-info">
           <div class="phold-name">${esc(h.name||h.symbol||'')}</div>
-          <div class="phold-amt">${h.amount} ${(h.symbol||'').toUpperCase()} &middot; avg $${fmt(h.buyPrice)}</div>
+          <div class="phold-amt">${h.amount} ${(h.symbol||'').toUpperCase()} &middot; avg ${sym}${fmt(h.buyPrice)}</div>
         </div>
         <div class="phold-val">
-          <div class="phold-cur">$${fmt(cv)}</div>
-          <div class="phold-pnl" style="color:${pc}">${s2}$${fmt(Math.abs(pl))} (${s2}${pp.toFixed(1)}%)</div>
+          <div class="phold-cur">${sym}${fmt(cv)}</div>
+          <div class="phold-pnl" style="color:${pc}">${s2}${sym}${fmt(Math.abs(pl))} (${s2}${pp.toFixed(1)}%)</div>
         </div>
       </div>`;
     });
@@ -2677,12 +2683,12 @@ const GC='#F7931A';
 function grd(ctx){const g=ctx.createLinearGradient(0,0,0,72);g.addColorStop(0,GC+'55');g.addColorStop(1,GC+'00');return g}
 function mkC(id,data){const el=document.getElementById(id);if(!el)return;if(chartI[id])chartI[id].destroy();chartI[id]=new Chart(el,{type:'line',data:{labels:data.map((_,i)=>i),datasets:[{data,borderColor:GC,borderWidth:2,fill:true,backgroundColor:grd(el.getContext('2d')),pointRadius:0,tension:.42}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:400},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.parsed.y.toLocaleString('de-DE',{maximumFractionDigits:4})},backgroundColor:'#1a1a1a',borderColor:'#333',borderWidth:1}},scales:{x:{display:false},y:{display:false}}}})}
 function demo(b,n){let v=b,d=[];for(let i=0;i<n;i++){v+=(Math.random()-.48)*b*.012;d.push(Math.round(v*100)/100)}return d}
-function fmtP(n){if(n>=1000)return'$'+n.toLocaleString('de-DE',{maximumFractionDigits:0});if(n>=1)return'$'+n.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});return'$'+n.toLocaleString('de-DE',{minimumFractionDigits:4,maximumFractionDigits:4})}
+function fmtP(n){const s=fmtCurSym(),l=_currency==='EUR'?'de-DE':'en-US';if(n>=1000)return s+n.toLocaleString(l,{maximumFractionDigits:0});if(n>=1)return s+n.toLocaleString(l,{minimumFractionDigits:2,maximumFractionDigits:2});return s+n.toLocaleString(l,{minimumFractionDigits:4,maximumFractionDigits:4})}
 
 async function fetchPulse(){
   try{
     const ids=Object.values(CID).join(',');
-    const r=await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&sparkline=true&price_change_percentage=24h`);
+    const r=await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${_currency.toLowerCase()}&ids=${ids}&sparkline=true&price_change_percentage=24h`);
     if(!r.ok)throw new Error();
     const data=await r.json();
     data.forEach(coin=>{
@@ -2698,6 +2704,7 @@ async function fetchPulse(){
   const dm={nvda:840,aapl:216,msft:415,amzn:186,goog:174,meta:512,tsla:248,sap:182,asml:820,novo:780,iwda:98,vwrl:105,acwi:108,spy:524,qqq:448,voo:481,stoxx:52,veur:68,exsa:77,ewj:68,mchi:48,aaxj:72};
   Object.entries(dm).forEach(([k,b])=>mkC('ch-'+k,demo(b,40)));
   [{k:'sv08',b:65},{k:'sv07',b:60},{k:'svpf',b:85}].forEach(({k,b})=>mkC('ch-'+k,demo(b,40)));
+  document.querySelectorAll('.ccs').forEach(el=>{if(el.innerHTML.includes('Live'))el.innerHTML=`<span class="ldot"></span>Live ${_currency}`;});
   setTimeout(addDemoBadges,100);
 }
 async function openCD(coin){
@@ -2725,7 +2732,7 @@ async function loadCD(coin,days){
     return;
   }
   try{
-    const r=await fetch(`https://api.coingecko.com/api/v3/coins/${cgId}/market_chart?vs_currency=usd&days=${days}&interval=${days==='max'||parseInt(days)>90?'weekly':'daily'}`,{headers:{'Accept':'application/json'}});
+    const r=await fetch(`https://api.coingecko.com/api/v3/coins/${cgId}/market_chart?vs_currency=${_currency.toLowerCase()}&days=${days}&interval=${days==='max'||parseInt(days)>90?'weekly':'daily'}`,{headers:{'Accept':'application/json'}});
     if(!r.ok)throw new Error();
     const data=await r.json();const prices=data.prices.map(p=>p[1]);
     const first=prices[0],last=prices[prices.length-1],chg=((last-first)/first*100).toFixed(2);
@@ -3102,7 +3109,12 @@ async function shareToConv(cid,pid){
 
 // ── PORTFOLIO ──────────────────────────────────────────────────────────────
 let portCat='crypto',portHoldings=[],portUnsub2=null,curHoldId=null;
-let portMode='real',demoState=null,demoUnsub=null,btcPriceEur=null,demoTradeType='buy';
+let portMode='real',demoState=null,demoUnsub=null,btcPriceEur=null,btcPriceUsd=null,demoTradeType='buy';
+let _currency=localStorage.getItem('jl_currency')||'EUR',_eurUsdRate=1.08;
+function fmtCurSym(){return _currency==='USD'?'$':'€';}
+function fmtC(eurVal){const sym=fmtCurSym(),loc=_currency==='USD'?'en-US':'de-DE',v=_currency==='USD'?eurVal*_eurUsdRate:eurVal;if(v>=1000)return sym+v.toLocaleString(loc,{maximumFractionDigits:0});return sym+v.toLocaleString(loc,{minimumFractionDigits:2,maximumFractionDigits:2});}
+function _btcP(){return _currency==='USD'?(btcPriceUsd||btcPriceEur*_eurUsdRate||54000):(btcPriceEur||50000);}
+function fmtBtcLive(){return(_currency==='USD'?'$'+Number(_btcP()).toLocaleString('en-US',{maximumFractionDigits:0}):'€'+Number(_btcP()).toLocaleString('de-DE',{maximumFractionDigits:0}));}
 const PHCID={btc:'bitcoin',eth:'ethereum',sol:'solana',bnb:'binancecoin',xrp:'ripple',ada:'cardano',doge:'dogecoin',dot:'polkadot',avax:'avalanche-2',link:'chainlink'};
 const PHDEMO={nvda:876,aapl:218,msft:415,amzn:186,goog:174,meta:512,tsla:248,sap:182,asml:820,novo:780,iwda:98,vwrl:105,acwi:108,spy:524,qqq:448,voo:481,stoxx:52,veur:68,exsa:77,ewj:68,mchi:48,aaxj:72};
 
@@ -3130,10 +3142,11 @@ async function refreshPortPrices(){
   const cgIds=[...new Set(portHoldings.filter(h=>h.category==='crypto').map(h=>PHCID[h.symbol?.toLowerCase()]).filter(Boolean))];
   if(cgIds.length){
     try{
-      const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cgIds.join(',')}&vs_currencies=usd`);
+      const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cgIds.join(',')}&vs_currencies=${_currency.toLowerCase()}`);
       if(r.ok){
         const data=await r.json();
-        portHoldings.forEach(h=>{if(h.category==='crypto'){const cid=PHCID[h.symbol?.toLowerCase()];if(cid&&data[cid])h.livePrice=data[cid].usd;}});
+        const vc=_currency.toLowerCase();
+        portHoldings.forEach(h=>{if(h.category==='crypto'){const cid=PHCID[h.symbol?.toLowerCase()];if(cid&&data[cid])h.livePrice=data[cid][vc];}});
       }
     }catch(e){}
   }
@@ -3144,7 +3157,8 @@ async function refreshPortPrices(){
 }
 
 function renderPortfolio(){
-  const fmt=n=>Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const sym=fmtCurSym(),loc=_currency==='EUR'?'de-DE':'en-US';
+  const fmt=n=>Number(n).toLocaleString(loc,{minimumFractionDigits:2,maximumFractionDigits:2});
   let totalVal=0,totalCost=0;
   portHoldings.forEach(h=>{totalVal+=(h.livePrice||h.buyPrice||0)*h.amount;totalCost+=h.buyPrice*h.amount});
   const pnl=totalVal-totalCost,pct=totalCost>0?(pnl/totalCost*100):0;
@@ -3152,8 +3166,8 @@ function renderPortfolio(){
   const tb=document.getElementById('port-total-box');
   if(tb)tb.innerHTML=`<div class="ptot">
     <div style="font-size:10px;color:var(--mu2);letter-spacing:.7px;text-transform:uppercase;margin-bottom:5px">${t('totalValue')}</div>
-    <div class="ptot-v">$${fmt(totalVal)}</div>
-    ${totalCost>0?`<div class="ptot-chg" style="color:${pnlCol}">${sg}$${fmt(Math.abs(pnl))} (${sg}${pct.toFixed(2)}%) all time</div>`:`<div style="font-size:12px;color:var(--mu2);margin-top:4px">${t('addFirst')}</div>`}
+    <div class="ptot-v">${sym}${fmt(totalVal)}</div>
+    ${totalCost>0?`<div class="ptot-chg" style="color:${pnlCol}">${sg}${sym}${fmt(Math.abs(pnl))} (${sg}${pct.toFixed(2)}%) all time</div>`:`<div style="font-size:12px;color:var(--mu2);margin-top:4px">${t('addFirst')}</div>`}
   </div>`;
   if(!portHoldings.length){
     const pl=document.getElementById('port-list');
@@ -3174,11 +3188,11 @@ function renderPortfolio(){
         <div class="phold-icon">${ini}</div>
         <div class="phold-info">
           <div class="phold-name">${esc(h.name||h.symbol||'')}</div>
-          <div class="phold-amt">${h.amount} ${(h.symbol||'').toUpperCase()} &middot; avg $${fmt(h.buyPrice)}</div>
+          <div class="phold-amt">${h.amount} ${(h.symbol||'').toUpperCase()} &middot; avg ${sym}${fmt(h.buyPrice)}</div>
         </div>
         <div class="phold-val">
-          <div class="phold-cur">$${fmt(cv)}</div>
-          <div class="phold-pnl" style="color:${pc}">${s2}$${fmt(Math.abs(pl))} (${s2}${pp.toFixed(1)}%)</div>
+          <div class="phold-cur">${sym}${fmt(cv)}</div>
+          <div class="phold-pnl" style="color:${pc}">${s2}${sym}${fmt(Math.abs(pl))} (${s2}${pp.toFixed(1)}%)</div>
         </div>
       </div>`;
     });
@@ -3230,7 +3244,8 @@ async function delHolding(id){
 function showHoldDetail(id){
   const h=portHoldings.find(x=>x.id===id);if(!h)return;
   curHoldId=id;
-  const fmt=n=>Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const sym=fmtCurSym(),loc=_currency==='EUR'?'de-DE':'en-US';
+  const fmt=n=>Number(n).toLocaleString(loc,{minimumFractionDigits:2,maximumFractionDigits:2});
   const lp=h.livePrice||h.buyPrice||0,cv=lp*h.amount,cost=h.buyPrice*h.amount,pl=cv-cost,pp=cost>0?(pl/cost*100):0;
   const plCol=pl>=0?'#4ade80':'#f87171',sg=pl>=0?'+':'';
   document.getElementById('hold-ov-title').textContent=h.name||h.symbol||'Holding';
@@ -3238,17 +3253,17 @@ function showHoldDetail(id){
   const row=(l,v)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--bd)"><span style="font-size:12px;color:var(--mu2)">${l}</span><span style="font-size:13px;font-weight:600;color:var(--tx)">${v}</span></div>`;
   document.getElementById('hold-ov-body').innerHTML=`
     <div style="text-align:center;padding:20px 0 24px">
-      <div style="font-size:32px;font-weight:800;color:var(--tx);letter-spacing:-.5px">$${fmt(cv)}</div>
-      <div style="font-size:14px;color:${plCol};font-weight:600;margin-top:4px">${sg}$${fmt(Math.abs(pl))} (${sg}${pp.toFixed(2)}%) all time</div>
+      <div style="font-size:32px;font-weight:800;color:var(--tx);letter-spacing:-.5px">${sym}${fmt(cv)}</div>
+      <div style="font-size:14px;color:${plCol};font-weight:600;margin-top:4px">${sg}${sym}${fmt(Math.abs(pl))} (${sg}${pp.toFixed(2)}%) all time</div>
     </div>
     <div style="background:var(--sf);border:1px solid var(--bd);border-radius:13px;overflow:hidden;margin-bottom:16px">
       ${row('Asset',esc(h.name||h.symbol||'-'))}
       ${row('Ticker',esc((h.symbol||'-').toUpperCase()))}
       ${row('Amount Held',h.amount+' '+(h.symbol||'').toUpperCase())}
-      ${row('Avg Buy Price','$'+fmt(h.buyPrice))}
-      ${row('Current Price','$'+fmt(lp))}
-      ${row('Total Value','$'+fmt(cv))}
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px"><span style="font-size:12px;color:var(--mu2)">P&amp;L</span><span style="font-size:13px;font-weight:600;color:${plCol}">${sg}$${fmt(Math.abs(pl))} (${sg}${pp.toFixed(2)}%)</span></div>
+      ${row('Avg Buy Price',sym+fmt(h.buyPrice))}
+      ${row('Current Price',sym+fmt(lp))}
+      ${row('Total Value',sym+fmt(cv))}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px"><span style="font-size:12px;color:var(--mu2)">P&amp;L</span><span style="font-size:13px;font-weight:600;color:${plCol}">${sg}${sym}${fmt(Math.abs(pl))} (${sg}${pp.toFixed(2)}%)</span></div>
     </div>`;
   document.getElementById('hold-ov').classList.add('on');
 }
@@ -3260,7 +3275,7 @@ function editHolding(){
     <div style="padding:8px 0">
       <div class="elabel">Amount (units)</div>
       <input class="einp" id="hold-edit-amount" type="number" step="any" min="0" value="${h.amount}">
-      <div class="elabel">Avg Buy Price ($)</div>
+      <div class="elabel">Avg Buy Price (${fmtCurSym()})</div>
       <input class="einp" id="hold-edit-price" type="number" step="any" min="0" value="${h.buyPrice}">
       <button class="savebtn" onclick="saveHoldEdit()">Save Changes</button>
       <button onclick="showHoldDetail('${h.id}')" style="width:100%;background:transparent;border:1px solid var(--bd);color:var(--mu2);padding:11px;border-radius:10px;font-size:13px;cursor:pointer;margin-top:8px">Cancel</button>
@@ -3430,6 +3445,8 @@ function switchPortMode(mode){
   document.getElementById('port-mode-demo').classList.toggle('ak',mode==='demo');
   const realSub=document.getElementById('port-real-sub');
   if(realSub)realSub.style.display=mode==='real'?'flex':'none';
+  const ptitleEl=document.querySelector('#sc-portfolio .stitle');
+  if(ptitleEl)ptitleEl.innerHTML=(mode==='demo'?'Demo Trading Account':'Portfolio')+'<em style="color:var(--gold);font-style:normal">.</em>';
   if(mode==='demo'){
     if(!CU){showToast('Bitte einloggen');switchPortMode('real');return;}
     loadDemoPortfolio();
@@ -3457,46 +3474,53 @@ async function loadDemoPortfolio(){
 
 async function fetchBtcEurPrice(){
   try{
-    const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=eur');
-    if(r.ok){const d=await r.json();btcPriceEur=d.bitcoin?.eur||btcPriceEur||50000;}
-  }catch(e){if(!btcPriceEur)btcPriceEur=50000;}
+    const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=eur,usd');
+    if(r.ok){const d=await r.json();btcPriceEur=d.bitcoin?.eur||btcPriceEur||50000;btcPriceUsd=d.bitcoin?.usd||btcPriceUsd||54000;if(btcPriceEur>0)_eurUsdRate=btcPriceUsd/btcPriceEur;}
+  }catch(e){if(!btcPriceEur)btcPriceEur=50000;if(!btcPriceUsd)btcPriceUsd=54000;}
 }
 
 function renderDemoPortfolio(){
   if(portMode!=='demo'||!demoState)return;
-  const fmtEur=n=>Number(n).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
   const fmtBtc=n=>Number(n).toLocaleString('de-DE',{minimumFractionDigits:6,maximumFractionDigits:6});
   const{cashEur=100000,btcAmount=0,avgBuyEur=0}=demoState;
-  const price=btcPriceEur||50000;
-  const btcVal=btcAmount*price;
-  const totalVal=cashEur+btcVal;
-  const pnl=totalVal-100000;
-  const pct=pnl/1000;
-  const pnlCol=pnl>=0?'#4ade80':'#f87171',sg=pnl>=0?'+':'';
+  const priceEur=btcPriceEur||50000;
+  const btcValEur=btcAmount*priceEur;
+  const totalValEur=cashEur+btcValEur;
+  // Auto-reset when account value drops to near 0
+  if(totalValEur<1&&CU){
+    const{db,doc,setDoc}=window._fb;
+    setDoc(doc(db,'users',CU.uid,'demoPortfolio','state'),{cashEur:100000,btcAmount:0,avgBuyEur:0});
+    showToast('Kontostand 0 — Konto zurückgesetzt');
+    return;
+  }
+  const pnlEur=totalValEur-100000;
+  const pct=pnlEur/1000;
+  const pnlCol=pnlEur>=0?'#4ade80':'#f87171',sg=pnlEur>=0?'+':'';
   const tb=document.getElementById('port-total-box');
   if(tb)tb.innerHTML=`<div class="ptot" style="background:linear-gradient(135deg,rgba(247,147,26,.07),rgba(247,147,26,.02));border:1px solid rgba(247,147,26,.2);position:relative">
     <div style="position:absolute;top:12px;right:14px;font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.5px;background:rgba(247,147,26,.1);padding:2px 8px;border-radius:6px;border:1px solid rgba(247,147,26,.2)">DEMO</div>
     <div style="font-size:10px;color:var(--mu2);letter-spacing:.7px;text-transform:uppercase;margin-bottom:5px">Virtuelles Portfolio</div>
-    <div class="ptot-v">€${fmtEur(totalVal)}</div>
-    <div class="ptot-chg" style="color:${pnlCol}">${sg}€${fmtEur(Math.abs(pnl))} (${sg}${pct.toFixed(2)}%) gesamt</div>
-    <div style="font-size:11px;color:var(--mu2);margin-top:8px">Start: €100.000 virtuell</div>
+    <div class="ptot-v">${fmtC(totalValEur)}</div>
+    <div class="ptot-chg" style="color:${pnlCol}">${sg}${fmtC(Math.abs(pnlEur))} (${sg}${pct.toFixed(2)}%) gesamt</div>
+    <div style="font-size:11px;color:var(--mu2);margin-top:8px">Start: ${fmtC(100000)} virtuell</div>
   </div>`;
   const pl2=document.getElementById('port-list');
+  const cashSym=_currency==='USD'?'$':'€';
   let html='<div class="sl">Cash</div>';
   html+=`<div class="phold">
-    <div class="phold-icon" style="background:rgba(74,222,128,.15);color:#4ade80;font-size:15px;font-weight:700">€</div>
-    <div class="phold-info"><div class="phold-name">Euro Cash</div><div class="phold-amt">Verfügbares Guthaben</div></div>
-    <div class="phold-val"><div class="phold-cur">€${fmtEur(cashEur)}</div><div class="phold-pnl" style="color:var(--mu2)">Fiat</div></div>
+    <div class="phold-icon" style="background:rgba(74,222,128,.15);color:#4ade80;font-size:15px;font-weight:700">${cashSym}</div>
+    <div class="phold-info"><div class="phold-name">${_currency==='USD'?'Dollar Cash':'Euro Cash'}</div><div class="phold-amt">Verfügbares Guthaben</div></div>
+    <div class="phold-val"><div class="phold-cur">${fmtC(cashEur)}</div><div class="phold-pnl" style="color:var(--mu2)">Fiat</div></div>
   </div>`;
   if(btcAmount>0.000001){
-    const cost=btcAmount*(avgBuyEur||price);
-    const pl=btcVal-cost,pp=cost>0?(pl/cost*100):0;
-    const pc=pl>=0?'#4ade80':'#f87171',s2=pl>=0?'+':'';
+    const costEur=btcAmount*(avgBuyEur||priceEur);
+    const plEur=btcValEur-costEur,pp=costEur>0?(plEur/costEur*100):0;
+    const pc=plEur>=0?'#4ade80':'#f87171',s2=plEur>=0?'+':'';
     html+='<div class="sl">Bitcoin</div>';
     html+=`<div class="phold">
       <div class="phold-icon" style="background:rgba(247,147,26,.15);color:var(--gold);font-size:15px;font-weight:700">₿</div>
-      <div class="phold-info"><div class="phold-name">Bitcoin</div><div class="phold-amt">${fmtBtc(btcAmount)} BTC &middot; avg €${fmtEur(avgBuyEur||price)}</div></div>
-      <div class="phold-val"><div class="phold-cur">€${fmtEur(btcVal)}</div><div class="phold-pnl" style="color:${pc}">${s2}€${fmtEur(Math.abs(pl))} (${s2}${pp.toFixed(1)}%)</div></div>
+      <div class="phold-info"><div class="phold-name">Bitcoin</div><div class="phold-amt">${fmtBtc(btcAmount)} BTC &middot; avg ${fmtC(avgBuyEur||priceEur)}</div></div>
+      <div class="phold-val"><div class="phold-cur">${fmtC(btcValEur)}</div><div class="phold-pnl" style="color:${pc}">${s2}${fmtC(Math.abs(plEur))} (${s2}${pp.toFixed(1)}%)</div></div>
     </div>`;
   }
   if(pl2)pl2.innerHTML=html;
@@ -3506,20 +3530,23 @@ function renderDemoPortfolio(){
       <button onclick="openDemoTrade('buy')" style="flex:1;padding:12px;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);color:#4ade80;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-trending-up"></i> BTC kaufen</button>
       <button onclick="openDemoTrade('sell')" ${btcAmount<=0.000001?'disabled':''} style="flex:1;padding:12px;background:${btcAmount<=0.000001?'var(--sf2)':'rgba(248,113,113,.12)'};border:1px solid ${btcAmount<=0.000001?'var(--bd)':'rgba(248,113,113,.3)'};color:${btcAmount<=0.000001?'var(--mu)':'#f87171'};border-radius:11px;font-size:13px;font-weight:700;cursor:${btcAmount<=0.000001?'default':'pointer'};display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-trending-down"></i> BTC verkaufen</button>
     </div>
-    <div style="margin:8px 14px 0;padding:9px 12px;background:var(--sf);border:1px solid var(--bd);border-radius:9px;font-size:11px;color:var(--mu2);display:flex;align-items:center;gap:7px"><i class="ti ti-info-circle" style="font-size:13px;flex-shrink:0"></i> Live-Preis: 1 BTC = €${Number(price).toLocaleString('de-DE')}</div>`;
+    <div style="margin:8px 14px 0;padding:9px 12px;background:var(--sf);border:1px solid var(--bd);border-radius:9px;font-size:11px;color:var(--mu2);display:flex;align-items:center;gap:7px"><i class="ti ti-info-circle" style="font-size:13px;flex-shrink:0"></i> Live-Preis: 1 BTC = ${fmtBtcLive()}</div>`;
 }
 
+function _demoTradeInfo(type){
+  const curLbl=document.getElementById('demo-trade-cur-lbl');
+  if(curLbl)curLbl.textContent=_currency==='USD'?'Dollar-Betrag ($)':'Euro-Betrag (€)';
+  return`1 BTC = ${fmtBtcLive()}<br>Verfügbar: ${type==='buy'?fmtC(demoState?.cashEur||0):((demoState?.btcAmount||0).toFixed(6)+' BTC')}`;
+}
 function openDemoTrade(type){
   if(!CU||!demoState){showToast('Bitte einloggen');return;}
   demoTradeType=type;
-  const fmtEur=n=>Number(n).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
-  const price=btcPriceEur||50000;
   document.getElementById('demo-trade-type-buy').classList.toggle('ak',type==='buy');
   document.getElementById('demo-trade-type-sell').classList.toggle('ak',type==='sell');
   document.getElementById('demo-trade-eur').value='';
   document.getElementById('demo-trade-btc').value='';
   document.getElementById('demo-trade-result').textContent='';
-  document.getElementById('demo-trade-info').innerHTML=`1 BTC = €${Number(price).toLocaleString('de-DE')}<br>Verfügbar: ${type==='buy'?'€'+fmtEur(demoState.cashEur||0):((demoState.btcAmount||0).toFixed(6)+' BTC')}`;
+  document.getElementById('demo-trade-info').innerHTML=_demoTradeInfo(type);
   document.getElementById('demo-trade-pm').classList.add('on');
   setTimeout(()=>document.getElementById(type==='buy'?'demo-trade-eur':'demo-trade-btc').focus(),120);
 }
@@ -3531,36 +3558,35 @@ function switchDemoTradeType(type){
   document.getElementById('demo-trade-eur').value='';
   document.getElementById('demo-trade-btc').value='';
   document.getElementById('demo-trade-result').textContent='';
-  const fmtEur=n=>Number(n).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
-  const price=btcPriceEur||50000;
-  document.getElementById('demo-trade-info').innerHTML=`1 BTC = €${Number(price).toLocaleString('de-DE')}<br>Verfügbar: ${type==='buy'?'€'+fmtEur(demoState?.cashEur||0):((demoState?.btcAmount||0).toFixed(6)+' BTC')}`;
+  document.getElementById('demo-trade-info').innerHTML=_demoTradeInfo(type);
   setTimeout(()=>document.getElementById(type==='buy'?'demo-trade-eur':'demo-trade-btc').focus(),80);
 }
 function updateDemoTradeCalc(){
-  const price=btcPriceEur||50000;
-  const fmtEur=n=>Number(n).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const price=_btcP();
   if(demoTradeType==='buy'){
-    const eur=parseFloat(document.getElementById('demo-trade-eur').value)||0;
-    const btc=eur>0?(eur/price):0;
+    const fiat=parseFloat(document.getElementById('demo-trade-eur').value)||0;
+    const btc=fiat>0?(fiat/price):0;
     document.getElementById('demo-trade-btc').value=btc>0?btc.toFixed(8):'';
-    document.getElementById('demo-trade-result').textContent=eur>0?`≈ ${btc.toFixed(8)} BTC`:'';
+    document.getElementById('demo-trade-result').textContent=fiat>0?`≈ ${btc.toFixed(8)} BTC`:'';
   }else{
     const btc=parseFloat(document.getElementById('demo-trade-btc').value)||0;
-    const eur=btc*price;
-    document.getElementById('demo-trade-eur').value=btc>0?eur.toFixed(2):'';
-    document.getElementById('demo-trade-result').textContent=btc>0?`≈ €${fmtEur(eur)}`:'';
+    const fiat=btc*price;
+    document.getElementById('demo-trade-eur').value=btc>0?fiat.toFixed(2):'';
+    document.getElementById('demo-trade-result').textContent=btc>0?`≈ ${fmtC(_currency==='USD'?fiat/_eurUsdRate:fiat)}`:'';
   }
 }
 async function executeDemoTrade(){
   if(!CU||!demoState)return;
-  const price=btcPriceEur||50000;
+  const priceEur=btcPriceEur||50000;
   const{db,doc,runTransaction,collection,addDoc,serverTimestamp}=window._fb;
   const stateRef=doc(db,'users',CU.uid,'demoPortfolio','state');
   if(demoTradeType==='buy'){
-    const eurAmount=parseFloat(document.getElementById('demo-trade-eur').value);
-    if(isNaN(eurAmount)||eurAmount<=0){showToast('Betrag eingeben');return;}
+    const fiatInput=parseFloat(document.getElementById('demo-trade-eur').value);
+    if(isNaN(fiatInput)||fiatInput<=0){showToast('Betrag eingeben');return;}
+    // Convert input to EUR for storage (fiat input may be USD)
+    const eurAmount=_currency==='USD'?fiatInput/_eurUsdRate:fiatInput;
     if(eurAmount>demoState.cashEur){showToast('Nicht genug Cash');return;}
-    const btcAmt=eurAmount/price;
+    const btcAmt=fiatInput/_btcP();
     try{
       await runTransaction(db,async txn=>{
         const snap=await txn.get(stateRef);
@@ -3568,17 +3594,17 @@ async function executeDemoTrade(){
         const s=snap.data();
         if(eurAmount>s.cashEur)throw new Error('insufficient');
         const newBtc=(s.btcAmount||0)+btcAmt;
-        const newAvg=s.btcAmount>0?((s.avgBuyEur||price)*(s.btcAmount)+eurAmount)/newBtc:price;
+        const newAvg=s.btcAmount>0?((s.avgBuyEur||priceEur)*(s.btcAmount)+eurAmount)/newBtc:priceEur;
         txn.update(stateRef,{cashEur:s.cashEur-eurAmount,btcAmount:newBtc,avgBuyEur:newAvg});
       });
-      await addDoc(collection(db,'users',CU.uid,'demoTrades'),{type:'buy',eurAmount,btcAmount:btcAmt,priceEur:price,createdAt:serverTimestamp()});
+      await addDoc(collection(db,'users',CU.uid,'demoTrades'),{type:'buy',eurAmount,btcAmount:btcAmt,priceEur,createdAt:serverTimestamp()});
       closeDemoTrade();showToast(`Gekauft: ${btcAmt.toFixed(6)} BTC`);
     }catch(e){showToast(e.message==='insufficient'?'Nicht genug Cash':'Fehler beim Kauf');}
   }else{
     const btcAmt=parseFloat(document.getElementById('demo-trade-btc').value);
     if(isNaN(btcAmt)||btcAmt<=0){showToast('BTC-Betrag eingeben');return;}
     if(btcAmt>(demoState.btcAmount||0)){showToast('Nicht genug BTC');return;}
-    const eurAmount=btcAmt*price;
+    const eurAmount=btcAmt*priceEur;
     try{
       await runTransaction(db,async txn=>{
         const snap=await txn.get(stateRef);
@@ -3588,7 +3614,7 @@ async function executeDemoTrade(){
         const newBtc=s.btcAmount-btcAmt;
         txn.update(stateRef,{cashEur:s.cashEur+eurAmount,btcAmount:newBtc,avgBuyEur:newBtc>0.000001?s.avgBuyEur:0});
       });
-      await addDoc(collection(db,'users',CU.uid,'demoTrades'),{type:'sell',eurAmount,btcAmount:btcAmt,priceEur:price,createdAt:serverTimestamp()});
+      await addDoc(collection(db,'users',CU.uid,'demoTrades'),{type:'sell',eurAmount,btcAmount:btcAmt,priceEur,createdAt:serverTimestamp()});
       closeDemoTrade();showToast(`Verkauft: ${btcAmt.toFixed(6)} BTC`);
     }catch(e){showToast(e.message==='insufficient'?'Nicht genug BTC':'Fehler beim Verkauf');}
   }
@@ -3671,9 +3697,10 @@ function applyLang(){
     if(a)el.setAttribute(a,t(k));else el.textContent=t(k);
   });
   // Titles that contain an <em>.</em> child
-  [['#sc-profile .stitle','myProfile'],['#sc-portfolio .stitle','portfolio_title'],['#sc-search .stitle','search_title']].forEach(([sel,key])=>{
+  [['#sc-profile .stitle','myProfile'],['#sc-search .stitle','search_title']].forEach(([sel,key])=>{
     const el=document.querySelector(sel);if(el)el.innerHTML=t(key)+'<em style="color:var(--gold);font-style:normal">.</em>';
   });
+  {const ptEl=document.querySelector('#sc-portfolio .stitle');if(ptEl)ptEl.innerHTML=(portMode==='demo'?'Demo Trading Account':t('portfolio_title'))+'<em style="color:var(--gold);font-style:normal">.</em>';}
   // Dynamic buttons with icons or sub-elements
   const addBtn=document.querySelector('.padd');if(addBtn)addBtn.innerHTML=`<i class="ti ti-plus"></i> ${t('addHolding')}`;
   const portTitle=document.querySelector('#port-pm .mtitle');if(portTitle)portTitle.textContent=t('addHolding');
@@ -3688,15 +3715,33 @@ function applyLang(){
     const b=document.getElementById('lang-'+l);
     if(b){b.style.borderColor=curLang===l?'var(--gold)':'var(--bd)';b.style.color=curLang===l?'var(--gold)':'var(--mu2)';b.style.background=curLang===l?'var(--gdim)':'var(--sf2)'}
   });
+  // Currency button active state
+  _applyCurrencyBtns();
   // Portfolio toggle label
   const ptogLblI18n=document.getElementById('ptog-lbl');
   if(ptogLblI18n&&UP!=null)ptogLblI18n.textContent=t(UP.portfolioPublic?'portfolio_public':'portfolio_private');
   // Re-render visible dynamic screens
   if(CU&&document.getElementById('mychs'))renderMyChs();
-  if(document.getElementById('sc-portfolio')?.classList.contains('on'))renderPortfolio();
+  if(document.getElementById('sc-portfolio')?.classList.contains('on')){
+    if(portMode==='demo'&&demoState)renderDemoPortfolio();else renderPortfolio();
+  }
   {const _si=document.getElementById('sinp');if(document.getElementById('sc-search')?.classList.contains('on')&&_si?.value.trim())renderUsers(allUsers);}
 }
 function setLang(l){curLang=l;localStorage.setItem('jl_lang',l);applyLang();showToast(l==='de'?'Sprache geändert':l==='es'?'Idioma cambiado':'Language changed')}
+function setCurrency(c){
+  _currency=c;localStorage.setItem('jl_currency',c);
+  _applyCurrencyBtns();
+  fetchPulse();
+  if(portMode==='demo'&&demoState)fetchBtcEurPrice().then(renderDemoPortfolio);
+  else if(portMode==='real')refreshPortPrices().then(renderPortfolio);
+  showToast(c==='EUR'?'Währung: Euro (€)':'Currency: US Dollar ($)');
+}
+function _applyCurrencyBtns(){
+  ['EUR','USD'].forEach(c=>{
+    const b=document.getElementById('cur-'+c.toLowerCase());
+    if(b){b.style.borderColor=_currency===c?'var(--gold)':'var(--bd)';b.style.color=_currency===c?'var(--gold)':'var(--mu2)';b.style.background=_currency===c?'var(--gdim)':'var(--sf2)';}
+  });
+}
 function shareOP(){
   const url='https://claude250k.github.io/JL/#profile?u='+(curOP||'');
   navigator.clipboard?.writeText(url).then(()=>showToast('Link copied!')).catch(()=>showToast('Link: '+url));
