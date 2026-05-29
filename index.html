@@ -1629,6 +1629,7 @@ function pH(p){
         ${qblockH(p.quoteOf)}
         ${img}
         ${p.pulseId?`<div onclick="openPulseFromPost('${esc(p.pulseId)}')" style="display:inline-flex;align-items:center;gap:5px;background:rgba(247,147,26,.12);border:1px solid rgba(247,147,26,.28);color:var(--gold);padding:3px 11px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;margin-bottom:5px"><i class="ti ti-chart-bar" style="font-size:12px"></i>Pulse öffnen →</div>`:''}
+        ${p.pulseId?'':assetButton(p.text||'')}
         <div class="pacts">
           <button class="pa${liked?' liked':''}" id="lb-${p.id}" onclick="likeP('${p.id}',this)">
             <i class="ti ${liked?'ti-heart-filled':'ti-heart'}"></i>
@@ -1782,7 +1783,7 @@ async function openPD(pid){
   const avH=p.authorAvatar?`<img src="${p.authorAvatar}">`:(p.authorName||'?').substring(0,2).toUpperCase();
   const liked=CU&&(p.likedBy||[]).includes(CU.uid);
   const isOwnPD=CU&&p.authorId===CU.uid;
-  document.getElementById('pd-content').innerHTML=`<div class="pi" style="cursor:default"><div class="pr"><div class="av" onclick="openOP('${p.authorId}')">${avH}</div><div class="pb"><div class="ptop"><span class="pan" onclick="openOP('${p.authorId}')">${esc(p.authorName||'')}</span><span class="cbadge ${cb}" ${chBadgeStyle(rawChPD)?`style="${chBadgeStyle(rawChPD)}"`:''}>${cl}</span><span class="ptm">${t}</span>${isOwnPD?`<button class="pa" onclick="delPost('${p.id}')" style="margin-left:auto;color:var(--mu)" title="Delete post"><i class="ti ti-trash" style="font-size:13px"></i></button>`:''}</div><div class="ptxt" style="cursor:default">${linkText(p.text||'')}</div>${img}<div class="pacts"><button class="pa${liked?' liked':''}" id="lb-${p.id}" onclick="likeP('${p.id}',this)"><i class="ti ${liked?'ti-heart-filled':'ti-heart'}"></i><span id="lc-${p.id}">${p.likes||0}</span></button></div></div></div></div>`;
+  document.getElementById('pd-content').innerHTML=`<div class="pi" style="cursor:default"><div class="pr"><div class="av" onclick="openOP('${p.authorId}')">${avH}</div><div class="pb"><div class="ptop"><span class="pan" onclick="openOP('${p.authorId}')">${esc(p.authorName||'')}</span><span class="cbadge ${cb}" ${chBadgeStyle(rawChPD)?`style="${chBadgeStyle(rawChPD)}"`:''}>${cl}</span><span class="ptm">${t}</span>${isOwnPD?`<button class="pa" onclick="delPost('${p.id}')" style="margin-left:auto;color:var(--mu)" title="Delete post"><i class="ti ti-trash" style="font-size:13px"></i></button>`:''}</div><div class="ptxt" style="cursor:default">${linkText(p.text||'')}</div>${img}${assetButton(p.text||'')}<div class="pacts"><button class="pa${liked?' liked':''}" id="lb-${p.id}" onclick="likeP('${p.id}',this)"><i class="ti ${liked?'ti-heart-filled':'ti-heart'}"></i><span id="lc-${p.id}">${p.likes||0}</span></button></div></div></div></div>`;
   await loadCmts(pid,'pd-cmts');
   document.getElementById('pdov').classList.add('on');
   document.getElementById('pd-inp').focus();
@@ -2150,7 +2151,9 @@ async function loadUsers(){
   const{db,collection,query,limit,getDocs}=window._fb;
   const snap=await getDocs(query(collection(db,'users'),limit(50)));
   allUsers=snap.docs.map(d=>d.data()).filter(u=>u.uid!==CU?.uid);
-  renderUsers(allUsers);
+  // Only render users if search input has text
+  const sinp=document.getElementById('sinp');
+  if(sinp&&sinp.value.trim())renderUsers(allUsers);
   loadTrending();
 }
 
@@ -2191,11 +2194,17 @@ function renderTrending(tags){
 }
 
 function searchByTag(tag){
-  const inp=document.getElementById('sinp');if(inp)inp.value='#'+tag;
-  const clr=document.getElementById('sinp-clear');if(clr)clr.style.display='block';
-  const clist=document.getElementById('clist'),lbl=document.getElementById('search-section-lbl');
-  if(clist)clist.style.display='none';if(lbl)lbl.style.display='none';
-  renderHashPosts(tag);
+  const onSearch=document.getElementById('sc-search')?.classList.contains('on');
+  if(!onSearch)goTo('search');
+  const run=()=>{
+    const inp=document.getElementById('sinp');if(inp)inp.value='#'+tag;
+    const clr=document.getElementById('sinp-clear');if(clr)clr.style.display='block';
+    const clist=document.getElementById('clist'),lbl=document.getElementById('search-section-lbl');
+    const hist=document.getElementById('search-history');
+    if(clist)clist.style.display='none';if(lbl)lbl.style.display='none';if(hist)hist.style.display='none';
+    renderHashPosts(tag);
+  };
+  if(onSearch)run();else setTimeout(run,120);
 }
 
 async function renderHashPosts(tag){
@@ -2224,8 +2233,8 @@ function doSearch(){
   if(!raw.trim()){
     if(hist)hist.style.display='none';
     if(hp)hp.style.display='none';
-    if(clist)clist.style.display='block';if(lbl)lbl.style.display='block';
-    renderUsers(allUsers);showSearchHistory();return;
+    if(clist)clist.style.display='none';if(lbl)lbl.style.display='none';
+    showSearchHistory();return;
   }
   if(hist)hist.style.display='none';
   const q=raw.trim().toLowerCase();
@@ -2260,8 +2269,8 @@ function clearSearch(){
   const el=document.getElementById('sinp');if(el)el.value='';
   const clr=document.getElementById('sinp-clear');if(clr)clr.style.display='none';
   const clist=document.getElementById('clist'),lbl=document.getElementById('search-section-lbl'),hp=document.getElementById('hash-posts');
-  if(clist)clist.style.display='block';if(lbl)lbl.style.display='block';if(hp)hp.style.display='none';
-  renderUsers(allUsers);renderSearchHistory();
+  if(hp)hp.style.display='none';if(clist)clist.style.display='none';if(lbl)lbl.style.display='none';
+  renderSearchHistory();
 }
 function tagS(t){document.getElementById('sinp').value=t;goTo('search');doSearch()}
 
@@ -2832,7 +2841,11 @@ function goTo(s){
   document.getElementById('bn-'+s).classList.add('ak');
   if(s==='puls')setTimeout(initPulse,80);
   if(s==='profile'&&CU){document.querySelectorAll('#sc-profile .ptabs .ptab').forEach((t,i)=>t.classList.toggle('ak',i===0));myTab='posts';myPFilt='all';updateUI();loadMyPosts('all');if(CU.email==='claude250k@gmail.com'&&!sessionStorage.getItem('jl_recounted'))recountFollowers();}
-  if(s==='search'){loadUsers();_trendIntv=setInterval(()=>loadTrending(true),60000);setTimeout(renderSearchHistory,80);}
+  if(s==='search'){
+    const _cl=document.getElementById('clist'),_ll=document.getElementById('search-section-lbl');
+    if(_cl)_cl.style.display='none';if(_ll)_ll.style.display='none';
+    loadUsers();_trendIntv=setInterval(()=>loadTrending(true),60000);setTimeout(renderSearchHistory,80);
+  }
   if(s==='messages'){loadConvs();switchMT('msgs');}
   if(s==='portfolio'){const ptog=document.getElementById('ptog');if(ptog)ptog.checked=UP?.portfolioPublic===true;const ptogLbl=document.getElementById('ptog-lbl');if(ptogLbl)ptogLbl.textContent=t(UP?.portfolioPublic?'portfolio_public':'portfolio_private');if(portMode==='demo'){loadDemoPortfolio();}else{renderPortfolio();refreshPortPrices().then(renderPortfolio);}}
 }
@@ -2897,6 +2910,13 @@ function ptxtClick(ev,pid,pulseId,el){
 }
 function tAgo(d){const s=Math.floor((new Date()-d)/1000);if(s<60)return'now';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';return Math.floor(s/86400)+'d'}
 const HASH_MAP={bitcoin:'btc',btc:'btc',ethereum:'eth',eth:'eth',solana:'sol',sol:'sol',bnb:'bnb',xrp:'xrp',ripple:'xrp',ada:'ada',cardano:'ada',doge:'doge',dogecoin:'doge',dot:'dot',polkadot:'dot',avax:'avax',avalanche:'avax',link:'link',chainlink:'link',nvidia:'nvda',nvda:'nvda',apple:'aapl',aapl:'aapl',microsoft:'msft',msft:'msft',amazon:'amzn',amzn:'amzn',google:'goog',alphabet:'goog',goog:'goog',meta:'meta',tesla:'tsla',tsla:'tsla',sap:'sap',spy:'spy',sp500:'spy',qqq:'qqq',voo:'voo',iwda:'iwda',vwrl:'vwrl'};
+const ASSET_NAMES={btc:'Bitcoin',eth:'Ethereum',sol:'Solana',bnb:'BNB',xrp:'XRP',ada:'Cardano',doge:'Dogecoin',dot:'Polkadot',avax:'Avalanche',link:'Chainlink',nvda:'Nvidia',aapl:'Apple',msft:'Microsoft',amzn:'Amazon',goog:'Alphabet',meta:'Meta',tsla:'Tesla',sap:'SAP',spy:'S&P 500',qqq:'Nasdaq 100',voo:'Vanguard S&P 500',iwda:'MSCI World',vwrl:'FTSE All-World'};
+function assetButton(text){
+  if(!text)return'';
+  const ms=text.match(/#(\w+)/g)||[];
+  for(const m of ms){const k=m.slice(1).toLowerCase();const a=HASH_MAP[k];if(a&&ASSET_NAMES[a]){return`<div onclick="event.stopPropagation();goToPuls('${a}')" style="display:inline-flex;align-items:center;gap:5px;background:rgba(247,147,26,.1);border:1px solid rgba(247,147,26,.25);color:var(--gold);padding:3px 11px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;margin-bottom:5px"><i class="ti ti-chart-line" style="font-size:12px"></i>${ASSET_NAMES[a]} öffnen →</div>`;}}
+  return'';
+}
 function linkText(s){
   const urlRe=/(https?:\/\/[^\s<>"']+)/g;
   const parts=[];let li=0,m;
@@ -2904,7 +2924,7 @@ function linkText(s){
   parts.push({t:'tx',v:s.slice(li)});
   return parts.map(p=>{
     if(p.t==='url'){try{new URL(p.v);return`<a href="${esc(p.v)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="${esc(p.v)}" style="display:inline-flex;align-items:center;gap:3px;background:rgba(247,147,26,.1);border:1px solid rgba(247,147,26,.28);border-radius:5px;padding:1px 7px;font-size:11px;color:rgba(247,147,26,.75);text-decoration:none;vertical-align:middle"><i class="ti ti-link" style="font-size:11px"></i>Link</a>`}catch(e){return esc(p.v)}}
-    return esc(p.v).replace(/\n/g,'<br>').replace(/#(\w+)/g,(m,tag)=>{const k=tag.toLowerCase();const a=HASH_MAP[k];return a?`<span class="htag" onclick="event.stopPropagation();goToPuls('${a}')">${m}</span>`:`<span class="htag">${m}</span>`;}).replace(/@(\w+)/g,(m,name)=>{const u=(allUsers||[]).find(u=>(u.name||'').toLowerCase()===name.toLowerCase());const act=u?`openOP('${u.uid}')`:`openByName('${name.replace(/'/g,'')}')`;return`<span class="htag" onclick="event.stopPropagation();${act}">@${esc(name)}</span>`;});
+    return esc(p.v).replace(/\n/g,'<br>').replace(/#(\w+)/g,(m,tag)=>{const k=tag.toLowerCase();const a=HASH_MAP[k];return a?`<span class="htag" onclick="event.stopPropagation();goToPuls('${a}')">${m}</span>`:`<span class="htag" onclick="event.stopPropagation();tagS('#${tag}')">${m}</span>`;}).replace(/@(\w+)/g,(m,name)=>{const u=(allUsers||[]).find(u=>(u.name||'').toLowerCase()===name.toLowerCase());const act=u?`openOP('${u.uid}')`:`openByName('${name.replace(/'/g,'')}')`;return`<span class="htag" onclick="event.stopPropagation();${act}">@${esc(name)}</span>`;});
   }).join('');
 }
 async function openByName(name){
@@ -3546,7 +3566,7 @@ function applyLang(){
   // Re-render visible dynamic screens
   if(CU&&document.getElementById('mychs'))renderMyChs();
   if(document.getElementById('sc-portfolio')?.classList.contains('on'))renderPortfolio();
-  if(document.getElementById('sc-search')?.classList.contains('on'))renderUsers(allUsers);
+  {const _si=document.getElementById('sinp');if(document.getElementById('sc-search')?.classList.contains('on')&&_si?.value.trim())renderUsers(allUsers);}
 }
 function setLang(l){curLang=l;localStorage.setItem('jl_lang',l);applyLang();showToast(l==='de'?'Sprache geändert':l==='es'?'Idioma cambiado':'Language changed')}
 function shareOP(){
