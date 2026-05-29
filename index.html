@@ -16,11 +16,11 @@
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,GoogleAuthProvider,onAuthStateChanged,signOut,updateProfile,sendPasswordResetEmail}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import{getFirestore,collection,addDoc,getDocs,getDoc,doc,setDoc,updateDoc,deleteDoc,query,orderBy,limit,where,onSnapshot,serverTimestamp,increment,runTransaction,arrayUnion,arrayRemove}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import{getFirestore,collection,collectionGroup,addDoc,getDocs,getDoc,doc,setDoc,updateDoc,deleteDoc,query,orderBy,limit,where,onSnapshot,serverTimestamp,increment,runTransaction,writeBatch,arrayUnion,arrayRemove}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import{getStorage,ref,uploadBytes,getDownloadURL}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 const cfg={apiKey:"AIzaSyBQ1-aEtgcMV8ZaNnjLAeyTu0t1piRm9Us",authDomain:"k-12b86.firebaseapp.com",projectId:"k-12b86",storageBucket:"k-12b86.firebasestorage.app",messagingSenderId:"375281147692",appId:"1:375281147692:web:5833aee12494854a859689"};
 const app=initializeApp(cfg);
-window._fb={auth:getAuth(app),db:getFirestore(app),storage:getStorage(app),gp:new GoogleAuthProvider(),createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,onAuthStateChanged,signOut,updateProfile,sendPasswordResetEmail,collection,addDoc,getDocs,getDoc,doc,setDoc,updateDoc,deleteDoc,query,orderBy,limit,where,onSnapshot,serverTimestamp,increment,runTransaction,arrayUnion,arrayRemove,ref,uploadBytes,getDownloadURL};
+window._fb={auth:getAuth(app),db:getFirestore(app),storage:getStorage(app),gp:new GoogleAuthProvider(),createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,onAuthStateChanged,signOut,updateProfile,sendPasswordResetEmail,collection,collectionGroup,addDoc,getDocs,getDoc,doc,setDoc,updateDoc,deleteDoc,query,orderBy,limit,where,onSnapshot,serverTimestamp,increment,runTransaction,writeBatch,arrayUnion,arrayRemove,ref,uploadBytes,getDownloadURL};
 window._fbReady=true;document.dispatchEvent(new Event("fb-ready"));
 </script>
 <style>
@@ -427,7 +427,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
     <button class="abtn" onclick="doLogin()">Sign In</button>
   </div>
   <div id="fr" style="display:none;width:100%">
-    <input class="ainp" id="re-n" type="text" placeholder="Unique name (e.g. MaxMueller)">
+    <input class="ainp" id="re-n" type="text" placeholder="Unique name (e.g. MaxMueller)" maxlength="15">
     <input class="ainp" id="re-e" type="email" placeholder="Email">
     <div style="position:relative;margin-bottom:8px">
       <input class="ainp" id="re-p" type="password" placeholder="Password (min. 6 characters)" style="margin-bottom:0;padding-right:40px">
@@ -783,7 +783,8 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
 <div class="pdov" id="pdov">
   <div class="pdh"><button class="pdb" onclick="closePD()"><i class="ti ti-arrow-left"></i></button><div style="font-size:14px;font-weight:600;color:var(--tx)">Post</div></div>
   <div class="scroll"><div id="pd-content"></div><div style="padding:8px 16px 4px;font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.8px;text-transform:uppercase">Comments</div><div id="pd-cmts"></div></div>
-  <div class="cmtir"><div class="cmtav" id="pd-myav"></div><input class="cmti" id="pd-inp" placeholder="Add a comment ... use @ to mention" onkeydown="if(event.key==='Enter')submitCmt()" oninput="onMentionInput(this)"><button class="cmts" onclick="submitCmt()"><i class="ti ti-send"></i></button></div>
+  <div class="cmtir"><div class="cmtav" id="pd-myav"></div><input class="cmti" id="pd-inp" placeholder="Add a comment ... use @ to mention" maxlength="2500" onkeydown="if(event.key==='Enter')submitCmt()" oninput="onMentionInput(this);cmtCount(this)"><button class="cmts" onclick="submitCmt()"><i class="ti ti-send"></i></button></div>
+  <div id="cmt-cnt" style="font-size:10px;color:var(--mu2);text-align:right;padding:0 14px 4px;display:none"></div>
 </div>
 
 <div class="setov" id="setov">
@@ -833,10 +834,10 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
   <div class="scroll" style="padding:16px">
     <div class="avpick" id="ep-av" onclick="document.getElementById('ep-avinp').click()"><div class="avpick-lbl"><i class="ti ti-camera"></i></div><input type="file" id="ep-avinp" accept="image/*" style="display:none" onchange="upAv(this)"></div>
     <div class="elabel">Display Name (unique - cannot be changed later easily)</div>
-    <input class="einp" id="ep-name" type="text" placeholder="Your unique name">
-    <div style="font-size:10px;color:var(--mu2);margin-top:-6px;margin-bottom:10px">Your # number never changes</div>
+    <input class="einp" id="ep-name" type="text" placeholder="Your unique name" maxlength="15">
+    <div style="font-size:10px;color:var(--mu2);margin-top:-6px;margin-bottom:10px">Your # number never changes · max 15 characters</div>
     <div class="elabel">Bio</div>
-    <input class="einp" id="ep-bio" type="text" placeholder="Describe yourself">
+    <input class="einp" id="ep-bio" type="text" placeholder="Describe yourself" maxlength="160">
     <div class="elabel">Cover Photo</div>
     <div class="seti" style="background:var(--sf2);border-radius:10px;margin-bottom:10px;border:1px solid var(--bd)" onclick="document.getElementById('ep-covinp').click()"><i class="ti ti-photo"></i><div class="setin"><div class="setit">Upload Cover Photo</div></div><input type="file" id="ep-covinp" accept="image/*" style="display:none" onchange="upCov(this)"></div>
     <button class="savebtn" onclick="saveProfile()">Save Changes</button>
@@ -876,7 +877,8 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
 <div class="mbg" id="pm" onclick="if(event.target===this)closePM()">
   <div class="msh">
     <div class="mtitle">New Post</div>
-    <textarea class="pta" id="pta" placeholder="What's on your mind? Use @ to mention someone" oninput="onMentionInput(this)"></textarea>
+    <textarea class="pta" id="pta" placeholder="What's on your mind? Use @ to mention someone" oninput="onMentionInput(this);ptaCount(this)" maxlength="2500"></textarea>
+    <div id="pta-cnt" style="font-size:10px;color:var(--mu2);text-align:right;margin:-4px 0 4px"></div>
     <div id="quote-prev" style="display:none"></div>
     <img id="uprev" class="uprev">
     <div style="font-size:10px;color:var(--mu);margin-top:8px;margin-bottom:3px">Choose channel:</div>
@@ -893,8 +895,8 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
     <div id="ccats"></div>
     <button onclick="addCh()" type="button" style="background:none;border:1px dashed var(--bd);color:var(--mu2);padding:3px 9px;border-radius:13px;font-size:10px;font-weight:600;cursor:pointer;margin-top:4px"><i class="ti ti-plus" style="font-size:10px"></i> New channel</button>
     <div class="mft">
-      <label class="uic" for="iminp"><i class="ti ti-photo"></i></label>
-      <input type="file" id="iminp" accept="image/*" style="display:none" onchange="prevImg(this)">
+      <div onclick="showToast('📸 Fotos kommen bald!')" style="display:flex;align-items:center;gap:5px;background:var(--sf2);border:1px solid var(--bd);color:var(--mu2);padding:5px 10px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer"><i class="ti ti-photo" style="font-size:14px"></i><span>Foto</span><span style="font-size:9px;color:var(--gold);font-weight:700;background:rgba(247,147,26,.1);padding:1px 5px;border-radius:4px;border:1px solid rgba(247,147,26,.25)">Soon</span></div>
+      <input type="file" id="iminp" accept="image/*" style="display:none">
       <div style="display:flex;gap:7px"><button class="mcancel" onclick="closePM()">Cancel</button><button class="mpost" id="pbtn" onclick="submitPost()">Post</button></div>
     </div>
   </div>
@@ -1158,7 +1160,7 @@ async function doReg(){
   const e=document.getElementById('re-e').value.trim(),p=document.getElementById('re-p').value,p2=document.getElementById('re-p2').value;
   if(!name||!e||!p||!p2){setAErr('Please fill all fields');return}
   if(p!==p2){setAErr('Passwords do not match');return}
-  if(name.length<2||name.length>30){setAErr('Name must be 2–30 characters');return}
+  if(name.length<2||name.length>15){setAErr('Name must be 2–15 characters');return}
   if(!/^[a-zA-Z0-9_\-]+$/.test(name)){setAErr('Name may only contain letters, numbers, _ and -');return}
   const captchaVal=parseInt(document.getElementById('re-captcha').value,10);
   if(isNaN(captchaVal)||captchaVal!==_captchaAns){setAErr('Sicherheitsprüfung falsch – bitte erneut versuchen.');genCaptcha();return}
@@ -1216,11 +1218,19 @@ function openChSettings(){
 }
 async function removeCh(ch){
   if(!CU)return;
-  if(!confirm(`Remove "${chLbl(ch)}" channel?\nAll posts from this channel will move to All.`))return;
+  if(!await appConfirm(`Channel "${chLbl(ch)}" löschen?\nDeine Posts werden zu "All Posts" verschoben.`))return;
+  const{db,doc,updateDoc,getDocs,query,collection,where,writeBatch}=window._fb;
+  try{
+    const ps=await getDocs(query(collection(db,'posts'),where('authorId','==',CU.uid),where('channel','==',ch)));
+    if(ps.docs.length){
+      let b=writeBatch(db),n=0;
+      for(const d of ps.docs){b.update(doc(db,'posts',d.id),{channel:'all'});if(++n%499===0){await b.commit();b=writeBatch(db);n=0;}}
+      if(n>0)await b.commit();
+    }
+  }catch(e){}
   customChs=customChs.filter(c=>c!==ch);
-  const{db,doc,updateDoc}=window._fb;
   await updateDoc(doc(db,'users',CU.uid),{customChannels:customChs});
-  renderMyChs();renderCCats();showToast('Channel removed');
+  renderMyChs();renderCCats();showToast('Channel entfernt · Posts verschoben');
   document.querySelector('.ov[style*="200"]')?.remove();openSet();
 }
 function openSet(){
@@ -1339,18 +1349,27 @@ async function saveProfile(){
   await updateDoc(doc(db,'users',CU.uid),{name:nn,bio});
   UP.name=nn;UP.bio=bio;updateUI();showToast('Profile saved!');closeEditProf();closeSet();
   if(nameChanged){
-    // Backfill authorName in all posts by this user
+    showToast('Name saved · updating posts…');
+    // Batch-update posts
     try{
+      const{writeBatch,collectionGroup}=window._fb;
       const ps=await getDocs(query(collection(db,'posts'),where('authorId','==',CU.uid)));
-      await Promise.all(ps.docs.map(d=>updateDoc(doc(db,'posts',d.id),{authorName:nn})));
-    }catch(e){}
-    // Backfill authorName in comments by this user across all posts
-    try{
-      const allPs=await getDocs(collection(db,'posts'));
-      for(const pd of allPs.docs){
-        const cmts=await getDocs(query(collection(db,`posts/${pd.id}/comments`),where('authorId','==',CU.uid)));
-        if(cmts.docs.length)await Promise.all(cmts.docs.map(d=>updateDoc(doc(db,`posts/${pd.id}/comments`,d.id),{authorName:nn})));
+      if(ps.docs.length){
+        let b=writeBatch(db),n=0;
+        for(const d of ps.docs){b.update(doc(db,'posts',d.id),{authorName:nn});if(++n%499===0){await b.commit();b=writeBatch(db);n=0;}}
+        if(n>0)await b.commit();
       }
+    }catch(e){}
+    // Batch-update comments via collectionGroup
+    try{
+      const{writeBatch,collectionGroup}=window._fb;
+      const cmts=await getDocs(query(collectionGroup(db,'comments'),where('authorId','==',CU.uid)));
+      if(cmts.docs.length){
+        let b=writeBatch(db),n=0;
+        for(const d of cmts.docs){b.update(d.ref,{authorName:nn});if(++n%499===0){await b.commit();b=writeBatch(db);n=0;}}
+        if(n>0)await b.commit();
+      }
+      showToast('Alle Posts & Kommentare aktualisiert ✓');
     }catch(e){}
   }
 }
@@ -1597,7 +1616,7 @@ function pH(p){
   const svd=isSaved(p.id);
   const myAvH=UP?.avatarUrl?`<img src="${UP.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(UP?.name||'?').substring(0,2).toUpperCase();
   const isOwn=CU&&p.authorId===CU.uid;
-  return`<div class="pi" data-id="${p.id}" data-txt="${esc(p.text||'')}" ontouchend="dtap(this,event)">
+  return`<div class="pi" data-id="${p.id}" data-txt="${esc(p.text||'')}">
     <div class="pr">
       <div class="av" onclick="openOP('${p.authorId}')">${avH}</div>
       <div class="pb">
@@ -1606,7 +1625,7 @@ function pH(p){
           <span class="cbadge ${cb}" onclick="goToCh('${p.channel||''}')" ${chBadgeStyle(rawCh)?`style="${chBadgeStyle(rawCh)}"`:''}>${cl}</span>
           <span class="ptm">${t}</span>
         </div>
-        <div class="ptxt" onclick="${p.pulseId?`openPulseFromPost('${esc(p.pulseId)}')`:`openPD('${p.id}')`}">${linkText(p.text||'')}</div>
+        <div class="ptxt" onclick="ptxtClick(event,'${p.id}','${esc(p.pulseId||'')}',this)" title="Klick: öffnen · Doppelklick: kopieren">${linkText(p.text||'')}</div>
         ${qblockH(p.quoteOf)}
         ${img}
         ${p.pulseId?`<div onclick="openPulseFromPost('${esc(p.pulseId)}')" style="display:inline-flex;align-items:center;gap:5px;background:rgba(247,147,26,.12);border:1px solid rgba(247,147,26,.28);color:var(--gold);padding:3px 11px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;margin-bottom:5px"><i class="ti ti-chart-bar" style="font-size:12px"></i>Pulse öffnen →</div>`:''}
@@ -1780,7 +1799,10 @@ async function loadCmts(pid,cid){
 }
 async function submitCmt(){
   if(!CU||!UP||!curPD)return;
-  const inp=document.getElementById('pd-inp');const text=inp.value.trim();if(!text)return;inp.value='';
+  const inp=document.getElementById('pd-inp');const text=inp.value.trim();if(!text)return;
+  const maxC=UP?.verified?2500:500;
+  if(text.length>maxC){showToast(`Max ${maxC} Zeichen`);return}
+  inp.value='';const cnt=document.getElementById('cmt-cnt');if(cnt)cnt.style.display='none';
   const{db,collection,addDoc,doc,updateDoc,increment,serverTimestamp,getDoc}=window._fb;
   await addDoc(collection(db,`posts/${curPD}/comments`),{text,authorId:CU.uid,authorName:UP.name||'',authorAvatar:UP.avatarUrl||'',createdAt:serverTimestamp()});
   await updateDoc(doc(db,'posts',curPD),{comments:increment(1)});
@@ -1814,9 +1836,31 @@ async function delCmt(pid,cmtId){
   await loadCmts(pid,'pd-cmts');
   showToast('Comment deleted');
 }
+function ptaCount(el){
+  const max=UP?.verified?2500:500;
+  el.maxLength=max;
+  const rem=max-el.value.length;
+  const cnt=document.getElementById('pta-cnt');
+  if(!cnt)return;
+  if(el.value.length===0){cnt.textContent='';return}
+  cnt.style.color=rem<50?'#f87171':rem<100?'#fb923c':'var(--mu2)';
+  cnt.textContent=rem+' Zeichen übrig';
+}
+function cmtCount(el){
+  const max=UP?.verified?2500:500;
+  el.maxLength=max;
+  const rem=max-el.value.length;
+  const cnt=document.getElementById('cmt-cnt');
+  if(!cnt)return;
+  cnt.style.display=el.value.length>0?'block':'none';
+  cnt.style.color=rem<50?'#f87171':rem<100?'#fb923c':'var(--mu2)';
+  cnt.textContent=rem+' Zeichen übrig';
+}
 async function submitPost(){
   if(!CU||!UP){showToast('Please sign in');return}
   const text=document.getElementById('pta').value.trim();if(!text){showToast('Please enter text');return}
+  const maxC=UP?.verified?2500:500;
+  if(text.length>maxC){showToast(`Max ${maxC} Zeichen (${text.length} eingegeben)`);return}
   if(!checkRateLimit()){showToast('Too many posts. Please wait a moment.');return}
   const btn=document.getElementById('pbtn');btn.textContent='...';btn.disabled=true;
   try{
@@ -1846,9 +1890,17 @@ async function loadMyReposts(ch='all'){
     const ps=await getDoc(doc(db,'posts',d.data().postId));
     return ps.exists()?{id:ps.id,...ps.data()}:null;
   }));
-  let valid=posts.filter(Boolean);
-  if(ch!=='all')valid=valid.filter(p=>p.channel===ch);
-  c.innerHTML=valid.length?valid.map(p=>pH(p)).join(''):`<div class="empty"><i class="ti ti-repeat"></i><p>${t('no_reposts_yet')}</p></div>`;
+  const all=posts.filter(Boolean);
+  // Build channel chip counts
+  const chCounts={};
+  all.forEach(p=>{const k=p.channel||'all';chCounts[k]=(chCounts[k]||0)+1;});
+  const chips=Object.entries(chCounts).sort((a,b)=>b[1]-a[1]);
+  const chipsHtml='<div style="display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px 4px;border-bottom:1px solid var(--bd)">'+
+    `<button class="kachel${ch==='all'?' ak':''}" onclick="loadMyReposts('all')" style="font-size:11px;padding:4px 10px">Alle <span style="font-size:10px;opacity:.7">${all.length}</span></button>`+
+    chips.map(([k,n])=>`<button class="kachel${ch===k?' ak':''}" onclick="loadMyReposts('${k}')" style="font-size:11px;padding:4px 10px">${chLbl(k)} <span style="font-size:10px;opacity:.7">${n}</span></button>`).join('')+
+    '</div>';
+  let valid=ch==='all'?all:all.filter(p=>(p.channel||'all')===ch);
+  c.innerHTML=chipsHtml+(valid.length?valid.map(p=>pH(p)).join(''):`<div class="empty"><i class="ti ti-repeat"></i><p>${t('no_reposts_yet')}</p></div>`);
 }
 async function loadMyLikes(ch='all'){
   if(!CU)return;
@@ -2824,10 +2876,24 @@ function dtap(el,ev){
   if(ev.target.closest('button,.htag,.cbadge,.pimg,a,.qcbox'))return;
   const k=el.dataset.id||(el.dataset.id=Math.random().toString(36).slice(2));
   const now=Date.now();
-  if(_dtapLast[k]&&now-_dtapLast[k]<380){
-    navigator.clipboard?.writeText(el.dataset.txt||'').then(()=>showToast('📋 Copied!')).catch(()=>{});
+  if(_dtapLast[k]&&now-_dtapLast[k]<400){
+    navigator.clipboard?.writeText(el.dataset.txt||'').then(()=>showToast('📋 Kopiert!')).catch(()=>{});
     delete _dtapLast[k];ev.preventDefault();
   }else{_dtapLast[k]=now;}
+}
+const _ptxtTimer={},_ptxtLast={};
+function ptxtClick(ev,pid,pulseId,el){
+  if(ev.target.closest('a,.htag,button,.cbadge,.pimg,.qcbox,.qcav,.qci,.qcs'))return;
+  const now=Date.now();
+  if(_ptxtLast[pid]&&now-_ptxtLast[pid]<380){
+    clearTimeout(_ptxtTimer[pid]);delete _ptxtLast[pid];
+    const txt=el.closest('[data-txt]')?.dataset.txt||el.textContent||'';
+    navigator.clipboard?.writeText(txt).then(()=>showToast('📋 Kopiert!')).catch(()=>{});
+  }else{
+    _ptxtLast[pid]=now;
+    clearTimeout(_ptxtTimer[pid]);
+    _ptxtTimer[pid]=setTimeout(()=>{delete _ptxtLast[pid];if(pulseId)openPulseFromPost(pulseId);else openPD(pid);},380);
+  }
 }
 function tAgo(d){const s=Math.floor((new Date()-d)/1000);if(s<60)return'now';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';return Math.floor(s/86400)+'d'}
 const HASH_MAP={bitcoin:'btc',btc:'btc',ethereum:'eth',eth:'eth',solana:'sol',sol:'sol',bnb:'bnb',xrp:'xrp',ripple:'xrp',ada:'ada',cardano:'ada',doge:'doge',dogecoin:'doge',dot:'dot',polkadot:'dot',avax:'avax',avalanche:'avax',link:'link',chainlink:'link',nvidia:'nvda',nvda:'nvda',apple:'aapl',aapl:'aapl',microsoft:'msft',msft:'msft',amazon:'amzn',amzn:'amzn',google:'goog',alphabet:'goog',goog:'goog',meta:'meta',tesla:'tsla',tsla:'tsla',sap:'sap',spy:'spy',sp500:'spy',qqq:'qqq',voo:'voo',iwda:'iwda',vwrl:'vwrl'};
@@ -3405,7 +3471,7 @@ const I18N={
     follow_to_see:'Follow people to see their posts here!',no_ch_posts:'No posts in this channel from people you follow yet.',
   },
   de:{
-    nav_feed:'Feed',nav_puls:'Puls',nav_search:'Suche',nav_messages:'Nachrichten',nav_portfolio:'Portfolio',nav_profile:'Profil',
+    nav_feed:'Feed',nav_puls:'Pulse',nav_search:'Suche',nav_messages:'Nachrichten',nav_portfolio:'Portfolio',nav_profile:'Profil',
     settings:'Einstellungen',account:'Konto',editProfile:'Profil bearbeiten',editProfileSub:'Name, Bio und Foto',
     installApp:'App installieren',installAppSub:'Zum Startbildschirm hinzufügen',manageChannels:'Kanäle verwalten',manageChannelsSub:'Kanäle hinzufügen oder entfernen',
     privacy:'Datenschutz',privacySub:'Sichtbarkeit und Daten',privacySoon:'Datenschutzeinstellungen demnächst',
@@ -3806,7 +3872,7 @@ function addPulseOption(){
   row.addEventListener('dragend',()=>{row.style.opacity='';_poDragEl=null;document.querySelectorAll('.po-inp-row').forEach(r=>r.classList.remove('drag-over'));});
   row.addEventListener('dragover',e=>{e.preventDefault();if(row!==_poDragEl){document.querySelectorAll('.po-inp-row').forEach(r=>r.classList.remove('drag-over'));row.classList.add('drag-over');}});
   row.addEventListener('drop',e=>{e.preventDefault();if(_poDragEl&&row!==_poDragEl){ol.insertBefore(_poDragEl,row);_renumPulseOpts();}document.querySelectorAll('.po-inp-row').forEach(r=>r.classList.remove('drag-over'));});
-  row.innerHTML=`<span class="po-drag" title="Ziehen zum Sortieren">⠿</span><span class="po-num" style="font-size:11px;color:var(--mu2);width:16px;text-align:right;flex-shrink:0">${count+1}</span><input class="po-inp" type="text" placeholder="Option ${count+1}" maxlength="80"><button class="po-rm" onclick="removePulseOption(this)"><i class="ti ti-x"></i></button>`;
+  row.innerHTML=`<span class="po-drag" title="Ziehen zum Sortieren">⠿</span><span class="po-num" style="font-size:11px;color:var(--mu2);width:16px;text-align:right;flex-shrink:0">${count+1}</span><input class="po-inp" type="text" placeholder="Option ${count+1}" maxlength="280"><button class="po-rm" onclick="removePulseOption(this)"><i class="ti ti-x"></i></button>`;
   ol.appendChild(row);
 }
 function removePulseOption(btn){
