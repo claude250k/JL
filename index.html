@@ -382,6 +382,15 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1}
 .ptr-wrap.ptr-visible{height:40px}
 .ptr-wrap i{transition:transform .2s}
 .ptr-wrap.ptr-loading i{animation:spin .7s linear infinite}
+.cv-row{border-top:1px solid var(--bd);padding:7px 12px 9px}
+.cv-btns{display:flex;gap:3px;margin-bottom:5px}
+.cv-btn{flex:1;padding:5px 2px;border:1px solid var(--bd);border-radius:7px;font-size:9px;font-weight:700;cursor:pointer;background:var(--sf2);color:var(--mu2);transition:all .15s;font-family:var(--fb);line-height:1.2}
+.cv-btn.buy{background:rgba(74,222,128,.13);color:#4ade80;border-color:rgba(74,222,128,.3)}
+.cv-btn.sell{background:rgba(248,113,113,.13);color:#f87171;border-color:rgba(248,113,113,.3)}
+.cv-btn.hold{background:rgba(247,147,26,.13);color:var(--gold);border-color:rgba(247,147,26,.3)}
+.cv-track{height:3px;background:var(--sf3);border-radius:2px;display:flex;overflow:hidden;margin-bottom:4px}
+.cv-bar-b{background:#4ade80;transition:width .4s}.cv-bar-h{background:var(--gold);transition:width .4s}.cv-bar-s{background:#f87171;transition:width .4s}
+.cv-pcts{display:flex;justify-content:space-between;font-size:9px;font-weight:700}
 </style>
 </head>
 <body>
@@ -1057,6 +1066,7 @@ setInterval(tick,10000);tick();
 let CU=null,UP=null,selCat='all';
 let feedUnsub=null,chatUnsub=null,msgUnsub=null,notifUnsub=null,opUnsub=null;
 let pulseInited=false,chartI={},cdChart=null,curCDCoin=null;
+let _avdUnsub=null,_avd={},_mavd={},_avdDate='';
 let statsData=null,_statsAll=[];
 let _curPulseId=null;
 let allUsers=[],myVote=null,curOP=null,curConv=null,curChatOid=null;
@@ -1133,8 +1143,8 @@ function wFB(cb){if(window._fbReady)cb();else document.addEventListener('fb-read
 wFB(()=>{
   const{auth,onAuthStateChanged}=window._fb;
   onAuthStateChanged(auth,async u=>{
-    if(u){CU=u;await loadUP(u.uid);document.getElementById('asc').style.display='none';updateUI();startFeed();loadUsers();loadConvs();loadNotifs();renderParties();loadMyVote();loadFollowing();loadPortfolio();loadReposts();}
-    else{CU=null;UP=null;followingIds=new Set();portHoldings=[];demoState=null;portMode='real';_msgUnread=0;_notifUnread=0;if(msgUnsub){msgUnsub();msgUnsub=null;}if(notifUnsub){notifUnsub();notifUnsub=null;}if(feedUnsub){feedUnsub();feedUnsub=null;}if(portUnsub2){portUnsub2();portUnsub2=null;}if(demoUnsub){demoUnsub();demoUnsub=null;}const pdr=document.getElementById('port-mode-real');if(pdr)pdr.classList.add('ak');const pdd=document.getElementById('port-mode-demo');if(pdd)pdd.classList.remove('ak');const prs=document.getElementById('port-real-sub');if(prs)prs.style.display='flex';updateNavBadge();document.getElementById('asc').style.display='flex';}
+    if(u){CU=u;await loadUP(u.uid);document.getElementById('asc').style.display='none';updateUI();startFeed();loadUsers();loadConvs();loadNotifs();renderParties();loadMyVote();loadFollowing();loadPortfolio();loadReposts();loadAssetVotes();}
+    else{CU=null;UP=null;followingIds=new Set();portHoldings=[];demoState=null;portMode='real';_msgUnread=0;_notifUnread=0;if(msgUnsub){msgUnsub();msgUnsub=null;}if(notifUnsub){notifUnsub();notifUnsub=null;}if(feedUnsub){feedUnsub();feedUnsub=null;}if(portUnsub2){portUnsub2();portUnsub2=null;}if(demoUnsub){demoUnsub();demoUnsub=null;}if(_avdUnsub){_avdUnsub();_avdUnsub=null;}_avd={};_mavd={};const pdr=document.getElementById('port-mode-real');if(pdr)pdr.classList.add('ak');const pdd=document.getElementById('port-mode-demo');if(pdd)pdd.classList.remove('ak');const prs=document.getElementById('port-real-sub');if(prs)prs.style.display='flex';updateNavBadge();document.getElementById('asc').style.display='flex';}
   });
 });
 
@@ -2858,7 +2868,83 @@ async function triggerAlert(coin,price,alertId){
 }
 function fpulse(btn,cat){document.querySelectorAll('#pk .kachel').forEach(b=>b.classList.remove('ak'));btn.classList.add('ak');document.querySelectorAll('#puls-scroll [data-pc]').forEach(el=>el.style.display=(cat==='all'||el.dataset.pc===cat)?'':'none');document.getElementById('puls-scroll').scrollTop=0;if(cat==='pulse')loadPulses();if(cat==='stats'||cat==='all')loadStatistics();}
 function rfPulse(){pulseInited=false;initPulse()}
-function initPulse(){if(pulseInited)return;pulseInited=true;fetchPulse();loadStatistics();setInterval(fetchPulse,60000)}
+function initPulse(){if(pulseInited)return;pulseInited=true;fetchPulse();loadStatistics();setInterval(fetchPulse,60000);initAssetVoteRows();if(!_avdUnsub||_berlinDate()!==_avdDate)loadAssetVotes();}
+
+// ── ASSET VOTING ──────────────────────────────────────────────────────────────
+function _berlinDate(){return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date());}
+
+function initAssetVoteRows(){
+  document.querySelectorAll('.cc[onclick^="openCD"]').forEach(card=>{
+    const m=card.getAttribute('onclick').match(/openCD\('(\w+)'\)/);
+    if(!m)return;
+    const key=m[1];
+    if(document.getElementById('cv-'+key))return;
+    const div=document.createElement('div');
+    div.id='cv-'+key;div.className='cv-row';
+    card.appendChild(div);
+    renderAssetVote(key);
+  });
+}
+
+async function loadAssetVotes(){
+  const date=_berlinDate();
+  if(_avdUnsub){_avdUnsub();_avdUnsub=null;}
+  _avdDate=date;
+  const{db,doc,onSnapshot,getDoc}=window._fb;
+  if(CU){try{const s=await getDoc(doc(db,'userAssetVoteDay',`${CU.uid}_${date}`));_mavd=s.exists()?s.data():{};}catch(e){_mavd={};}}
+  else{_mavd={};}
+  _avdUnsub=onSnapshot(doc(db,'assetVoteDay',date),snap=>{_avd=snap.exists()?snap.data():{};renderAllAssetVotes();});
+}
+
+function renderAssetVote(key){
+  const el=document.getElementById('cv-'+key);if(!el)return;
+  const v=_avd[key]||{buy:0,sell:0,hold:0};
+  const myV=_mavd[key];
+  const total=(v.buy||0)+(v.sell||0)+(v.hold||0);
+  const pct=n=>total>0?Math.round(n/total*100):0;
+  const bP=pct(v.buy||0),hP=pct(v.hold||0),sP=Math.max(0,100-bP-hP);
+  el.innerHTML=`<div class="cv-btns">
+    <button class="cv-btn${myV==='buy'?' buy':''}" onclick="event.stopPropagation();assetVote('${key}','buy')">Kaufen</button>
+    <button class="cv-btn${myV==='hold'?' hold':''}" onclick="event.stopPropagation();assetVote('${key}','hold')">Halten</button>
+    <button class="cv-btn${myV==='sell'?' sell':''}" onclick="event.stopPropagation();assetVote('${key}','sell')">Verkaufen</button>
+  </div>${total>0?`<div class="cv-track"><div class="cv-bar-b" style="width:${bP}%"></div><div class="cv-bar-h" style="width:${hP}%"></div><div class="cv-bar-s" style="width:${sP}%"></div></div><div class="cv-pcts"><span style="color:#4ade80">${bP}% Kaufen</span><span style="color:var(--gold)">${hP}% Halten</span><span style="color:#f87171">${sP}% Verkaufen</span></div>`:'<div style="font-size:9px;color:var(--mu2);text-align:center;padding:2px 0">Sei der Erste! ↑</div>'}`;
+}
+
+function renderAllAssetVotes(){
+  document.querySelectorAll('[id^="cv-"]').forEach(el=>renderAssetVote(el.id.slice(3)));
+}
+
+async function assetVote(key,voteType){
+  if(!CU){showToast('Bitte einloggen');return;}
+  const date=_berlinDate();
+  if(date!==_avdDate){await loadAssetVotes();return;}
+  const{db,doc,runTransaction}=window._fb;
+  const dayRef=doc(db,'assetVoteDay',date);
+  const userRef=doc(db,'userAssetVoteDay',`${CU.uid}_${date}`);
+  const prevVote=_mavd[key];
+  const tog=prevVote===voteType;
+  // Optimistic update
+  const v={...(_avd[key]||{buy:0,sell:0,hold:0})};
+  if(prevVote&&!tog)v[prevVote]=Math.max(0,(v[prevVote]||0)-1);
+  if(!tog){v[voteType]=(v[voteType]||0)+1;_mavd={..._mavd,[key]:voteType};}
+  else{v[voteType]=Math.max(0,(v[voteType]||0)-1);const m={..._mavd};delete m[key];_mavd=m;}
+  _avd={..._avd,[key]:v};
+  renderAssetVote(key);
+  try{
+    await runTransaction(db,async txn=>{
+      const[ds,us]=await Promise.all([txn.get(dayRef),txn.get(userRef)]);
+      const dd=ds.exists()?{...ds.data()}:{};
+      const ud=us.exists()?{...us.data()}:{};
+      const prev=ud[key];const t2=prev===voteType;
+      const av=dd[key]?{...dd[key]}:{buy:0,sell:0,hold:0};
+      if(prev&&!t2)av[prev]=Math.max(0,(av[prev]||0)-1);
+      if(!t2){av[voteType]=(av[voteType]||0)+1;ud[key]=voteType;}
+      else{av[voteType]=Math.max(0,(av[voteType]||0)-1);delete ud[key];}
+      dd[key]=av;
+      txn.set(dayRef,dd);txn.set(userRef,ud);
+    });
+  }catch(e){showToast('Fehler beim Abstimmen');loadAssetVotes();}
+}
 
 function openPM(){if(!CU){showToast('Please sign in');return}document.getElementById('pm').classList.add('on');renderQuotePreview();}
 function closePM(){document.getElementById('pm').classList.remove('on');clearQuote();}
